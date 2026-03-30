@@ -1,0 +1,122 @@
+direction: right
+
+title: {
+  label: "Mem0 — Architecture & Flow"
+  near: top-center
+  shape: text
+  style.font-size: 28
+  style.bold: true
+}
+
+classes: {
+  llm: {
+    shape: rectangle
+    style.fill: "#e94560"
+    style.stroke: "#b8354d"
+    style.font-color: "#ffffff"
+    style.border-radius: 10
+    style.shadow: true
+    style.3d: true
+  }
+  db: {
+    shape: cylinder
+    style.fill: "#2ecc71"
+    style.stroke: "#1a9c54"
+    style.font-color: "#ffffff"
+    style.shadow: true
+  }
+  process: {
+    shape: rectangle
+    style.fill: "#e67e22"
+    style.stroke: "#d35400"
+    style.font-color: "#ffffff"
+    style.border-radius: 8
+    style.shadow: true
+  }
+  api: {
+    shape: rectangle
+    style.fill: "#9b59b6"
+    style.stroke: "#7d3c98"
+    style.font-color: "#ffffff"
+    style.border-radius: 10
+    style.shadow: true
+    style.3d: true
+  }
+}
+
+app: "AI Agent" {
+  style.fill: "#1a1a2e"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+  style.shadow: true
+}
+
+mem0_api: "Mem0 API\nadd() / search()" {class: api}
+
+write_pipeline: "WRITE pipeline" {
+  style.fill: "#0f3460"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  extract: "LLM\nExtraction" {class: llm}
+  dedup: "LLM Dedup\n(A.U.D.N.)" {class: llm}
+  embed: "Embedding" {class: process}
+
+  extract -> dedup: "atomic facts" {style.stroke: "#e94560"; style.font-size: 12}
+  dedup -> embed: "ADD / UPDATE\n/ DELETE / NOOP" {style.stroke: "#e94560"; style.font-size: 11}
+}
+
+storage: "Storage" {
+  style.fill: "#1a1a2e"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  vector_db: "Vector DB\n(Qdrant / Pinecone)" {class: db}
+  graph_db: "Graph DB\n(Neo4j)" {class: db}
+}
+
+read_pipeline: "READ pipeline" {
+  style.fill: "#0f3460"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  q_embed: "Query\nEmbedding" {class: process}
+  vec_search: "Vector\nSearch" {class: process}
+  graph_trav: "Graph\nTraversal" {class: process}
+  merge: "Merge &\nRank" {class: process}
+
+  q_embed -> vec_search {style.stroke: "#e67e22"}
+  q_embed -> graph_trav {style.stroke: "#e67e22"}
+  vec_search -> merge {style.stroke: "#e67e22"}
+  graph_trav -> merge {style.stroke: "#e67e22"}
+}
+
+app -> mem0_api: "conversation" {style.stroke: "#9b59b6"; style.font-size: 13}
+
+mem0_api -> write_pipeline.extract: "add()" {style.stroke: "#e94560"; style.font-size: 13}
+
+write_pipeline.embed -> storage.vector_db: "vectors" {style.stroke: "#2ecc71"; style.font-size: 12}
+write_pipeline.extract -> storage.graph_db: "entities &\nrelations" {style.stroke: "#2ecc71"; style.font-size: 12}
+
+mem0_api -> read_pipeline.q_embed: "search()" {style.stroke: "#e67e22"; style.font-size: 13}
+
+storage.vector_db -> read_pipeline.vec_search {style.stroke: "#2ecc71"; style.stroke-dash: 3}
+storage.graph_db -> read_pipeline.graph_trav {style.stroke: "#2ecc71"; style.stroke-dash: 3}
+
+read_pipeline.merge -> app: "relevant\nmemories" {style.stroke: "#9b59b6"; style.font-size: 13}
+
+note: |md
+  **LLM-powered memory**: every add() = 1-2 LLM calls + embedding
+  **A.U.D.N.**: LLM decides ADD / UPDATE / DELETE / NOOP
+  **DELETE = old fact removed forever**, no audit trail
+| {
+  near: bottom-center
+  style.font-size: 14
+  style.fill: "#16213e"
+  style.font-color: "#eaeaea"
+  style.border-radius: 8
+}

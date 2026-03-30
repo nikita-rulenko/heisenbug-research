@@ -1,0 +1,119 @@
+direction: right
+
+title: {
+  label: "MD Files — Context Flow"
+  near: top-center
+  shape: text
+  style.font-size: 28
+  style.bold: true
+}
+
+classes: {
+  human: {
+    shape: person
+    style.fill: "#4a90d9"
+    style.stroke: "#2c5f8a"
+    style.font-color: "#ffffff"
+    style.border-radius: 8
+    style.shadow: true
+  }
+  file: {
+    shape: page
+    style.fill: "#2ecc71"
+    style.stroke: "#1a9c54"
+    style.font-color: "#ffffff"
+    style.border-radius: 6
+    style.shadow: true
+  }
+  agent: {
+    shape: hexagon
+    style.fill: "#e94560"
+    style.stroke: "#b8354d"
+    style.font-color: "#ffffff"
+    style.shadow: true
+  }
+  ide: {
+    shape: rectangle
+    style.fill: "#9b59b6"
+    style.stroke: "#7d3c98"
+    style.font-color: "#ffffff"
+    style.border-radius: 10
+    style.shadow: true
+  }
+  output: {
+    shape: rectangle
+    style.fill: "#f39c12"
+    style.stroke: "#d68910"
+    style.font-color: "#ffffff"
+    style.border-radius: 8
+    style.shadow: true
+  }
+}
+
+dev: "Developer" {class: human}
+
+repo: "Git Repository" {
+  style.fill: "#1a1a2e"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+  style.shadow: true
+
+  agents_md: "AGENTS.md\n(project context)" {class: file}
+  cursor_rules: ".cursor/rules/*.mdc\n(IDE rules)" {class: file}
+  spec: "spec.md / PRD.md\n(requirements)" {class: file}
+}
+
+ide: "Cursor IDE" {class: ide}
+agent: "AI Agent" {class: agent}
+code: "Generated Code\n+ PR" {class: output}
+
+dev -> repo.agents_md: "1. Writes" {
+  style.stroke: "#4a90d9"
+  style.font-size: 14
+}
+dev -> repo.cursor_rules: "1. Writes" {
+  style.stroke: "#4a90d9"
+  style.font-size: 14
+}
+dev -> repo.spec: "1. Writes" {
+  style.stroke: "#4a90d9"
+  style.font-size: 14
+}
+
+repo.agents_md -> ide: "2. Auto-loaded\nat session start" {
+  style.stroke: "#2ecc71"
+  style.font-size: 14
+}
+repo.cursor_rules -> ide: "2. Auto-loaded" {
+  style.stroke: "#2ecc71"
+  style.font-size: 14
+}
+repo.spec -> ide: "2. Referenced" {
+  style.stroke: "#2ecc71"
+  style.font-size: 14
+  style.stroke-dash: 3
+}
+
+ide -> agent: "3. Context\ninjected into\nprompt" {
+  style.stroke: "#9b59b6"
+  style.font-size: 14
+}
+
+agent -> code: "4. Generates" {
+  style.stroke: "#e94560"
+  style.font-size: 14
+}
+
+note: |md
+  **Key trait**: One-directional flow
+  Agent reads context but never writes back.
+  Human maintains all .md files manually.
+  Zero LLM cost. Zero latency.
+| {
+  near: bottom-center
+  style.font-size: 14
+  style.fill: "#16213e"
+  style.font-color: "#eaeaea"
+  style.border-radius: 8
+}

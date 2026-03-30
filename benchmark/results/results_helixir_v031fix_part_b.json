@@ -1,0 +1,87 @@
+{
+  "approach": "helixir_v031fix",
+  "part": "B",
+  "total_score": 104,
+  "max_score": 125,
+  "percentage": 83.2,
+  "extra": {
+    "version": "v0.3.1-fix"
+  },
+  "scenarios": [
+    {
+      "id": "G1",
+      "name": "Multi-hop dependency trace",
+      "total": 25,
+      "latency_ms": 2340,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 5,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 5,
+        "actionability": 5,
+        "total": 25,
+        "brief_comment": "The answer correctly traces the full dependency chain (including the interface layer), covers all required links, introduces no spurious connections, demonstrates clear understanding of the layered architecture, and provides concrete test references that make the information directly usable."
+      }
+    },
+    {
+      "id": "G2",
+      "name": "Cross-entity impact",
+      "total": 15,
+      "latency_ms": 1993,
+      "scores": {
+        "hop_accuracy": 3,
+        "chain_completeness": 3,
+        "no_hallucinated_links": 2,
+        "structural_awareness": 4,
+        "actionability": 3,
+        "total": 15,
+        "brief_comment": "The answer captures many of the key layers (entity, repository, handler, tests) and shows general direction of dependencies, but it adds several components not in the gold standard (e.g., migrations, use‑case layer, templates) and omits some specific test files. The extra, fabricated links lower the hallucination score, while the overall understanding keeps structural awareness relatively high."
+      }
+    },
+    {
+      "id": "G3",
+      "name": "Causal chain: flaky → root cause → fix",
+      "total": 23,
+      "latency_ms": 2258,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 5,
+        "no_hallucinated_links": 3,
+        "structural_awareness": 5,
+        "actionability": 5,
+        "total": 23,
+        "brief_comment": "The answer correctly identifies the shared in‑memory SQLite and Unicode‑LIKE issues and offers concrete fixes, showing strong structural insight. It adds an extra ORDER‑BY claim not present in the gold standard, which counts as a hallucinated link, lowering the hallucination score."
+      }
+    },
+    {
+      "id": "G4",
+      "name": "Inverse lookup: test → what it validates",
+      "total": 20,
+      "latency_ms": 1976,
+      "scores": {
+        "hop_accuracy": 4,
+        "chain_completeness": 5,
+        "no_hallucinated_links": 2,
+        "structural_awareness": 5,
+        "actionability": 4,
+        "total": 20,
+        "brief_comment": "The answer correctly maps the main entities to their POST endpoints and shows good layer awareness, covering all required links. However it introduces several components (e.g., respondError, Error entity, Order status handling) that aren't in the gold standard, which counts as hallucinated connections and lowers the hallucination score."
+      }
+    },
+    {
+      "id": "G5",
+      "name": "Contradiction detection",
+      "total": 21,
+      "latency_ms": 1658,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 2,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 4,
+        "actionability": 5,
+        "total": 21,
+        "brief_comment": "The answer correctly identifies the problematic test and its location, showing solid understanding of the repository layer and DB interactions. However, it omits the other two tests mentioned in the gold standard, so the chain is incomplete. No fabricated links are present, and the remediation steps are clear and actionable."
+      }
+    }
+  ]
+}

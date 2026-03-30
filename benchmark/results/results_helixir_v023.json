@@ -1,0 +1,91 @@
+{
+  "approach": "helixir_v023",
+  "part_a": {
+    "total": 124,
+    "scenarios": [
+      {
+        "id": "S1",
+        "total": 22,
+        "mems": 10
+      },
+      {
+        "id": "S2",
+        "total": 7,
+        "mems": 10
+      },
+      {
+        "id": "S3",
+        "total": 25,
+        "mems": 10
+      },
+      {
+        "id": "S4",
+        "total": 1,
+        "mems": 10
+      },
+      {
+        "id": "S5",
+        "total": 25,
+        "mems": 10
+      },
+      {
+        "id": "S6",
+        "total": 4,
+        "mems": 10
+      },
+      {
+        "id": "S7",
+        "total": 0,
+        "mems": 10
+      },
+      {
+        "id": "S8",
+        "total": 1,
+        "mems": 10
+      },
+      {
+        "id": "S9",
+        "total": 25,
+        "mems": 10
+      },
+      {
+        "id": "S10",
+        "total": 14,
+        "mems": 10
+      }
+    ]
+  },
+  "part_b": {
+    "total": 71,
+    "p50": 77,
+    "p95": 82,
+    "scenarios": [
+      {
+        "id": "G1",
+        "total": 10,
+        "mems": 10
+      },
+      {
+        "id": "G2",
+        "total": 11,
+        "mems": 10
+      },
+      {
+        "id": "G3",
+        "total": 22,
+        "mems": 10
+      },
+      {
+        "id": "G4",
+        "total": 11,
+        "mems": 10
+      },
+      {
+        "id": "G5",
+        "total": 17,
+        "mems": 10
+      }
+    ]
+  },
+  "combined": 195
+}

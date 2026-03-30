@@ -1,0 +1,50 @@
+[
+  {
+    "name": "project_overview",
+    "content": "Bean & Brew is a Go web application for a coffee shop. Architecture: Clean Architecture with layers entity, usecase, repository, handler. Tech stack: Go, chi router, SQLite, html/template. The project has 62 tests across 4 levels: unit (32), integration (13), API (10), usecase (7)."
+  },
+  {
+    "name": "entity_layer",
+    "content": "Entity layer contains domain types: Product (ID, Name, Description, Price, CategoryID, ImageURL, Active), Category (ID, Name, Description, SortOrder), NewsItem (ID, Title, Content, PublishedAt, ImageURL, Active) with Summary(n) method that truncates using runes for correct UTF-8, Order (ID, Items, Status, Total, CreatedAt) with status flow new→processing→completed or new/processing→cancelled. Order has methods: CalculateTotal(), CanCancel(), CanComplete(), Validate(). Product has Validate() checking required fields."
+  },
+  {
+    "name": "repository_layer",
+    "content": "Repository interfaces defined in repository/interfaces.go: ProductRepository (Create, GetByID, List, Update, Delete, Search, Count), CategoryRepository (Create, GetByID, List, Update, Delete), NewsRepository (Create, GetByID, List, Update, Delete), OrderRepository (Create, GetByID, List, UpdateStatus). SQLite implementations in repository/sqlite/ package. Migrations create tables: categories, products, news, orders, order_items. Seed data populates initial categories and products."
+  },
+  {
+    "name": "usecase_layer",
+    "content": "Usecase layer contains business logic services: ProductUsecase (wraps ProductRepository with validation), CategoryUsecase, NewsUsecase, OrderUsecase (manages order lifecycle: create with total calculation, cancel, complete with status validation)."
+  },
+  {
+    "name": "handler_layer",
+    "content": "Handler layer has HTTP handlers using chi router. API endpoints: GET/POST /api/v1/products, GET/PUT/DELETE /api/v1/products/{id}, GET/POST /api/v1/categories, GET/POST /api/v1/news, GET/POST /api/v1/orders, POST /api/v1/orders/{id}/cancel, POST /api/v1/orders/{id}/complete. Pages: /, /catalog, /news. Helpers: respondJSON, respondError, parseID."
+  },
+  {
+    "name": "unit_tests",
+    "content": "Unit tests (32 total) in entity package: TestUnitProductValidate (table-driven, 5 subcases: valid, empty name, negative price, zero price, long name), TestUnitProductValidateDescription, TestUnitProductValidateImageURL, TestUnitOrderCalculateTotal, TestUnitOrderCalculateTotalEmpty, TestUnitOrderCalculateTotalSingleItem, TestUnitOrderCalculateTotalLargeOrder, TestUnitOrderCanCancel (4 subcases: new, processing, completed, cancelled), TestUnitOrderCanComplete, TestUnitOrderValidate (5 subcases), TestUnitOrderValidateItems, TestUnitOrderStatusTransitions, TestUnitCategoryValidation, TestUnitNewsItemSummary (tests rune-based UTF-8 truncation), TestUnitNewsItemSummaryEdgeCases, TestUnitNewsItemValidation."
+  },
+  {
+    "name": "integration_tests",
+    "content": "Integration tests (13 total) in repository/sqlite package: TestIntegrationProductCRUD, TestIntegrationProductList, TestIntegrationProductSearch (potentially flaky: uses LIKE with Cyrillic text, depends on insert order), TestIntegrationProductCount, TestIntegrationCategoryCRUD, TestIntegrationCategoryList, TestIntegrationOrderCRUD, TestIntegrationOrderList, TestIntegrationOrderStatusUpdate, TestIntegrationOrderCancelFlow, TestIntegrationOrderCompleteFlow, TestIntegrationSeedData, TestIntegrationMigrations. All use setupTestDB() helper that creates in-memory SQLite."
+  },
+  {
+    "name": "usecase_tests",
+    "content": "Usecase tests (7 total): TestUsecaseProductCreate, TestUsecaseProductCreateValidationError, TestUsecaseProductGetByID, TestUsecaseProductList, TestUsecaseCategoryCreate, TestUsecaseOrderCreate, TestUsecaseOrderCancel. Use real SQLite repository (not mocks) via setupTestDB()."
+  },
+  {
+    "name": "api_tests",
+    "content": "API tests (10 total) in handler package: TestAPIProductCRUD (full CRUD cycle), TestAPIProductValidationError, TestAPIProductNotFound, TestAPICategoryCRUD, TestAPICategoryList, TestAPINewsCRUD, TestAPINewsList, TestAPIOrderFlow (create category→create product→create order→verify total=640), TestAPIOrderCancel, TestAPIOrderComplete. Use httptest.NewServer with full handler wiring via setupTestServer() helper."
+  },
+  {
+    "name": "test_patterns",
+    "content": "Test patterns used: table-driven tests with t.Run() for parametric testing, setupTestDB() creates fresh in-memory SQLite with migrations, setupTestServer() creates httptest.NewServer with full handler stack, tests follow naming convention TestLevel_Entity_Method (e.g. TestUnitProductValidate, TestIntegrationProductCRUD, TestAPIOrderFlow). Anti-patterns to avoid: shared state between tests, testing implementation details, testing framework code."
+  },
+  {
+    "name": "flaky_test_analysis",
+    "content": "TestIntegrationProductSearch is potentially flaky because: 1) It uses LIKE queries with Cyrillic text which can behave differently across SQLite versions, 2) It depends on the order of inserted records which is not guaranteed, 3) It shares the in-memory database with other tests in the same test function. TestUnitNewsItemSummary was fixed to use []rune instead of len() for correct UTF-8 string truncation."
+  },
+  {
+    "name": "file_structure",
+    "content": "Project file structure: cmd/server/main.go (entry point), internal/entity/ (product.go, category.go, news.go, order.go, errors.go + *_test.go), internal/repository/interfaces.go, internal/repository/sqlite/ (db.go, migrations.go, seed.go, product.go, category.go, news.go, order.go, testhelper_test.go + *_test.go), internal/usecase/ (product.go, category.go, news.go, order.go, usecase_test.go), internal/handler/ (helpers.go, product.go, category.go, news.go, order.go, pages.go, api_test.go), templates/ (layout.html, home.html, catalog.html, news.html)."
+  }
+]

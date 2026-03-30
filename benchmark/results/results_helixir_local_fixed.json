@@ -1,0 +1,277 @@
+{
+  "approach": "helixir_local_fixed",
+  "part_a": {
+    "total": 96,
+    "max": 250,
+    "scenarios": [
+      {
+        "id": "S1",
+        "name": "Генерация unit-теста",
+        "total": 17,
+        "latency_ms": 1973,
+        "search_ms": 168,
+        "mems": 10,
+        "scores": {
+          "accuracy": 4,
+          "completeness": 5,
+          "no_hallucination": 3,
+          "context_utilization": 2,
+          "actionability": 3,
+          "total": 17,
+          "brief_comment": "The answer provides a comprehensive test suite covering the required cases and more, but it assumes specific struct fields and helper functions that may not exist in the actual project, limiting its immediate applicability."
+        }
+      },
+      {
+        "id": "S2",
+        "name": "Поиск покрытия endpoint",
+        "total": 10,
+        "latency_ms": 910,
+        "search_ms": 134,
+        "mems": 10,
+        "scores": {
+          "accuracy": 1,
+          "completeness": 1,
+          "no_hallucination": 5,
+          "context_utilization": 2,
+          "actionability": 1,
+          "total": 10,
+          "brief_comment": "The answer fails to provide the specific test names listed in the gold standard, making it inaccurate and incomplete, though it does not fabricate information."
+        }
+      },
+      {
+        "id": "S3",
+        "name": "Анализ flaky-теста",
+        "total": 21,
+        "latency_ms": 1994,
+        "search_ms": 127,
+        "mems": 10,
+        "scores": {
+          "accuracy": 3,
+          "completeness": 3,
+          "no_hallucination": 5,
+          "context_utilization": 5,
+          "actionability": 5,
+          "total": 21,
+          "brief_comment": "The answer captures many relevant causes (shared DB, isolation) and offers concrete fixes, but misses the UTF‑8 LIKE issue and includes extra speculation, so accuracy and completeness are moderate while other criteria are strong."
+        }
+      },
+      {
+        "id": "S4",
+        "name": "Рефакторинг с обновлением тестов",
+        "total": 6,
+        "latency_ms": 1224,
+        "search_ms": 227,
+        "mems": 10,
+        "scores": {
+          "accuracy": 1,
+          "completeness": 1,
+          "no_hallucination": 1,
+          "context_utilization": 1,
+          "actionability": 2,
+          "total": 6,
+          "brief_comment": "The answer provides a generic, guessed list of files and steps rather than the exact files from the gold standard. It does not accurately reflect the project's specific structure, omits the required files, and introduces likely non‑existent items, resulting in low scores across all criteria."
+        }
+      },
+      {
+        "id": "S5",
+        "name": "E2E тест для нового flow",
+        "total": 0,
+        "latency_ms": 1686,
+        "search_ms": 155,
+        "mems": 10,
+        "scores": {
+          "accuracy": 0,
+          "completeness": 0,
+          "no_hallucination": 0,
+          "context_utilization": 0,
+          "actionability": 0,
+          "total": 0,
+          "brief_comment": "The answer does not use httptest or POST endpoints as required, invents structs and repositories, and does not match the gold‑standard test flow."
+        }
+      },
+      {
+        "id": "S6",
+        "name": "Impact analysis изменения схемы",
+        "total": 4,
+        "latency_ms": 2195,
+        "search_ms": 123,
+        "mems": 10,
+        "scores": {
+          "accuracy": 1,
+          "completeness": 1,
+          "no_hallucination": 0,
+          "context_utilization": 1,
+          "actionability": 1,
+          "total": 4,
+          "brief_comment": "Answer deviates from gold; adds many unnecessary changes, likely fabricates files, and misses the specific repository updates required."
+        }
+      },
+      {
+        "id": "S7",
+        "name": "Обнаружение дублей",
+        "total": 0,
+        "latency_ms": 601,
+        "search_ms": 123,
+        "mems": 10,
+        "scores": {
+          "accuracy": 0,
+          "completeness": 0,
+          "no_hallucination": 0,
+          "context_utilization": 0,
+          "actionability": 0,
+          "total": 0,
+          "brief_comment": "The answer does not mention any of the tests from the gold standard, provides incorrect information about test existence, and offers no actionable insight."
+        }
+      },
+      {
+        "id": "S8",
+        "name": "Генерация test plan",
+        "total": 20,
+        "latency_ms": 1675,
+        "search_ms": 103,
+        "mems": 10,
+        "scores": {
+          "accuracy": 5,
+          "completeness": 5,
+          "no_hallucination": 3,
+          "context_utilization": 3,
+          "actionability": 4,
+          "total": 20,
+          "brief_comment": "Covers all required test types and details, but introduces many assumed file names and utilities that may not exist in the actual project, limiting certainty of context and direct applicability."
+        }
+      },
+      {
+        "id": "S9",
+        "name": "Темпоральный контекст",
+        "total": 0,
+        "latency_ms": 686,
+        "search_ms": 111,
+        "mems": 10,
+        "scores": {
+          "accuracy": 0,
+          "completeness": 0,
+          "no_hallucination": 0,
+          "context_utilization": 0,
+          "actionability": 0,
+          "total": 0,
+          "brief_comment": "The answer does not address the question; it fabricates test details and ignores the request to admit lack of information or locate a commit."
+        }
+      },
+      {
+        "id": "S10",
+        "name": "Оптимизация тестового suite",
+        "total": 18,
+        "latency_ms": 1829,
+        "search_ms": 120,
+        "mems": 10,
+        "scores": {
+          "accuracy": 4,
+          "completeness": 5,
+          "no_hallucination": 2,
+          "context_utilization": 3,
+          "actionability": 4,
+          "total": 18,
+          "brief_comment": "The answer is largely accurate and covers the gold‑standard points, adding many concrete steps. However it invents several specific files and helpers that may not exist, showing some hallucination and limited grounding in the actual project context, though the suggestions are still fairly actionable."
+        }
+      }
+    ]
+  },
+  "part_b": {
+    "total": 70,
+    "max": 125,
+    "search_p50": 135,
+    "search_p95": 206,
+    "scenarios": [
+      {
+        "id": "G1",
+        "name": "Multi-hop dependency trace",
+        "total": 23,
+        "latency_ms": 936,
+        "search_ms": 120,
+        "mems": 10,
+        "scores": {
+          "hop_accuracy": 5,
+          "chain_completeness": 5,
+          "no_hallucinated_links": 5,
+          "structural_awareness": 5,
+          "actionability": 3,
+          "total": 23,
+          "brief_comment": "The answer correctly traces the dependency chain and shows good architectural understanding, but it omits the detailed test coverage listed in the gold standard, limiting its direct usefulness for test verification."
+        }
+      },
+      {
+        "id": "G2",
+        "name": "Cross-entity impact",
+        "total": 13,
+        "latency_ms": 1594,
+        "search_ms": 133,
+        "mems": 10,
+        "scores": {
+          "hop_accuracy": 3,
+          "chain_completeness": 2,
+          "no_hallucinated_links": 2,
+          "structural_awareness": 3,
+          "actionability": 3,
+          "total": 13,
+          "brief_comment": "The answer outlines general layer impacts but misses many specific components from the gold standard (e.g., repository/sqlite, seed.go, exact test files) and introduces likely non‑existent pages/templates, reducing completeness and introducing hallucinated links."
+        }
+      },
+      {
+        "id": "G3",
+        "name": "Causal chain: flaky → root cause → fix",
+        "total": 24,
+        "latency_ms": 1921,
+        "search_ms": 179,
+        "mems": 10,
+        "scores": {
+          "hop_accuracy": 5,
+          "chain_completeness": 5,
+          "no_hallucinated_links": 4,
+          "structural_awareness": 5,
+          "actionability": 5,
+          "total": 24,
+          "brief_comment": "The answer accurately pinpoints the shared in‑memory SQLite issue and its impact on LIKE queries, enumerates the affected integration tests, and offers concrete, actionable fixes. The only drawback is a slight risk of invented test names, but overall the reasoning is solid and actionable."
+        }
+      },
+      {
+        "id": "G4",
+        "name": "Inverse lookup: test → what it validates",
+        "total": 7,
+        "latency_ms": 1481,
+        "search_ms": 135,
+        "mems": 10,
+        "scores": {
+          "hop_accuracy": 2,
+          "chain_completeness": 1,
+          "no_hallucinated_links": 1,
+          "structural_awareness": 2,
+          "actionability": 1,
+          "total": 7,
+          "brief_comment": "The answer captures some high‑level flow (HTTP → helpers → Order methods) but deviates from the gold standard: it omits OrderItem, Product.Validate, setupTestServer, migrations/seed and adds unrelated endpoints (cancel/complete) and entities (News). Consequently many connections are inaccurate or fabricated, limiting usefulness."
+        }
+      },
+      {
+        "id": "G5",
+        "name": "Contradiction detection",
+        "total": 3,
+        "latency_ms": 569,
+        "search_ms": 206,
+        "mems": 10,
+        "scores": {
+          "hop_accuracy": 1,
+          "chain_completeness": 0,
+          "no_hallucinated_links": 0,
+          "structural_awareness": 1,
+          "actionability": 1,
+          "total": 3,
+          "brief_comment": "The answer misses the key integration tests from the gold standard, invents an unrelated unit test, and provides no concrete guidance, resulting in low scores across all criteria."
+        }
+      }
+    ]
+  },
+  "combined": {
+    "total": 166,
+    "max": 375,
+    "pct": 44.3
+  }
+}

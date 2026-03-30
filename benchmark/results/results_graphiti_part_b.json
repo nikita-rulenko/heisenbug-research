@@ -1,0 +1,84 @@
+{
+  "approach": "graphiti",
+  "part": "B",
+  "total_score": 98,
+  "max_score": 125,
+  "percentage": 78.4,
+  "scenarios": [
+    {
+      "id": "G1",
+      "name": "Multi-hop dependency trace",
+      "total": 23,
+      "latency_ms": 31883,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 5,
+        "no_hallucinated_links": 3,
+        "structural_awareness": 5,
+        "actionability": 5,
+        "total": 23,
+        "brief_comment": "The answer correctly traces the handler → usecase → repository → entity chain and shows good architectural awareness, but it invents several test names and an extra interface file that were not in the gold standard, leading to some hallucinated links."
+      }
+    },
+    {
+      "id": "G2",
+      "name": "Cross-entity impact",
+      "total": 13,
+      "latency_ms": 1957,
+      "scores": {
+        "hop_accuracy": 3,
+        "chain_completeness": 4,
+        "no_hallucinated_links": 1,
+        "structural_awareness": 3,
+        "actionability": 2,
+        "total": 13,
+        "brief_comment": "The answer identifies many of the correct layers (entity, repository, handler, tests) but adds numerous unnecessary or fabricated components (templates, migrations, usecase logic, extra test suites). While it covers the required files, the extra hallucinated links reduce its precision and actionable value."
+      }
+    },
+    {
+      "id": "G3",
+      "name": "Causal chain: flaky → root cause → fix",
+      "total": 25,
+      "latency_ms": 1868,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 5,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 5,
+        "actionability": 5,
+        "total": 25,
+        "brief_comment": "The answer correctly traces the problematic connections, covers all relevant links, introduces no spurious relationships, demonstrates clear understanding of the system's layers, and provides concrete, implementable fixes."
+      }
+    },
+    {
+      "id": "G4",
+      "name": "Inverse lookup: test → what it validates",
+      "total": 17,
+      "latency_ms": 1757,
+      "scores": {
+        "hop_accuracy": 3,
+        "chain_completeness": 5,
+        "no_hallucinated_links": 1,
+        "structural_awareness": 4,
+        "actionability": 4,
+        "total": 17,
+        "brief_comment": "The answer captures all required entities, endpoints, business rules, and helpers, showing good layer awareness, but it adds several unsupported GET endpoints, status enums, and extra layers that are not in the gold standard, leading to hallucinated links and reduced hop accuracy."
+      }
+    },
+    {
+      "id": "G5",
+      "name": "Contradiction detection",
+      "total": 20,
+      "latency_ms": 1154,
+      "scores": {
+        "hop_accuracy": 3,
+        "chain_completeness": 2,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 5,
+        "actionability": 5,
+        "total": 20,
+        "brief_comment": "The answer correctly pinpoints TestIntegrationProductSearch as order‑dependent and explains isolation for other layers, showing solid structural insight and actionable fixes. However, it omits the other order‑sensitive tests (TestIntegrationSeedData, TestAPIOrderFlow) mentioned in the gold standard, so the chain is not fully complete."
+      }
+    }
+  ]
+}

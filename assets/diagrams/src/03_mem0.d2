@@ -1,0 +1,98 @@
+vars: {
+  d2-config: {
+    theme-id: 200
+    layout-engine: elk
+  }
+}
+
+direction: down
+
+classes: {
+  primary: {
+    style: {
+      border-radius: 8
+      shadow: true
+      font-size: 16
+    }
+  }
+  db: {
+    shape: cylinder
+    style: {
+      shadow: true
+      font-size: 14
+    }
+  }
+}
+
+app: AI Application {
+  class: primary
+  style.3d: true
+
+  agent: LLM Agent
+}
+
+mem0: Mem0 Layer {
+  class: primary
+  style.double-border: true
+
+  api: "API — 3 lines of code" {
+    style.border-radius: 6
+    style.font-size: 14
+  }
+
+  extraction: LLM Extraction {
+    style.border-radius: 6
+
+    extract: "Fact Extraction"
+    dedup: "Deduplication"
+    extract -> dedup
+  }
+
+  ops: Memory Operations {
+    style.border-radius: 6
+
+    add: "add()"
+    search: "search()"
+    update: "update()"
+    forget: "delete()"
+  }
+}
+
+storage: Storage {
+  class: primary
+
+  vector: "Vector DB\n(Qdrant / Chroma)" {
+    class: db
+  }
+  graph: "Graph DB\n(Neo4j)" {
+    class: db
+  }
+}
+
+integrations: Integrations {
+  style.border-radius: 8
+  style.font-size: 14
+
+  crewai: CrewAI
+  flowise: Flowise
+  langflow: Langflow
+  aws: "AWS Agent SDK"
+  langchain: LangChain
+}
+
+app.agent -> mem0.api: "add() / search()"
+mem0.api -> mem0.extraction: process
+mem0.extraction -> mem0.ops: store / retrieve
+mem0.ops -> storage.vector: semantic ops
+mem0.ops -> storage.graph: relationship ops
+mem0.api -> integrations: SDK / MCP
+
+metrics: Metrics {
+  shape: class
+
+  latency: "p95 1.44s"
+  tokens: "~7K tokens/conv"
+  accuracy: "87%+ long-term"
+  stars: "47.8K GitHub stars"
+  funding: "24M raised"
+}

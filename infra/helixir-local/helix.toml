@@ -1,0 +1,10 @@
+[project]
+name = "helixir-local"
+queries = "./db/"
+container_runtime = "docker"
+
+[local.bench]
+port = 6970
+build_mode = "dev"
+
+[cloud]

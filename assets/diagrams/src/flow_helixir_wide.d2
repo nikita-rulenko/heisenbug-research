@@ -1,0 +1,175 @@
+direction: right
+
+title: {
+  label: "Helixir — Architecture & Flow"
+  near: top-center
+  shape: text
+  style.font-size: 28
+  style.bold: true
+}
+
+classes: {
+  protocol: {
+    shape: rectangle
+    style.fill: "#e94560"
+    style.stroke: "#b8354d"
+    style.font-color: "#ffffff"
+    style.border-radius: 10
+    style.shadow: true
+    style.3d: true
+  }
+  memory: {
+    shape: rectangle
+    style.fill: "#e67e22"
+    style.stroke: "#d35400"
+    style.font-color: "#ffffff"
+    style.border-radius: 8
+    style.shadow: true
+  }
+  db: {
+    shape: cylinder
+    style.fill: "#2ecc71"
+    style.stroke: "#1a9c54"
+    style.font-color: "#ffffff"
+    style.shadow: true
+  }
+  mcp: {
+    shape: rectangle
+    style.fill: "#9b59b6"
+    style.stroke: "#7d3c98"
+    style.font-color: "#ffffff"
+    style.border-radius: 10
+    style.shadow: true
+    style.3d: true
+  }
+  ontology: {
+    shape: rectangle
+    style.fill: "#4a90d9"
+    style.stroke: "#2c5f8a"
+    style.font-color: "#ffffff"
+    style.border-radius: 8
+    style.shadow: true
+  }
+  causal_edge: {
+    shape: rectangle
+    style.fill: "#c0392b"
+    style.stroke: "#922b21"
+    style.font-color: "#ffffff"
+    style.border-radius: 8
+    style.shadow: true
+  }
+}
+
+agent: "AI Agent\n(Cursor / Claude)" {
+  style.fill: "#1a1a2e"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+  style.shadow: true
+}
+
+mcp_srv: "MCP Server\n(Rust)" {class: mcp}
+
+cognitive: "Cognitive Protocol" {
+  style.fill: "#0f3460"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  recall: "auto_recall" {class: protocol}
+  save: "auto_save" {class: protocol}
+  think: "think_about" {class: protocol}
+}
+
+fast_think: "FastThink" {
+  style.fill: "#16213e"
+  style.stroke: "#ffd700"
+  style.font-color: "#ffd700"
+  style.border-radius: 12
+  style.shadow: true
+
+  scratchpad: "Scratchpad\n(isolated)" {class: memory}
+}
+
+llm_layer: "LLM Layer" {
+  style.fill: "#0f3460"
+  style.stroke: "#e94560"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  extract: "Atomic Fact\nExtraction" {class: protocol}
+  dedup: "Smart Dedup\n(ADD / UPDATE\n/ SUPERSEDE)" {class: protocol}
+  embed: "Embedding" {class: memory}
+
+  extract -> dedup {style.stroke: "#e94560"}
+  dedup -> embed {style.stroke: "#e67e22"}
+}
+
+classify: "Ontology + Causal" {
+  style.fill: "#0f3460"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  types: "7 Fact Types\nskill | preference\ngoal | fact | opinion\nexperience | achievement" {class: ontology}
+  edges: "Causal Edges\nIMPLIES | BECAUSE\nCONTRADICTS\nSUPERSEDE" {class: causal_edge}
+
+  types -> edges {style.stroke: "#4a90d9"}
+}
+
+helix_db: "HelixDB (Rust)" {
+  style.fill: "#1a1a2e"
+  style.stroke: "#2ecc71"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+  style.shadow: true
+
+  graph: "Graph Store\n(nodes + causal edges)" {class: db}
+  vector: "Vector Store\n(HNSW)" {class: db}
+}
+
+retrieval: "SmartTraversal" {
+  style.fill: "#0f3460"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  temporal: "Temporal Filter\n4h | 30d | 90d | all" {class: memory}
+  traverse: "Vector + Graph\nTraversal" {class: memory}
+
+  temporal -> traverse {style.stroke: "#e67e22"}
+}
+
+agent -> mcp_srv: "tool calls" {style.stroke: "#9b59b6"; style.font-size: 13}
+
+mcp_srv -> cognitive.save: "new fact" {style.stroke: "#e94560"; style.font-size: 12}
+mcp_srv -> cognitive.recall: "session start" {style.stroke: "#e94560"; style.font-size: 12}
+mcp_srv -> cognitive.think: "deep question" {style.stroke: "#e94560"; style.font-size: 12}
+
+cognitive.think -> fast_think.scratchpad: "isolate\nreasoning" {style.stroke: "#ffd700"; style.font-size: 12}
+
+cognitive.save -> llm_layer.extract: "extract" {style.stroke: "#e94560"; style.font-size: 12}
+
+llm_layer.dedup -> classify.types: "classify" {style.stroke: "#4a90d9"; style.font-size: 12}
+
+classify.edges -> helix_db.graph: "store nodes\n+ causal edges" {style.stroke: "#2ecc71"; style.font-size: 12}
+llm_layer.embed -> helix_db.vector: "store\nembeddings" {style.stroke: "#2ecc71"; style.font-size: 12}
+
+cognitive.recall -> retrieval.temporal: "query" {style.stroke: "#e67e22"; style.font-size: 12}
+
+helix_db.graph -> retrieval.traverse {style.stroke: "#2ecc71"; style.stroke-dash: 3}
+helix_db.vector -> retrieval.traverse {style.stroke: "#2ecc71"; style.stroke-dash: 3}
+
+retrieval.traverse -> agent: "memories +\ncausal chains" {style.stroke: "#9b59b6"; style.font-size: 13}
+
+note: |md
+  **Like Mem0**: LLM extraction + dedup in pipeline
+  **Unlike Mem0**: + causal edges + ontology + FastThink
+  **Append-only**: CONTRADICTS / SUPERSEDE — nothing deleted
+| {
+  near: bottom-center
+  style.font-size: 14
+  style.fill: "#16213e"
+  style.font-color: "#eaeaea"
+  style.border-radius: 8
+}

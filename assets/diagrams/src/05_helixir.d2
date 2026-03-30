@@ -1,0 +1,140 @@
+vars: {
+  d2-config: {
+    theme-id: 200
+    layout-engine: elk
+  }
+}
+
+direction: down
+
+classes: {
+  primary: {
+    style: {
+      border-radius: 8
+      shadow: true
+      font-size: 16
+    }
+  }
+  engine: {
+    style: {
+      border-radius: 6
+      font-size: 13
+    }
+  }
+  db: {
+    shape: cylinder
+    style: {
+      shadow: true
+    }
+  }
+}
+
+ide: "Cursor / Claude Desktop" {
+  class: primary
+  style.3d: true
+
+  user: User {
+    shape: person
+  }
+}
+
+mcp: MCP Server (stdio) {
+  class: primary
+
+  memory_tools: Memory Tools {
+    style.border-radius: 6
+    add_memory
+    search_memory
+    search_by_concept
+    search_reasoning_chain
+    get_memory_graph
+  }
+
+  think_tools: FastThink Tools {
+    style.border-radius: 6
+    think_start
+    think_add
+    think_recall
+    think_conclude
+    think_commit
+  }
+}
+
+helixir: HelixirClient {
+  class: primary
+  style.double-border: true
+
+  tooling: ToolingManager {
+    style.border-radius: 8
+
+    extractor: "LLM Extractor\n(atomic facts)" {
+      class: engine
+    }
+    decision: "Decision Engine\n(ADD / UPDATE / SUPERSEDE / NOOP)" {
+      class: engine
+    }
+    entity: "Entity Manager\n(entities + relations)" {
+      class: engine
+    }
+    reasoning: "Reasoning Engine\n(IMPLIES / BECAUSE / CONTRADICTS)" {
+      class: engine
+    }
+    search: "Search Engine\n(SmartTraversalV2)" {
+      class: engine
+    }
+    ontology: "Ontology Manager\n(skill | pref | goal | fact | opinion)" {
+      class: engine
+    }
+  }
+
+  fastthink: FastThinkManager {
+    style.border-radius: 8
+
+    graph: "petgraph::StableDiGraph\n(in-memory scratchpad)" {
+      style.border-radius: 6
+    }
+    limits: "100 thoughts · depth 10 · 30s timeout" {
+      style.font-size: 12
+      style.opacity: 0.8
+    }
+  }
+}
+
+helixdb: HelixDB {
+  class: primary
+
+  graph_layer: Graph Layer {
+    class: db
+  }
+  vector_layer: Vector Layer {
+    class: db
+  }
+}
+
+llm: LLM Provider {
+  class: primary
+
+  cerebras: "Cerebras\n(3000 tok/s)"
+  openrouter: "OpenRouter\n(embeddings)"
+}
+
+ide -> mcp: MCP protocol
+mcp.memory_tools -> helixir.tooling: memory ops
+mcp.think_tools -> helixir.fastthink: think ops
+helixir.tooling.extractor -> llm: extract facts
+helixir.tooling.search -> helixdb: query
+helixir.tooling.entity -> helixdb.graph_layer: CRUD
+helixir.tooling.reasoning -> helixdb.graph_layer: causal chains
+helixir.fastthink -> helixir.tooling.search: think_recall {
+  style.stroke-dash: 5
+}
+helixir.fastthink.graph -> helixdb: think_commit
+
+cognitive: Cognitive Protocol {
+  shape: class
+
+  "\"remember\" → recent search"
+  "\"why did we\" → reasoning chains"
+  "\"what's next\" → task context"
+  "\"like before\" → preference lookup"
+}

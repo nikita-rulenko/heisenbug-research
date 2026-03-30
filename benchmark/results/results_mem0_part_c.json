@@ -1,0 +1,85 @@
+{
+  "approach": "mem0",
+  "part": "C",
+  "total_score": 123,
+  "max_score": 125,
+  "percentage": 98.4,
+  "extra": {},
+  "scenarios": [
+    {
+      "id": "D1",
+      "name": "Clean Architecture with 4 layers (entity, usecase, repository, handler)",
+      "total": 25,
+      "latency_ms": 1789,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer fully recovers the original reasoning, names rejected alternatives, clearly lists trade‑offs, stays faithful to the likely source material, and ties each point back to the Clean Architecture decision."
+      }
+    },
+    {
+      "id": "D2",
+      "name": "Table-driven tests with t.Run() for parametric testing",
+      "total": 25,
+      "latency_ms": 1678,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer fully recovers the original reasoning, names the rejected alternatives, spells out the trade‑offs, stays faithful to the context, and clearly links the decision to concrete project constraints."
+      }
+    },
+    {
+      "id": "D3",
+      "name": "Keep TestIntegrationProductSearch despite known flakiness",
+      "total": 25,
+      "latency_ms": 960,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer fully recovers the original reasoning, explicitly names rejected alternatives, clearly states the accepted trade‑offs, stays faithful to the source context, and provides a traceable decision narrative."
+      }
+    },
+    {
+      "id": "D4",
+      "name": "SQLite instead of PostgreSQL",
+      "total": 25,
+      "latency_ms": 1146,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer reproduces the original reasoning, names rejected alternatives (PostgreSQL, ICU extension, flat handler), lists accepted downsides (Unicode LIKE issue, concurrency limits, DB size), stays faithful to the source context, and provides a clear cause‑effect trace for the SQLite decision."
+      }
+    },
+    {
+      "id": "D5",
+      "name": "Real DB in usecase tests instead of mocks",
+      "total": 23,
+      "latency_ms": 1374,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 3,
+        "decision_traceability": 5,
+        "total": 23,
+        "brief_comment": "The answer fully recovers the original reasoning, names rejected alternatives, and lists trade‑offs. It clearly traces the decision. However, it introduces several details (CI convenience, Clean Architecture justification, Docker concerns) that were not present in the gold‑standard context, which counts as some fabricated reasoning, lowering that score."
+      }
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "approach": "md_files",
+  "part": "B",
+  "total_score": 78,
+  "max_score": 125,
+  "percentage": 62.4,
+  "scenarios": [
+    {
+      "id": "G1",
+      "name": "Multi-hop dependency trace",
+      "total": 21,
+      "latency_ms": 1785,
+      "scores": {
+        "hop_accuracy": 4,
+        "chain_completeness": 5,
+        "no_hallucinated_links": 3,
+        "structural_awareness": 5,
+        "actionability": 4,
+        "total": 21,
+        "brief_comment": "The answer correctly traces the main handler → usecase → repository → entity path and shows good architectural insight, but it adds an extra repository‑interface layer and mentions a ProductRepository that aren't in the gold standard, introducing some hallucinated links. Overall it is largely accurate and usable."
+      }
+    },
+    {
+      "id": "G2",
+      "name": "Cross-entity impact",
+      "total": 13,
+      "latency_ms": 1772,
+      "scores": {
+        "hop_accuracy": 3,
+        "chain_completeness": 4,
+        "no_hallucinated_links": 1,
+        "structural_awareness": 3,
+        "actionability": 2,
+        "total": 13,
+        "brief_comment": "The answer mentions most of the required files but adds many that are not in the gold standard, showing partial layer tracing and several fabricated dependencies. While the overall structure is recognized, the excess and inaccurate links reduce its usefulness."
+      }
+    },
+    {
+      "id": "G3",
+      "name": "Causal chain: flaky → root cause → fix",
+      "total": 25,
+      "latency_ms": 2047,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 5,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 5,
+        "actionability": 5,
+        "total": 25,
+        "brief_comment": "The answer correctly traces the shared in‑memory SQLite and seed data issue through the test stack, identifies all affected tests, proposes concrete isolation fixes, and shows clear layer awareness with actionable code snippets."
+      }
+    },
+    {
+      "id": "G4",
+      "name": "Inverse lookup: test → what it validates",
+      "total": 11,
+      "latency_ms": 2296,
+      "scores": {
+        "hop_accuracy": 3,
+        "chain_completeness": 2,
+        "no_hallucinated_links": 1,
+        "structural_awareness": 3,
+        "actionability": 2,
+        "total": 11,
+        "brief_comment": "The answer captures some correct connections but adds many extra, non‑existent endpoints, business rules, and helpers while omitting required items (respondJSON, parseID, migrations/seed). It shows partial structural understanding but includes hallucinated links and is not directly actionable."
+      }
+    },
+    {
+      "id": "G5",
+      "name": "Contradiction detection",
+      "total": 8,
+      "latency_ms": 1250,
+      "scores": {
+        "hop_accuracy": 1,
+        "chain_completeness": 1,
+        "no_hallucinated_links": 1,
+        "structural_awareness": 2,
+        "actionability": 3,
+        "total": 8,
+        "brief_comment": "The answer misidentifies the order‑dependent tests, omitting the gold‑standard ones (TestIntegrationSeedData, TestAPIOrderFlow) and inventing others (TestIntegrationProductCount, TestAPIProductNotFound). It shows limited understanding of the test‑dependency graph and provides generic advice rather than directly addressing the required list."
+      }
+    }
+  ]
+}

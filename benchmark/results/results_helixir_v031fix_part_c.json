@@ -1,0 +1,87 @@
+{
+  "approach": "helixir_v031fix",
+  "part": "C",
+  "total_score": 123,
+  "max_score": 125,
+  "percentage": 98.4,
+  "extra": {
+    "version": "v0.3.1-fix"
+  },
+  "scenarios": [
+    {
+      "id": "D1",
+      "name": "Clean Architecture with 4 layers (entity, usecase, repository, handler)",
+      "total": 25,
+      "latency_ms": 1626,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer fully recovers the original reasoning, names the rejected flat/monolithic alternative, lists concrete trade‑offs, shows no signs of hallucinated content, and clearly ties the decision to its causes and effects."
+      }
+    },
+    {
+      "id": "D2",
+      "name": "Table-driven tests with t.Run() for parametric testing",
+      "total": 25,
+      "latency_ms": 1375,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer fully recovers the original reasoning, names the rejected alternatives, lists the trade‑offs, stays faithful to the given context, and clearly ties the decision to its causes."
+      }
+    },
+    {
+      "id": "D3",
+      "name": "Keep TestIntegrationProductSearch despite known flakiness",
+      "total": 23,
+      "latency_ms": 1115,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 3,
+        "decision_traceability": 5,
+        "total": 23,
+        "brief_comment": "The answer recovers the original reasoning, lists rejected alternatives, and spells out trade‑offs clearly. However it introduces an extra alternative not present in the source, indicating some fabricated reasoning."
+      }
+    },
+    {
+      "id": "D4",
+      "name": "SQLite instead of PostgreSQL",
+      "total": 25,
+      "latency_ms": 1500,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer reproduces the original reasoning, names rejected alternatives (PostgreSQL, mocks, other embedded DBs), lists accepted downsides (Unicode LIKE, concurrency, size limits), stays faithful to the source without hallucination, and clearly ties the decision to its causes."
+      }
+    },
+    {
+      "id": "D5",
+      "name": "Real DB in usecase tests instead of mocks",
+      "total": 25,
+      "latency_ms": 1383,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer fully recovers the original reasoning, names rejected alternatives, spells out the trade‑offs, stays faithful to the context, and clearly traces the decision to use an in‑memory SQLite DB."
+      }
+    }
+  ]
+}

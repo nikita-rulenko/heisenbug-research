@@ -1,0 +1,236 @@
+direction: down
+
+title: {
+  label: "Helixir — Architecture & Flow"
+  near: top-center
+  shape: text
+  style.font-size: 28
+  style.bold: true
+}
+
+classes: {
+  protocol: {
+    shape: rectangle
+    style.fill: "#e94560"
+    style.stroke: "#b8354d"
+    style.font-color: "#ffffff"
+    style.border-radius: 10
+    style.shadow: true
+    style.3d: true
+  }
+  memory: {
+    shape: rectangle
+    style.fill: "#e67e22"
+    style.stroke: "#d35400"
+    style.font-color: "#ffffff"
+    style.border-radius: 8
+    style.shadow: true
+  }
+  db: {
+    shape: cylinder
+    style.fill: "#2ecc71"
+    style.stroke: "#1a9c54"
+    style.font-color: "#ffffff"
+    style.shadow: true
+  }
+  mcp: {
+    shape: rectangle
+    style.fill: "#9b59b6"
+    style.stroke: "#7d3c98"
+    style.font-color: "#ffffff"
+    style.border-radius: 10
+    style.shadow: true
+    style.3d: true
+  }
+  ontology: {
+    shape: rectangle
+    style.fill: "#4a90d9"
+    style.stroke: "#2c5f8a"
+    style.font-color: "#ffffff"
+    style.border-radius: 8
+    style.shadow: true
+  }
+}
+
+agent: "AI Agent\n(Cursor / Claude / etc)" {
+  style.fill: "#1a1a2e"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+  style.shadow: true
+}
+
+mcp: "Helixir MCP Server\n(Rust)" {class: mcp}
+
+cognitive: "Cognitive Protocol" {
+  style.fill: "#0f3460"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  recall: "auto_recall\n(session start)" {class: protocol}
+  save: "auto_save\n(on new fact)" {class: protocol}
+  think: "think_about\n(deep reasoning)" {class: protocol}
+}
+
+fast_think: "FastThink\n(Working Memory)" {
+  style.fill: "#16213e"
+  style.stroke: "#533483"
+  style.font-color: "#ffd700"
+  style.border-radius: 12
+  style.shadow: true
+
+  scratchpad: "Scratchpad\n(isolated reasoning)" {class: memory}
+  timeout: "Timeout Recovery\n[INCOMPLETE] marker" {class: memory}
+}
+
+llm_layer: "LLM Layer (required)" {
+  style.fill: "#0f3460"
+  style.stroke: "#e94560"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  extractor: "Atomic Fact\nExtraction (LLM)" {class: protocol}
+  dedup: "Smart Dedup\nADD/UPDATE/\nSUPERSEDE/NOOP" {class: protocol}
+  embedder: "Embedding Model" {class: memory}
+}
+
+ontology: "Ontological Classifier" {
+  style.fill: "#0f3460"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  types: "7 Fact Types:\nskill | preference | goal\nfact | opinion\nexperience | achievement" {class: ontology}
+}
+
+causal: "Causal Engine" {
+  style.fill: "#0f3460"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  implies: "IMPLIES" {class: protocol}
+  because: "BECAUSE" {class: protocol}
+  contradicts: "CONTRADICTS" {class: protocol}
+  supersede: "SUPERSEDE" {class: protocol}
+}
+
+helix_db: "HelixDB (Rust)" {
+  style.fill: "#1a1a2e"
+  style.stroke: "#2ecc71"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+  style.shadow: true
+
+  graph: "Graph Store\n(nodes + edges)" {class: db}
+  vector: "Vector Store\n(HNSW index)" {class: db}
+  compiled: "Compiled Queries\n(HelixQL)" {class: memory}
+}
+
+retrieval: "SmartTraversal\nRetrieval" {
+  style.fill: "#0f3460"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  temporal: "Temporal Filter\n4h | 30d | 90d | all" {class: memory}
+  traverse: "Graph Traversal\n+ Vector Similarity" {class: memory}
+}
+
+agent -> mcp: "Tool calls" {
+  style.stroke: "#9b59b6"
+  style.font-size: 14
+}
+
+mcp -> cognitive.recall: "1. Session start\ntrigger" {
+  style.stroke: "#e94560"
+  style.font-size: 13
+}
+
+mcp -> cognitive.save: "2. New fact\ndetected" {
+  style.stroke: "#e94560"
+  style.font-size: 13
+}
+
+mcp -> cognitive.think: "3. Complex\nquestion" {
+  style.stroke: "#e94560"
+  style.font-size: 13
+}
+
+cognitive.think -> fast_think.scratchpad: "Isolate\nreasoning" {
+  style.stroke: "#ffd700"
+  style.font-size: 13
+}
+
+cognitive.save -> llm_layer.extractor: "4. Extract\natomic facts" {
+  style.stroke: "#e94560"
+  style.font-size: 13
+}
+
+llm_layer.extractor -> llm_layer.dedup: "5. Dedup vs\nexisting" {
+  style.stroke: "#e94560"
+  style.font-size: 13
+}
+
+llm_layer.dedup -> ontology.types: "6. Classify\nfact type" {
+  style.stroke: "#4a90d9"
+  style.font-size: 13
+}
+
+ontology.types -> causal: "7. Build\ncausal links" {
+  style.stroke: "#e94560"
+  style.font-size: 13
+}
+
+llm_layer.embedder -> helix_db.vector: "8b. Store\nembeddings" {
+  style.stroke: "#2ecc71"
+  style.font-size: 13
+}
+
+llm_layer.dedup -> llm_layer.embedder: "Embed facts" {
+  style.stroke: "#e67e22"
+  style.font-size: 13
+}
+
+causal -> helix_db.graph: "8a. Store\nnodes + edges" {
+  style.stroke: "#2ecc71"
+  style.font-size: 13
+}
+
+cognitive.recall -> retrieval.temporal: "Select\ntime window" {
+  style.stroke: "#e67e22"
+  style.font-size: 13
+}
+
+retrieval.temporal -> retrieval.traverse: "Filter" {
+  style.stroke: "#e67e22"
+  style.font-size: 13
+}
+
+helix_db.graph -> retrieval.traverse: "" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+helix_db.vector -> retrieval.traverse: "" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+retrieval.traverse -> agent: "Return memories\n+ causal chains" {
+  style.stroke: "#9b59b6"
+  style.font-size: 14
+}
+
+note: |md
+  **Key trait**: LLM-powered causal memory
+  Like Mem0: LLM extraction + dedup in pipeline.
+  Unlike Mem0: adds causal chains + ontology + FastThink.
+  Rust MCP server, but LLM API key required.
+| {
+  near: bottom-center
+  style.font-size: 14
+  style.fill: "#16213e"
+  style.font-color: "#eaeaea"
+  style.border-radius: 8
+}

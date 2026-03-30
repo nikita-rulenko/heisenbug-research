@@ -1,0 +1,172 @@
+direction: down
+
+title: {
+  label: "Mem0 — Architecture & Flow"
+  near: top-center
+  shape: text
+  style.font-size: 28
+  style.bold: true
+}
+
+classes: {
+  llm: {
+    shape: rectangle
+    style.fill: "#e94560"
+    style.stroke: "#b8354d"
+    style.font-color: "#ffffff"
+    style.border-radius: 10
+    style.shadow: true
+    style.3d: true
+  }
+  db: {
+    shape: cylinder
+    style.fill: "#2ecc71"
+    style.stroke: "#1a9c54"
+    style.font-color: "#ffffff"
+    style.shadow: true
+  }
+  process: {
+    shape: rectangle
+    style.fill: "#e67e22"
+    style.stroke: "#d35400"
+    style.font-color: "#ffffff"
+    style.border-radius: 8
+    style.shadow: true
+  }
+  api: {
+    shape: rectangle
+    style.fill: "#9b59b6"
+    style.stroke: "#7d3c98"
+    style.font-color: "#ffffff"
+    style.border-radius: 10
+    style.shadow: true
+    style.3d: true
+  }
+}
+
+app: "Your AI App / Agent" {
+  style.fill: "#1a1a2e"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+  style.shadow: true
+}
+
+mem0_api: "Mem0 API\nadd() / search() / update()" {class: api}
+
+add_flow: "ADD Flow (write)" {
+  style.fill: "#0f3460"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  extract: "LLM Extraction\n(GPT-4 / Claude)" {class: llm}
+  dedup: "LLM Dedup\n& Conflict Resolution" {class: llm}
+  embed: "Embedding Model\n(text-embedding-3)" {class: process}
+}
+
+search_flow: "SEARCH Flow (read)" {
+  style.fill: "#0f3460"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  q_embed: "Query Embedding" {class: process}
+  vector_search: "Vector Similarity\nSearch" {class: process}
+  graph_traverse: "Graph Traversal\n(relationships)" {class: process}
+  merge: "Merge & Rank\nResults" {class: process}
+}
+
+storage: "Storage Layer" {
+  style.fill: "#1a1a2e"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+
+  vector_db: "Vector DB\n(Qdrant / Pinecone\n/ Chroma)" {class: db}
+  graph_db: "Graph DB\n(Neo4j)" {class: db}
+  kv: "Key-Value Store\n(metadata)" {class: db}
+}
+
+app -> mem0_api: "Conversation\nmessages" {
+  style.stroke: "#9b59b6"
+  style.font-size: 14
+}
+
+mem0_api -> add_flow.extract: "1. Extract facts\nfrom conversation" {
+  style.stroke: "#e94560"
+  style.font-size: 13
+}
+
+add_flow.extract -> add_flow.dedup: "2. Compare with\nexisting memories" {
+  style.stroke: "#e94560"
+  style.font-size: 13
+}
+
+add_flow.dedup -> add_flow.embed: "3. Embed new\n/ updated facts" {
+  style.stroke: "#e67e22"
+  style.font-size: 13
+}
+
+add_flow.embed -> storage.vector_db: "4a. Store\nvectors" {
+  style.stroke: "#2ecc71"
+  style.font-size: 13
+}
+
+add_flow.extract -> storage.graph_db: "4b. Store\nentities &\nrelations" {
+  style.stroke: "#2ecc71"
+  style.font-size: 13
+}
+
+mem0_api -> search_flow.q_embed: "1. Embed query" {
+  style.stroke: "#e67e22"
+  style.font-size: 13
+}
+
+search_flow.q_embed -> search_flow.vector_search: "2. Find\nsimilar" {
+  style.stroke: "#e67e22"
+  style.font-size: 13
+}
+
+storage.vector_db -> search_flow.vector_search: "" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+search_flow.q_embed -> search_flow.graph_traverse: "2. Traverse\ngraph" {
+  style.stroke: "#e67e22"
+  style.font-size: 13
+}
+
+storage.graph_db -> search_flow.graph_traverse: "" {
+  style.stroke: "#2ecc71"
+  style.stroke-dash: 3
+}
+
+search_flow.vector_search -> search_flow.merge: "3. Combine" {
+  style.stroke: "#e67e22"
+  style.font-size: 13
+}
+
+search_flow.graph_traverse -> search_flow.merge: "3. Combine" {
+  style.stroke: "#e67e22"
+  style.font-size: 13
+}
+
+search_flow.merge -> app: "Return relevant\nmemories" {
+  style.stroke: "#9b59b6"
+  style.font-size: 14
+}
+
+note: |md
+  **Key trait**: LLM-powered memory pipeline
+  Every add() = 1-2 LLM calls (extraction + dedup)
+  + 1+ embedding calls. Cost: ~1-3K tokens per add().
+  Search = embedding only (fast, ~100ms).
+| {
+  near: bottom-center
+  style.font-size: 14
+  style.fill: "#16213e"
+  style.font-color: "#eaeaea"
+  style.border-radius: 8
+}

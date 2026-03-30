@@ -1,0 +1,89 @@
+vars: {
+  d2-config: {
+    theme-id: 200
+    layout-engine: elk
+  }
+}
+
+direction: down
+
+classes: {
+  primary: {
+    style: {
+      border-radius: 8
+      shadow: true
+      font-size: 16
+    }
+  }
+  storage: {
+    shape: document
+    style: {
+      border-radius: 4
+      font-size: 14
+    }
+  }
+  weak: {
+    style: {
+      stroke-dash: 5
+      opacity: 0.7
+    }
+  }
+}
+
+developer: Developer {
+  shape: person
+  style.font-size: 18
+}
+
+ide: IDE {
+  class: primary
+  style.font-size: 20
+
+  agent: AI Coding Agent
+  loader: Context Loader
+  loader -> agent: inject rules
+}
+
+repo: Git Repository {
+  class: primary
+  style.double-border: true
+
+  agents_md: AGENTS.md {
+    class: storage
+  }
+  rules: ".cursor/rules/*.mdc" {
+    class: storage
+  }
+  spec: "specs/spec.md" {
+    class: storage
+  }
+  plan: "docs/plan.md" {
+    class: storage
+  }
+  tasks: "docs/tasks.md" {
+    class: storage
+  }
+  code: Source Code {
+    shape: package
+    style.shadow: true
+  }
+}
+
+developer -> ide: prompt
+ide.loader -> repo.agents_md: read on start
+ide.loader -> repo.rules: match by glob
+ide.loader -> repo.spec: load spec
+ide.agent -> repo.code: generate code
+ide.agent -> repo.plan: update plan
+ide.agent -> repo.tasks: track progress
+
+developer -> repo.agents_md: manual update {
+  class: weak
+}
+
+limits: Limitations {
+  shape: cloud
+  style.opacity: 0.85
+
+  "Static — no auto-update\nNo semantic search\nContext window limit\nNo forgetting"
+}

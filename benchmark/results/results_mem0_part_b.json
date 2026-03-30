@@ -1,0 +1,105 @@
+{
+  "approach": "mem0",
+  "part": "B",
+  "total_score": 88,
+  "max_score": 125,
+  "percentage": 70.4,
+  "search_metrics": {
+    "p50_ms": 101,
+    "p95_ms": 213,
+    "all_ms": [
+      86,
+      213,
+      68,
+      105,
+      101
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "G1",
+      "name": "Multi-hop dependency trace",
+      "total": 19,
+      "latency_ms": 1594,
+      "scores": {
+        "hop_accuracy": 4,
+        "chain_completeness": 3,
+        "no_hallucinated_links": 3,
+        "structural_awareness": 5,
+        "actionability": 4,
+        "total": 19,
+        "brief_comment": "The answer correctly captures the main layer flow (handler → usecase → repository → entity) and shows good structural insight, but it omits the specific `sqlite` sub‑package in the repository path and misses several test cases listed in the gold standard, leading to partial completeness and a slight risk of invented file names.",
+        "search_latency_ms": 86,
+        "memories_found": 11
+      }
+    },
+    {
+      "id": "G2",
+      "name": "Cross-entity impact",
+      "total": 15,
+      "latency_ms": 2254,
+      "scores": {
+        "hop_accuracy": 3,
+        "chain_completeness": 4,
+        "no_hallucinated_links": 1,
+        "structural_awareness": 3,
+        "actionability": 4,
+        "total": 15,
+        "brief_comment": "The answer correctly links the main entity, repository, handler, and tests, but adds unnecessary layers (usecase, migrations) that are not in the gold standard, leading to hallucinated connections. It shows decent architectural understanding and gives actionable steps, though some details are inaccurate.",
+        "search_latency_ms": 213,
+        "memories_found": 11
+      }
+    },
+    {
+      "id": "G3",
+      "name": "Causal chain: flaky → root cause → fix",
+      "total": 22,
+      "latency_ms": 1964,
+      "scores": {
+        "hop_accuracy": 3,
+        "chain_completeness": 4,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 5,
+        "actionability": 5,
+        "total": 22,
+        "brief_comment": "The answer captures the core issue of a shared in‑memory SQLite DB and Cyrillic LIKE quirks, and offers concrete fixes. It adds an extra \"order\" problem not in the gold standard, but otherwise is thorough, realistic, and directly actionable.",
+        "search_latency_ms": 68,
+        "memories_found": 11
+      }
+    },
+    {
+      "id": "G4",
+      "name": "Inverse lookup: test → what it validates",
+      "total": 13,
+      "latency_ms": 1710,
+      "scores": {
+        "hop_accuracy": 3,
+        "chain_completeness": 2,
+        "no_hallucinated_links": 1,
+        "structural_awareness": 4,
+        "actionability": 3,
+        "total": 13,
+        "brief_comment": "The answer correctly identifies the main entities and shows a decent grasp of layer separation, but it omits several gold‑standard links (e.g., POST /categories, POST /products, specific helpers) and introduces many extra endpoints and rules that were not part of the reference, leading to hallucinated connections and an incomplete chain.",
+        "search_latency_ms": 105,
+        "memories_found": 11
+      }
+    },
+    {
+      "id": "G5",
+      "name": "Contradiction detection",
+      "total": 19,
+      "latency_ms": 671,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 2,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 4,
+        "actionability": 3,
+        "total": 19,
+        "brief_comment": "The answer correctly explains why TestIntegrationProductSearch depends on execution order, but it omits other relevant tests (SeedData and APIOrderFlow) from the reasoning, reducing completeness. No false connections are introduced, and the explanation shows good grasp of the DB layer, though actionable guidance is only partial.",
+        "search_latency_ms": 101,
+        "memories_found": 11
+      }
+    }
+  ]
+}

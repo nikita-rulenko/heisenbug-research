@@ -1,0 +1,141 @@
+direction: right
+
+title: {
+  label: "GitHub Issues MCP — Context Flow"
+  near: top-center
+  shape: text
+  style.font-size: 28
+  style.bold: true
+}
+
+classes: {
+  human: {
+    shape: person
+    style.fill: "#4a90d9"
+    style.stroke: "#2c5f8a"
+    style.font-color: "#ffffff"
+    style.shadow: true
+  }
+  service: {
+    shape: cloud
+    style.fill: "#333"
+    style.stroke: "#555"
+    style.font-color: "#ffffff"
+    style.shadow: true
+  }
+  mcp: {
+    shape: rectangle
+    style.fill: "#e67e22"
+    style.stroke: "#d35400"
+    style.font-color: "#ffffff"
+    style.border-radius: 10
+    style.shadow: true
+    style.3d: true
+  }
+  agent: {
+    shape: hexagon
+    style.fill: "#e94560"
+    style.stroke: "#b8354d"
+    style.font-color: "#ffffff"
+    style.shadow: true
+  }
+  ide: {
+    shape: rectangle
+    style.fill: "#9b59b6"
+    style.stroke: "#7d3c98"
+    style.font-color: "#ffffff"
+    style.border-radius: 10
+    style.shadow: true
+  }
+  output: {
+    shape: rectangle
+    style.fill: "#2ecc71"
+    style.stroke: "#1a9c54"
+    style.font-color: "#ffffff"
+    style.border-radius: 8
+    style.shadow: true
+  }
+}
+
+dev: "Developer" {class: human}
+
+github: "GitHub" {class: service}
+
+issue_db: "Issues & Comments" {
+  style.fill: "#1a1a2e"
+  style.stroke: "#533483"
+  style.font-color: "#eaeaea"
+  style.border-radius: 12
+  style.shadow: true
+
+  issue: "Issue #42\nFix auth bug" {
+    shape: page
+    style.fill: "#4a90d9"
+    style.stroke: "#2c5f8a"
+    style.font-color: "#ffffff"
+  }
+  comments: "Comments\n(progress log)" {
+    shape: page
+    style.fill: "#4a90d9"
+    style.stroke: "#2c5f8a"
+    style.font-color: "#ffffff"
+  }
+}
+
+mcp: "GitHub MCP Server\n(OAuth 2.1)" {class: mcp}
+ide: "Cursor IDE" {class: ide}
+agent: "AI Agent" {class: agent}
+result: "Code Changes\n+ PR + Comment" {class: output}
+
+dev -> issue_db.issue: "1. Creates issue" {
+  style.stroke: "#4a90d9"
+  style.font-size: 14
+}
+
+ide -> mcp: "2. Agent calls\nissue_get()" {
+  style.stroke: "#9b59b6"
+  style.font-size: 14
+}
+
+mcp -> github: "3. GitHub API" {
+  style.stroke: "#e67e22"
+  style.font-size: 14
+}
+
+github -> issue_db: "" {
+  style.stroke: "#555"
+  style.stroke-dash: 3
+}
+
+mcp -> agent: "4. Returns\nissue context" {
+  style.stroke: "#e67e22"
+  style.font-size: 14
+}
+
+agent -> result: "5. Writes code" {
+  style.stroke: "#e94560"
+  style.font-size: 14
+}
+
+agent -> mcp: "6. issue_comment()\nissue_close()" {
+  style.stroke: "#2ecc71"
+  style.font-size: 14
+}
+
+mcp -> issue_db.comments: "7. Writes\nprogress" {
+  style.stroke: "#2ecc71"
+  style.font-size: 14
+}
+
+note: |md
+  **Key trait**: Bidirectional flow
+  Agent reads tasks AND writes back progress.
+  Full audit trail in GitHub.
+  Zero LLM cost for memory. MCP = tool calls.
+| {
+  near: bottom-center
+  style.font-size: 14
+  style.fill: "#16213e"
+  style.font-color: "#eaeaea"
+  style.border-radius: 8
+}

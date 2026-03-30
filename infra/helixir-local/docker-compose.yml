@@ -1,0 +1,17 @@
+services:
+  helixdb:
+    image: helixdb/helixdb:latest
+    container_name: helixdb-local
+    ports:
+      - "6970:6969"
+    volumes:
+      - helixdb_local_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:6969/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  helixdb_local_data:

@@ -1,0 +1,37 @@
+[
+  {
+    "id": "D1",
+    "decision": "Clean Architecture with 4 layers (entity, usecase, repository, handler)",
+    "question": "Почему мы выбрали Clean Architecture? Какие альтернативы рассматривались и почему были отвергнуты?",
+    "reasoning": "Clean Architecture обеспечивает 4 уровня изоляции тестов: unit (entity без DB), usecase (можно мокать repository), integration (реальный SQLite), API (httptest). Каждый слой тестируется независимо. Рассматривалась альтернатива: плоская структура, где handler напрямую работает с DB. Отвергнута потому что: невозможно тестировать бизнес-логику без DB, рефакторинг ломает тесты на всех уровнях, flaky-тесты распространяются. Trade-off: больше boilerplate (интерфейсы для каждого repository), но взамен — 32 быстрых unit-теста за <1ms и чёткое разделение ответственности.",
+    "gold": "4-level test isolation: entity unit tests don't need DB, usecase can mock repo, integration hits real SQLite, API uses httptest. Flat structure rejected: can't test business logic without DB, refactoring breaks all tests, flaky propagation. Trade-off: more boilerplate for interfaces but 32 fast unit tests."
+  },
+  {
+    "id": "D2",
+    "decision": "Table-driven tests with t.Run() for parametric testing",
+    "question": "Почему мы используем table-driven тесты вместо отдельных тестовых функций? В чём обоснование?",
+    "reasoning": "Table-driven тесты с t.Run() выбраны потому что: 1) Единая точка assertion — при изменении API достаточно поправить один тест, а не 5 отдельных функций. 2) Легко добавить новый subcase — просто строка в таблице. 3) t.Run() даёт понятные имена в go test -v. Рассматривались отдельные тест-функции (TestProductValidateValid, TestProductValidateEmptyName, ...) — отвергнуты из-за дублирования setup-кода и взрывного роста функций. Пример: TestUnitProductValidate имеет 5 subcases в одной таблице вместо 5 отдельных функций.",
+    "gold": "Table-driven chosen for: single assertion point (one fix for API change), easy to add subcases (just a table row), clear test names via t.Run(). Rejected separate functions: setup duplication, function explosion. Example: TestUnitProductValidate has 5 subcases in one table."
+  },
+  {
+    "id": "D3",
+    "decision": "Keep TestIntegrationProductSearch despite known flakiness",
+    "question": "Почему TestIntegrationProductSearch оставили в suite несмотря на flaky-статус? Какой trade-off был принят?",
+    "reasoning": "TestIntegrationProductSearch флачит из-за LIKE-запроса с кириллическим текстом в SQLite. Исправление требует подключения ICU extension к SQLite, что: 1) увеличивает размер бинарника на ~5MB, 2) усложняет CI-сборку (нужен CGO_ENABLED=1 + libicu), 3) решает проблему только для одного теста. Trade-off: оставили flaky-тест с документацией причины, вместо исправления ICU. Причина: стоимость фикса превышает пользу, а тест всё равно проходит в 9 из 10 случаев. Альтернатива — удалить тест — отвергнута, потому что он единственный проверяет поиск по кириллице.",
+    "gold": "Kept because: fixing requires ICU extension (+5MB binary, CGO_ENABLED=1, complex CI). Cost exceeds benefit — test passes 9/10. Alternative: delete test — rejected because it's the only one testing Cyrillic search. Trade-off: documented flakiness instead of ICU fix."
+  },
+  {
+    "id": "D4",
+    "decision": "SQLite instead of PostgreSQL",
+    "question": "Почему выбрали SQLite, а не PostgreSQL? Какие недостатки приняли?",
+    "reasoning": "SQLite выбран потому что: 1) Single binary — не нужен отдельный DB-сервер, развёртывание одним файлом. 2) In-memory mode для тестов — setupTestDB() создаёт чистую DB за <1ms, не нужен Docker/testcontainers. 3) Проект маленький, concurrency не нужен. Рассматривали PostgreSQL — отвергнут потому что: нужен Docker для тестов (или testcontainers), усложняет CI, overkill для кофейного магазина с одним пользователем. Принятые недостатки SQLite: нет полноценного LIKE с Unicode (причина flaky TestIntegrationProductSearch), нет concurrent writes, лимит на размер DB.",
+    "gold": "SQLite chosen for: single binary (no DB server), in-memory tests (<1ms setup, no Docker), small project scope. PostgreSQL rejected: needs Docker for tests, complex CI, overkill. Accepted downsides: broken LIKE with Unicode (causes flaky test), no concurrent writes, DB size limit."
+  },
+  {
+    "id": "D5",
+    "decision": "Real DB in usecase tests instead of mocks",
+    "question": "Новый разработчик предлагает: 'Давайте в usecase-тестах используем моки вместо реальной DB.' Какое было исходное решение и почему?",
+    "reasoning": "Usecase-тесты используют реальный SQLite (через setupTestDB()) вместо моков. Решение принято потому что: 1) Моки не ловят SQL-баги — если в repository/sqlite/product.go неправильный SQL, мок это пропустит. 2) setupTestDB() создаёт in-memory SQLite за <1ms — скорость как у мока. 3) Usecase-слой тонкий (делегирует в repository), моки бы просто дублировали integration-тесты. Рассматривали: interface-based моки с gomock/testify — отвергнуты потому что: при 4 repository с ~5 методами каждый = 20 mock-методов, что дороже в поддержке чем real DB. Trade-off: usecase-тесты зависят от SQLite (не полностью unit), но зато ловят реальные баги на уровне SQL.",
+    "gold": "Real DB chosen because: 1) Mocks miss SQL bugs in repository layer. 2) In-memory SQLite as fast as mocks (<1ms). 3) Usecase layer is thin — mocks would duplicate integration tests. Rejected gomock/testify: 4 repos × 5 methods = 20 mock methods, costly maintenance. Trade-off: usecase tests depend on SQLite (not pure unit) but catch real SQL bugs."
+  }
+]

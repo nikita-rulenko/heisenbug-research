@@ -1,0 +1,85 @@
+{
+  "approach": "md_files",
+  "part": "C",
+  "total_score": 121,
+  "max_score": 125,
+  "percentage": 96.8,
+  "extra": {},
+  "scenarios": [
+    {
+      "id": "D1",
+      "name": "Clean Architecture with 4 layers (entity, usecase, repository, handler)",
+      "total": 23,
+      "latency_ms": 1689,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 3,
+        "decision_traceability": 5,
+        "total": 23,
+        "brief_comment": "The answer fully recovers the original reasoning, names rejected alternatives, and lists trade‑offs. It is well‑structured and traceable to the decision. However, it adds several details (test counts, flaky test name, SQLite ICU issue) that are not present in the gold‑standard context and may be hallucinated, lowering the ‘no fabricated reasoning’ score."
+      }
+    },
+    {
+      "id": "D2",
+      "name": "Table-driven tests with t.Run() for parametric testing",
+      "total": 25,
+      "latency_ms": 1311,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer fully recovers the original reasoning, explicitly names rejected alternatives, clearly states the trade‑offs taken, contains no hallucinated content, and provides a traceable decision narrative."
+      }
+    },
+    {
+      "id": "D3",
+      "name": "Keep TestIntegrationProductSearch despite known flakiness",
+      "total": 25,
+      "latency_ms": 1196,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer reproduces the original reasoning, names the rejected alternatives, clearly states the trade‑offs (flakiness vs CI complexity), stays faithful to the source context, and provides a traceable decision flow."
+      }
+    },
+    {
+      "id": "D4",
+      "name": "SQLite instead of PostgreSQL",
+      "total": 23,
+      "latency_ms": 1401,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 3,
+        "decision_traceability": 5,
+        "total": 23,
+        "brief_comment": "The answer fully recovers the original reasoning, names rejected alternatives, and lists the accepted trade‑offs. It is well‑structured and clearly traces the decision. However, it adds several details (e.g., CGO, exact MB overhead, specific test names) that were not present in the gold‑standard context, which may be considered fabricated, lowering the ‘no fabricated reasoning’ score."
+      }
+    },
+    {
+      "id": "D5",
+      "name": "Real DB in usecase tests instead of mocks",
+      "total": 25,
+      "latency_ms": 1138,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer reproduces the original reasoning, names rejected alternatives (gomock/testify, pure unit tests), states the trade‑off (dependency on SQLite), shows no hallucinated facts, and clearly links the decision to its causes."
+      }
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+vars: {
+  d2-config: {
+    theme-id: 200
+    layout-engine: elk
+  }
+}
+
+direction: right
+
+classes: {
+  primary: {
+    style: {
+      border-radius: 8
+      shadow: true
+      font-size: 16
+    }
+  }
+  entity: {
+    style: {
+      border-radius: 6
+      font-size: 13
+    }
+  }
+}
+
+sdd: "1 · Spec-Driven (MD)" {
+  class: primary
+
+  file: Markdown File {
+    class: entity
+    shape: document
+  }
+  section: "Section (## heading)" {
+    class: entity
+  }
+  rule: Rule / Instruction {
+    class: entity
+  }
+
+  file -> section: contains
+  section -> rule: contains
+}
+
+jira: "2 · Jira / Tickets" {
+  class: primary
+
+  project: Project {
+    class: entity
+  }
+  epic: Epic {
+    class: entity
+  }
+  ticket: Ticket {
+    class: entity
+  }
+  comment: Comment {
+    class: entity
+  }
+
+  project -> epic: has
+  epic -> ticket: has
+  ticket -> comment: has
+  ticket -> ticket: linked to {
+    style.stroke-dash: 5
+  }
+}
+
+mem0: "3 · Mem0" {
+  class: primary
+
+  memory: Memory {
+    class: entity
+  }
+  embedding: Vector Embedding {
+    class: entity
+    shape: diamond
+  }
+  entity_node: Entity {
+    class: entity
+  }
+  relation: Relation {
+    class: entity
+  }
+  user_ctx: User Context {
+    class: entity
+  }
+
+  memory -> embedding: indexed by
+  memory -> entity_node: extracted
+  entity_node -> relation: connected
+  memory -> user_ctx: scoped to
+}
+
+helixir: "4 · Helixir (HelixDB)" {
+  class: primary
+  style.double-border: true
+
+  fact: Atomic Fact {
+    class: entity
+  }
+  entity_h: Entity {
+    class: entity
+  }
+  ontology: Ontology Type {
+    class: entity
+    shape: diamond
+  }
+  causal: Causal Chain {
+    class: entity
+    shape: hexagon
+  }
+  thought: Thought (FastThink) {
+    class: entity
+    shape: oval
+  }
+  temporal: Temporal Layer {
+    class: entity
+    shape: queue
+  }
+
+  fact -> entity_h: belongs to
+  fact -> ontology: classified as
+  fact -> causal: linked by
+  thought -> fact: commit
+  fact -> temporal: filtered by
+  entity_h -> entity_h: related {
+    style.stroke-dash: 5
+  }
+}

@@ -1,0 +1,97 @@
+vars: {
+  d2-config: {
+    theme-id: 200
+    layout-engine: elk
+  }
+}
+
+direction: down
+
+classes: {
+  primary: {
+    style: {
+      border-radius: 8
+      shadow: true
+      font-size: 16
+    }
+  }
+  db: {
+    shape: cylinder
+    style: {
+      shadow: true
+    }
+  }
+}
+
+app: Your Application {
+  class: primary
+  style.3d: true
+}
+
+helixql: HelixQL Queries {
+  shape: page
+  style.shadow: true
+}
+
+compiler: "HelixQL → Rust Compiler" {
+  class: primary
+
+  transpile: Transpile to Rust
+  build: Build into binary
+  endpoints: Generate API endpoints
+  transpile -> build -> endpoints
+}
+
+server: Helix Server {
+  class: primary
+  style.double-border: true
+
+  api: Native API Endpoints {
+    style.border-radius: 6
+  }
+
+  graph_engine: Graph Engine {
+    style.border-radius: 6
+    pipelined: Pipelined Traversals
+    parallel: Parallel Execution
+  }
+
+  vector_engine: Vector Engine {
+    style.border-radius: 6
+    hnsw: HNSW Index
+    similarity: Similarity Search
+  }
+
+  storage: "Storage (SSD)" {
+    class: db
+  }
+
+  api -> graph_engine
+  api -> vector_engine
+  graph_engine -> storage
+  vector_engine -> storage
+}
+
+deploy: Deployment {
+  style.border-radius: 8
+
+  lite: "Helix Lite\n(local / cloud)" {
+    style.border-radius: 6
+  }
+  enterprise: "Helix Enterprise\n(distributed, HA, SOC II)" {
+    style.border-radius: 6
+  }
+}
+
+app -> helixql: write queries
+helixql -> compiler: compile time
+compiler -> server.api: native endpoints
+
+benchmarks: Benchmarks {
+  shape: class
+
+  graph: "vs Neo4j: 100-1000x faster"
+  vector: "vs Pinecone: on par"
+  language: "Language: Rust"
+  backers: "YC + Nvidia + Vercel"
+}

@@ -1,0 +1,85 @@
+{
+  "approach": "github_issues",
+  "part": "C",
+  "total_score": 117,
+  "max_score": 125,
+  "percentage": 93.6,
+  "extra": {},
+  "scenarios": [
+    {
+      "id": "D1",
+      "name": "Clean Architecture with 4 layers (entity, usecase, repository, handler)",
+      "total": 25,
+      "latency_ms": 2400,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer fully recovers the original reasoning, explicitly names rejected alternatives, clearly lists the trade‑offs taken, shows no signs of hallucinated content, and provides a traceable cause‑effect chain for the Clean Architecture decision."
+      }
+    },
+    {
+      "id": "D2",
+      "name": "Table-driven tests with t.Run() for parametric testing",
+      "total": 22,
+      "latency_ms": 1262,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 2,
+        "decision_traceability": 5,
+        "total": 22,
+        "brief_comment": "The answer fully recovers the original reasoning, names the rejected alternatives, and lists trade‑offs. However, it introduces several details (e.g., speed metrics, style consistency) that were not present in the stored context, suggesting some fabricated reasoning."
+      }
+    },
+    {
+      "id": "D3",
+      "name": "Keep TestIntegrationProductSearch despite known flakiness",
+      "total": 23,
+      "latency_ms": 1240,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 3,
+        "decision_traceability": 5,
+        "total": 23,
+        "brief_comment": "The answer fully recovers the original reasoning, names rejected alternatives, and clearly states trade‑offs. It is well‑structured and traceable to the decision. However, it introduces extra details (e.g., PostgreSQL alternative) that are not present in the source context, lowering the ‘no fabricated reasoning’ score."
+      }
+    },
+    {
+      "id": "D4",
+      "name": "SQLite instead of PostgreSQL",
+      "total": 22,
+      "latency_ms": 1433,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 2,
+        "decision_traceability": 5,
+        "total": 22,
+        "brief_comment": "The answer fully recovers the original reasoning, names rejected alternatives, and lists the accepted downsides. However it introduces many details (e.g., extra alternatives, specific test names, CGO settings, ICU extension) that were not present in the gold‑standard context, which counts as fabricated reasoning, lowering that criterion."
+      }
+    },
+    {
+      "id": "D5",
+      "name": "Real DB in usecase tests instead of mocks",
+      "total": 25,
+      "latency_ms": 1322,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer reproduces the original reasoning, explicitly names rejected alternatives, clearly states the trade‑offs, stays faithful to the source, and links the decision to its causes and effects."
+      }
+    }
+  ]
+}

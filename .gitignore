@@ -1,0 +1,26 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Data
+*.db
+
+# Python
+__pycache__/
+.venv/
+*.pyc
+
+# Helixir volumes
+infra/helixir-local/.helix/.volumes/
+infra/helixir-local/.helix/bench/helix-repo-copy/
+infra/helixir-local/data/
+infra/helixir-local/db/
+
+# OS
+.DS_Store
+
+# IDE
+.cursor/
+.claude/
+.mcp.json

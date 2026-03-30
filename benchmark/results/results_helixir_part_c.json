@@ -1,0 +1,85 @@
+{
+  "approach": "helixir",
+  "part": "C",
+  "total_score": 124,
+  "max_score": 125,
+  "percentage": 99.2,
+  "extra": {},
+  "scenarios": [
+    {
+      "id": "D1",
+      "name": "Clean Architecture with 4 layers (entity, usecase, repository, handler)",
+      "total": 25,
+      "latency_ms": 1996,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer fully recovers the original reasoning, names rejected alternatives, spells out trade‑offs, stays faithful to the source context, and clearly links the decision to its motivations."
+      }
+    },
+    {
+      "id": "D2",
+      "name": "Table-driven tests with t.Run() for parametric testing",
+      "total": 25,
+      "latency_ms": 1222,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer fully recovers the original reasoning, explicitly names rejected alternatives, clearly states the accepted trade‑offs, stays faithful to the source context, and provides a traceable cause‑effect link to the decision."
+      }
+    },
+    {
+      "id": "D3",
+      "name": "Keep TestIntegrationProductSearch despite known flakiness",
+      "total": 24,
+      "latency_ms": 1110,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 4,
+        "decision_traceability": 5,
+        "total": 24,
+        "brief_comment": "The answer fully recovers the original reasoning, lists the rejected alternatives, and clearly states the trade‑offs. It is well‑traced to the decision point. The only shortcoming is the addition of a mock‑test alternative that was not present in the source context, which counts as a minor fabrication."
+      }
+    },
+    {
+      "id": "D4",
+      "name": "SQLite instead of PostgreSQL",
+      "total": 25,
+      "latency_ms": 1344,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer reproduces the original reasoning, names rejected alternatives (PostgreSQL, MySQL/MariaDB, mock DB), lists the accepted downsides (LIKE/Unicode issues, lack of concurrency, size limits), shows no hallucinated content, and clearly ties each reason to the decision to use SQLite."
+      }
+    },
+    {
+      "id": "D5",
+      "name": "Real DB in usecase tests instead of mocks",
+      "total": 25,
+      "latency_ms": 1112,
+      "scores": {
+        "rationale_recovery": 5,
+        "alternatives_mentioned": 5,
+        "tradeoffs_articulated": 5,
+        "no_fabricated_reasoning": 5,
+        "decision_traceability": 5,
+        "total": 25,
+        "brief_comment": "The answer fully recovers the original reasoning, names the rejected alternatives, states the trade‑offs, stays faithful to the source context, and clearly links the decision to its causes."
+      }
+    }
+  ]
+}

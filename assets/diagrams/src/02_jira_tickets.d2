@@ -1,0 +1,86 @@
+vars: {
+  d2-config: {
+    theme-id: 200
+    layout-engine: elk
+  }
+}
+
+direction: down
+
+classes: {
+  primary: {
+    style: {
+      border-radius: 8
+      shadow: true
+      font-size: 16
+    }
+  }
+  weak: {
+    style: {
+      stroke-dash: 5
+      opacity: 0.7
+    }
+  }
+}
+
+developer: Developer {
+  shape: person
+  style.font-size: 18
+}
+
+agent: AI Agent {
+  class: primary
+  style.3d: true
+
+  planner: Planner
+  executor: Executor
+  reporter: Reporter
+}
+
+tracker: Issue Tracker {
+  class: primary
+  style.double-border: true
+
+  backlog: Backlog {
+    shape: queue
+  }
+  ticket: Ticket {
+    class: primary
+    assignee: "Assignee: AI Agent"
+    status: "Status: To Do → In Progress → Done"
+    comments: "Comments (audit trail)" {
+      style.border-radius: 6
+    }
+  }
+  history: Change History {
+    shape: cylinder
+  }
+}
+
+vcs: Git / GitHub {
+  class: primary
+
+  branch: Feature Branch
+  pr: Pull Request
+  code: Code Changes
+}
+
+developer -> tracker.backlog: create issue
+agent.planner -> tracker.backlog: pick up
+agent.planner -> tracker.ticket: update status
+agent.executor -> vcs.branch: create branch
+agent.executor -> vcs.code: write code
+agent.executor -> vcs.pr: open PR
+agent.reporter -> tracker.ticket.comments: progress updates
+vcs.pr -> tracker.ticket: link PR
+tracker.ticket -> tracker.history: log changes
+developer -> tracker.ticket.comments: review {
+  class: weak
+}
+
+risks: Risks {
+  shape: cloud
+  style.opacity: 0.85
+
+  "Hallucination risk\nTracker becomes the job\nNo semantic search\nComment noise"
+}

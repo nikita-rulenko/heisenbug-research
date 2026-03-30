@@ -1,0 +1,105 @@
+{
+  "approach": "helixir_local",
+  "part": "B",
+  "total_score": 81,
+  "max_score": 125,
+  "percentage": 64.8,
+  "search_metrics": {
+    "p50_ms": 128,
+    "p95_ms": 149,
+    "all_ms": [
+      149,
+      139,
+      128,
+      103,
+      121
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "G1",
+      "name": "Multi-hop dependency trace",
+      "total": 22,
+      "latency_ms": 1439,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 3,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 5,
+        "actionability": 4,
+        "total": 22,
+        "brief_comment": "The answer correctly maps the four code layers, showing good structural awareness and no invented links. However, it omits the detailed test chain present in the gold standard, reducing completeness, and the test coverage info is incomplete, limiting direct actionability.",
+        "search_latency_ms": 149,
+        "memories_found": 1
+      }
+    },
+    {
+      "id": "G2",
+      "name": "Cross-entity impact",
+      "total": 20,
+      "latency_ms": 1777,
+      "scores": {
+        "hop_accuracy": 4,
+        "chain_completeness": 3,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 5,
+        "actionability": 3,
+        "total": 20,
+        "brief_comment": "The answer correctly maps the main dependencies (model → DB → handlers → tests) but omits several concrete items from the gold list (specific test files, seed.go, OrderFlow test). No false connections are introduced, and the architectural understanding is solid, though the guidance is not fully actionable without the exact file references.",
+        "search_latency_ms": 139,
+        "memories_found": 1
+      }
+    },
+    {
+      "id": "G3",
+      "name": "Causal chain: flaky → root cause → fix",
+      "total": 24,
+      "latency_ms": 1737,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 5,
+        "no_hallucinated_links": 4,
+        "structural_awareness": 5,
+        "actionability": 5,
+        "total": 24,
+        "brief_comment": "The answer correctly traces the shared in‑memory SQLite and Cyrillic LIKE issue and adds useful mitigation steps, showing solid architectural insight. The only drawback is the introduction of specific test names that may not exist in the codebase, which could be considered a minor hallucination.",
+        "search_latency_ms": 128,
+        "memories_found": 1
+      }
+    },
+    {
+      "id": "G4",
+      "name": "Inverse lookup: test → what it validates",
+      "total": 9,
+      "latency_ms": 1636,
+      "scores": {
+        "hop_accuracy": 2,
+        "chain_completeness": 1,
+        "no_hallucinated_links": 1,
+        "structural_awareness": 3,
+        "actionability": 2,
+        "total": 9,
+        "brief_comment": "The answer traces some layers (test → handler → helpers → Order) but misses many gold‑standard entities and endpoints, and introduces several unsupported endpoints and business rules, indicating incomplete and partially inaccurate chain mapping.",
+        "search_latency_ms": 103,
+        "memories_found": 1
+      }
+    },
+    {
+      "id": "G5",
+      "name": "Contradiction detection",
+      "total": 6,
+      "latency_ms": 651,
+      "scores": {
+        "hop_accuracy": 0,
+        "chain_completeness": 0,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 1,
+        "actionability": 0,
+        "total": 6,
+        "brief_comment": "The answer does not identify the required test dependencies (TestIntegrationProductSearch, TestIntegrationSeedData, TestAPIOrderFlow) and therefore misses the essential hops and chain links. It only lists unrelated entities, which are not hallucinated but are irrelevant, showing little structural insight and offering no actionable guidance.",
+        "search_latency_ms": 121,
+        "memories_found": 1
+      }
+    }
+  ]
+}
