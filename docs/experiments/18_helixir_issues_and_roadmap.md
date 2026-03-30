@@ -88,7 +88,7 @@ Helixir стабильно лидирует в Part B: multi-hop reasoning и co
 
 ## Что есть у Helixir, чего нет у остальных
 
-### 1. Graph relations — работают (единственная система)
+### 1. Graph relations — работают в нашем стеке
 
 | Система | Graph relations | Реально работают |
 |---------|----------------|-----------------|
@@ -98,9 +98,10 @@ Helixir стабильно лидирует в Part B: multi-hop reasoning и co
 | GitHub Issues | Нет | — |
 | MD-файлы | Нет | — |
 
-Helixir — **единственная** из пяти систем, где graph relations реально построились и используются
-при поиске. Graphiti архитектурно способен, но заблокирован OpenAI Responses API. Mem0g не
-удалось поднять из-за отсутствия langchain-neo4j в Docker-образе.
+В рамках нашего эксперимента (Cerebras + Ollama, без OpenAI key) graph relations удалось
+построить только в Helixir. Graphiti архитектурно способен, но заблокирован OpenAI Responses API.
+Mem0g (Neo4j graph store) не удалось поднять из-за отсутствия langchain-neo4j в Docker-образе.
+При наличии OpenAI API key результат Graphiti и Mem0g мог бы быть другим.
 
 ### 2. FastThink — структурированный reasoning pipeline
 
@@ -115,8 +116,8 @@ think_start("Почему Clean Architecture?")
   → concepts_mapped: 1
 ```
 
-Ни у одной другой системы нет аналога: Mem0 сохраняет решения как flat text,
-Graphiti мог бы строить temporal episode chains, но не работает без OpenAI.
+В остальных протестированных системах structured reasoning pipeline отсутствует: Mem0 сохраняет
+решения как flat text, Graphiti мог бы строить temporal episode chains, но не работает без OpenAI.
 
 ### 3. search_reasoning_chain — каузальный поиск
 
@@ -130,8 +131,8 @@ Chain depth: 3
     → "Repository pattern isolates SQL from business logic" (IMPLIES)
 ```
 
-Аналогов нет: Mem0 search_memory возвращает flat список фактов, MD-файлы и Issues —
-весь текст целиком. Только Helixir прослеживает цепочки причин.
+Для сравнения: Mem0 `search_memory` возвращает flat список фактов без связей между ними,
+MD-файлы и Issues подают весь текст целиком. Helixir прослеживает цепочки причин через graph traversal.
 
 ### 4. LLM-агностичность
 
