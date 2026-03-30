@@ -1,6 +1,19 @@
 # Helixir: Проблемы, статус и план доработки
 
+**Ссылки:**
+- Helixir: https://github.com/nikita-rulenko/Helixir
+- HelixDB: https://github.com/helixdb/helix-db
+- Cerebras API: https://inference-docs.cerebras.ai/
+- Ollama (nomic-embed-text): https://ollama.com/library/nomic-embed-text
+- MCP спецификация: https://modelcontextprotocol.io/
+- Релиз v0.3.1-fix: https://github.com/nikita-rulenko/Helixir/releases/tag/v0.3.1-fix
+
 ## Текущий статус: v0.3.1-fix
+
+### Что решено в v0.3.1-fix (критическое)
+- **Relation creation pipeline** — relations_created выросло с 0 до 14
+- **search_reasoning_chain** — теперь возвращает реальные IMPLIES/BECAUSE цепочки (deepest_chain=3)
+- **3 root cause** исправлены: неправильный JSON для Cerebras, пропуск inference для Update/Noop, сломанный index mapping
 
 ### Что работает
 - `add_memory` — сохраняет факты, извлекает entities, создаёт relations

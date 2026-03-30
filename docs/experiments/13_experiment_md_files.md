@@ -1,5 +1,16 @@
 # Эксперимент 1: Управление тестовым контекстом через MD-файлы
 
+**Ссылки и источники:**
+- Cursor Rules: https://docs.cursor.com/context/rules-for-ai
+- Cursor Best Practices (Lee Robinson, Jan 2026): https://cursor.com/blog/best-practices
+- Traycer AGENTS.md: https://docs.traycer.ai/guides/agents-md
+- BMAD-METHOD: https://github.com/bmadcode/BMAD-METHOD
+- arXiv:2602.11988 (Context Files for Code Generation): https://arxiv.org/abs/2602.11988
+- arXiv:2512.18925 (Spec-Driven Development): https://arxiv.org/abs/2512.18925
+- arXiv:2307.03172 (Lost in the Middle): https://arxiv.org/abs/2307.03172
+- Chroma «Context Rot» (блог): https://www.trychroma.com/blog/context-rot
+- JetBrains AI research: https://blog.jetbrains.com/ai/
+
 ## Настройка
 
 ### Созданные файлы

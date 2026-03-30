@@ -1,5 +1,14 @@
 # Mem0 — AI Memory Framework
 
+**Ссылки:**
+- GitHub: https://github.com/mem0ai/mem0
+- Документация: https://docs.mem0.ai/
+- Сайт: https://mem0.ai/
+- Research (LoCoMo benchmark): https://mem0.ai/research
+- PyPI: https://pypi.org/project/mem0ai/
+- pgvector: https://github.com/pgvector/pgvector
+- MCP-server mem0: https://github.com/mem0ai/mem0-mcp
+
 ## Обзор
 
 **Mem0** — инфраструктурная платформа памяти для AI-агентов. Позиционируется как "default memory layer for AI". Основана Taranjeet Singh (ex-Paytm, Khatabook) и Deshraj Yadav (ex-Tesla).

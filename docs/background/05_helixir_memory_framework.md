@@ -1,5 +1,15 @@
 # Helixir — Онтологический Memory Framework на HelixDB
 
+**Ссылки:**
+- Helixir: https://github.com/nikita-rulenko/Helixir
+- HelixDB: https://github.com/helixdb/helix-db
+- HelixDB сайт: https://www.helix-db.com/
+- Cerebras API: https://inference-docs.cerebras.ai/
+- Ollama (embeddings): https://ollama.com/
+- nomic-embed-text: https://ollama.com/library/nomic-embed-text
+- MCP спецификация: https://modelcontextprotocol.io/
+- Mem0 (для сравнения): https://github.com/mem0ai/mem0
+
 ## Обзор
 
 **Helixir** — ассоциативный и каузальный AI memory framework, построенный на HelixDB. Позиционируется как "The Fastest Memory for LLM Agents". Это первый фреймворк памяти, построенный поверх HelixDB, использующий его graph-vector возможности.
