@@ -81,19 +81,20 @@ VERIFICATION_QUESTIONS = [
     {
         "id": "Q4",
         "question": "Сколько всего тестов в проекте и как они распределены по слоям?",
-        "gold": "175 test functions (241 runs with subtests). Entity layer: 28 functions "
-                "(66 subtests) — validation, business logic. Repository layer: 39 functions — "
-                "CRUD, pagination, search. Usecase layer: 51 functions — business validation, "
-                "status transitions, lifecycle. API handler layer: 57 functions — REST endpoints, "
-                "error codes, content-type.",
+        "gold": "637 test runs across 4 layers. Entity layer: 237 runs — validation, "
+                "business logic, discount calculations, state transitions, UTF-8 summary. "
+                "Repository layer: 94 runs — CRUD, pagination, search, timestamps, bulk ops. "
+                "Usecase layer: 127 runs — business validation, status transitions, lifecycle, "
+                "pagination edge cases. API handler layer: 179 runs — REST endpoints, "
+                "error codes, validation cases, CRUD full cycles.",
     },
     {
         "id": "Q5",
         "question": "Что сломается если изменить схему миграций (migrations.go)?",
-        "gold": "147 out of 175 tests depend on migrations via setupTestDB/setupTestServer/setupUC. "
-                "Only 28 entity unit tests are independent. Breakdown: 39 integration tests "
-                "(via setupTestDB), 57 API tests (via setupTestServer which calls RunMigrations), "
-                "51 usecase tests (via setupUC which creates DB). ~84% of all tests will break.",
+        "gold": "~400 out of 637 test runs depend on migrations via setupTestDB/setupTestServer/setupUC. "
+                "Only 237 entity unit tests are independent (no DB). Breakdown: 94 integration tests "
+                "(via setupTestDB), 179 API tests (via setupTestServer which calls RunMigrations), "
+                "127 usecase tests (via setupUC which creates DB). ~63% of all tests will break.",
     },
 ]
 
@@ -373,7 +374,7 @@ def onboard_helixir_mcp():
         ("Bean & Brew architecture Clean Architecture layers", "causal", "fact"),
         ("SQLite PostgreSQL database choice trade-off", "causal", "opinion"),
         ("TestIntegrationProductSearch flaky test ICU", "causal", "fact"),
-        ("test count distribution entity repository usecase handler 175", "forward", "fact"),
+        ("test count distribution entity repository usecase handler 637", "forward", "fact"),
         ("setupTestDB migrations dependencies break", "forward", "fact"),
     ]
 
