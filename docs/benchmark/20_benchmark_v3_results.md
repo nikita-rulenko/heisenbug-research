@@ -46,6 +46,24 @@
 | Helixir MCP | 75.0% | 170,668 | **$0.102** | 586 |
 | Mem0 | 58.8% | 29,638 | $0.018 | **2,643** |
 
+## Методология расчёта стоимости
+
+Все стоимости рассчитаны по **публичному тарифу Cerebras Inference API** (март 2026):
+
+- **Input tokens**: $0.60 / 1M tokens
+- **Output tokens**: $0.60 / 1M tokens
+- **Источник**: [cerebras.ai/pricing](https://cerebras.ai/pricing)
+- **Embedding (Ollama nomic-embed-text)**: $0.00 — self-hosted
+- **MCP tool calls (Helixir/Mem0)**: $0.00 — self-hosted
+
+**Формула:**
+```
+cost_usd = (input_tokens × 0.60 + output_tokens × 0.60) / 1,000,000
+CPR = median_quality_score / cost_usd
+```
+
+> ⚠️ В расчёт **не включена** стоимость обновления памяти (Mem0: ~30 API calls к embedding, Helixir: rebuild графа). Это скрытый OPEX — см. раздел ниже.
+
 ## Анализ: почему v3 не показал ожидаемого расхождения
 
 ### 1. Контекст все ещё помещается в окно

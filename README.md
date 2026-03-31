@@ -236,6 +236,38 @@ Temporal knowledge graph поверх FalkorDB.
 - [Дизайн бенчмарка](docs/benchmark/12_benchmark_design.md)
 - [Полные результаты](docs/benchmark/16_benchmark_results.md)
 
+### Методология расчёта стоимости
+
+Все стоимости рассчитаны по **публичному тарифу Cerebras Inference API** (март 2026):
+
+| Параметр | Значение | Источник |
+|----------|---------|----------|
+| Input tokens | **$0.60 / 1M tokens** | [cerebras.ai/pricing](https://cerebras.ai/pricing) |
+| Output tokens | **$0.60 / 1M tokens** | [cerebras.ai/pricing](https://cerebras.ai/pricing) |
+| Embedding (Ollama) | **$0.00** (локально) | Self-hosted nomic-embed-text |
+| MCP tool calls | **$0.00** (локально) | Helixir/Mem0 self-hosted |
+
+**Формула расчёта стоимости онбординга:**
+
+```
+cost_usd = (input_tokens × 0.60 + output_tokens × 0.60) / 1,000,000
+```
+
+Где:
+- `input_tokens` = context_tokens (загрузка контекста) + verification_input_tokens (5 вопросов)
+- `output_tokens` = verification_output_tokens (ответы модели)
+- Для Helixir MCP: input_tokens включают overhead от 15 tool_call циклов (request→response)
+
+**CPR (Cost-Performance Ratio):**
+
+```
+CPR = median_quality_score / cost_usd
+```
+
+Чем выше CPR — тем больше качества за доллар. Mem0 лидирует по CPR (2,643) за счёт минимальных токенов (29K), но **только при актуальных данных**.
+
+> ⚠️ Стоимость обновления памяти (Mem0: ~30 API calls к embedding, Helixir: rebuild графа) **не включена** в расчёт, т.к. зависит от частоты изменений проекта. Это скрытый OPEX, описанный в [анализе v3](docs/benchmark/20_benchmark_v3_results.md#3-стоимость-обновления-памяти--скрытый-расход).
+
 ## Портал Bean & Brew
 
 Go-портал (кофейный магазин) — демо-приложение для исследования:
