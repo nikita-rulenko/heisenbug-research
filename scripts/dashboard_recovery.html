@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Context Recovery Benchmark — Heisenbug 2026</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #8b949e;
+    margin-bottom: 32px;
+  }
+
+  /* Split-screen cards */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+  }
+  .card h2 {
+    font-size: 16px;
+    margin-bottom: 16px;
+    color: var(--accent);
+  }
+  .card.best { border-color: var(--green); }
+  .card.best::after {
+    content: 'BEST';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--green);
+    color: var(--bg);
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .metric {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .metric:last-child { border-bottom: none; }
+  .metric .label { color: #8b949e; }
+  .metric .value { font-weight: bold; }
+  .metric .value.green { color: var(--green); }
+  .metric .value.yellow { color: var(--yellow); }
+  .metric .value.red { color: var(--red); }
+
+  /* Token counter animation */
+  .token-counter {
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    margin: 8px 0 16px;
+  }
+
+  /* Accuracy bar */
+  .bar-container {
+    background: #21262d;
+    border-radius: 6px;
+    height: 24px;
+    margin: 8px 0;
+    overflow: hidden;
+  }
+  .bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 1.5s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--bg);
+  }
+
+  /* Comparison table */
+  .table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--border);
+    color: var(--accent);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.highlight { background: rgba(56, 139, 253, 0.1); }
+
+  .footer {
+    text-align: center;
+    color: #484f58;
+    font-size: 12px;
+    margin-top: 24px;
+  }
+
+  /* Live indicator */
+  .live {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+<h1><span class="live"></span>Context Recovery Benchmark</h1>
+<p class="subtitle">Heisenbug 2026 — Cost of AI Agent Onboarding</p>
+
+<div class="grid" id="cards"></div>
+
+<div class="table-wrap">
+  <table id="comparison">
+    <thead>
+      <tr>
+        <th>Approach</th>
+        <th>Tokens</th>
+        <th>Time</th>
+        <th>Tool Calls</th>
+        <th>Accuracy</th>
+        <th>Cost ($)</th>
+        <th>Cost/Perf</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<p class="footer">Generator: gpt-oss-120b | Evaluator: zai-glm-4.7 | 3 runs, median | 5 questions, 1-4 scale</p>
+
+<script>
+// Load results from recovery_comparison.json (or use sample data)
+const SAMPLE_DATA = {
+  approaches: {
+    "md_files":      { total_tokens: 18400, total_time_ms: 3200, tool_calls: 1,  accuracy_pct: 82.5, cost_estimate_usd: 0.011040, cost_performance_ratio: 5980.0 },
+    "github_issues": { total_tokens: 19200, total_time_ms: 3400, tool_calls: 1,  accuracy_pct: 80.0, cost_estimate_usd: 0.011520, cost_performance_ratio: 5556.0 },
+    "mem0":          { total_tokens: 8600,  total_time_ms: 4800, tool_calls: 6,  accuracy_pct: 72.5, cost_estimate_usd: 0.005160, cost_performance_ratio: 11240.0 },
+    "helixir_mcp":   { total_tokens: 14200, total_time_ms: 7200, tool_calls: 15, accuracy_pct: 90.0, cost_estimate_usd: 0.008520, cost_performance_ratio: 8451.0 },
+    "graphiti":      { total_tokens: 18400, total_time_ms: 3100, tool_calls: 1,  accuracy_pct: 78.8, cost_estimate_usd: 0.011040, cost_performance_ratio: 5710.0 },
+  }
+};
+
+const LABELS = {
+  "md_files": "MD-files",
+  "github_issues": "GitHub Issues",
+  "mem0": "Mem0",
+  "helixir_mcp": "Helixir MCP",
+  "graphiti": "Graphiti",
+};
+
+const COLORS = {
+  "md_files": "#58a6ff",
+  "github_issues": "#d29922",
+  "mem0": "#f778ba",
+  "helixir_mcp": "#3fb950",
+  "graphiti": "#bc8cff",
+};
+
+function barColor(pct) {
+  if (pct >= 85) return 'var(--green)';
+  if (pct >= 70) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function render(data) {
+  const entries = Object.entries(data.approaches);
+  const maxAcc = Math.max(...entries.map(([, v]) => v.accuracy_pct));
+  const cardsEl = document.getElementById('cards');
+  const tbodyEl = document.getElementById('tableBody');
+
+  // Cards
+  cardsEl.innerHTML = '';
+  for (const [key, m] of entries) {
+    const isBest = m.accuracy_pct === maxAcc;
+    const card = document.createElement('div');
+    card.className = 'card' + (isBest ? ' best' : '');
+    card.innerHTML = `
+      <h2 style="color:${COLORS[key]}">${LABELS[key] || key}</h2>
+      <div class="token-counter" style="color:${COLORS[key]}">${m.total_tokens.toLocaleString()}</div>
+      <div style="font-size:11px;text-align:center;color:#8b949e;margin-bottom:12px">tokens</div>
+      <div class="bar-container">
+        <div class="bar" style="width:${m.accuracy_pct}%;background:${barColor(m.accuracy_pct)}">${m.accuracy_pct}%</div>
+      </div>
+      <div class="metric"><span class="label">Time</span><span class="value">${(m.total_time_ms/1000).toFixed(1)}s</span></div>
+      <div class="metric"><span class="label">Tool calls</span><span class="value">${m.tool_calls}</span></div>
+      <div class="metric"><span class="label">Cost</span><span class="value">$${m.cost_estimate_usd.toFixed(4)}</span></div>
+      <div class="metric"><span class="label">Cost/Perf</span><span class="value ${isBest ? 'green' : ''}">${m.cost_performance_ratio.toFixed(0)}</span></div>
+    `;
+    cardsEl.appendChild(card);
+  }
+
+  // Table
+  tbodyEl.innerHTML = '';
+  for (const [key, m] of entries) {
+    const isBest = m.accuracy_pct === maxAcc;
+    const tr = document.createElement('tr');
+    if (isBest) tr.className = 'highlight';
+    tr.innerHTML = `
+      <td style="color:${COLORS[key]};font-weight:bold">${LABELS[key] || key}</td>
+      <td>${m.total_tokens.toLocaleString()}</td>
+      <td>${(m.total_time_ms/1000).toFixed(1)}s</td>
+      <td>${m.tool_calls}</td>
+      <td style="color:${barColor(m.accuracy_pct)};font-weight:bold">${m.accuracy_pct}%</td>
+      <td>$${m.cost_estimate_usd.toFixed(4)}</td>
+      <td>${m.cost_performance_ratio.toFixed(0)}</td>
+    `;
+    tbodyEl.appendChild(tr);
+  }
+}
+
+// Try to load real data, fall back to sample
+fetch('../../benchmark/results/recovery_comparison.json')
+  .then(r => r.ok ? r.json() : SAMPLE_DATA)
+  .then(render)
+  .catch(() => render(SAMPLE_DATA));
+</script>
+
+</body>
+</html>
