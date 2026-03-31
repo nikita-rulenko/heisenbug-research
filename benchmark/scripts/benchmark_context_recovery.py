@@ -262,7 +262,7 @@ class Mem0Client:
     def search(self, query, limit=20):
         try:
             resp = _http.post(
-                f"{MEM0_BASE_URL}/v1/memories/search/",
+                f"{MEM0_BASE_URL}/search",
                 json={"query": query, "user_id": MEM0_USER_ID, "limit": limit},
             )
             resp.raise_for_status()
@@ -278,7 +278,7 @@ class Mem0Client:
 
     def list_all(self, limit=100):
         try:
-            resp = _http.get(f"{MEM0_BASE_URL}/v1/memories/", params={"user_id": MEM0_USER_ID, "limit": limit})
+            resp = _http.get(f"{MEM0_BASE_URL}/memories", params={"user_id": MEM0_USER_ID, "limit": limit})
             resp.raise_for_status()
             data = resp.json()
             results = data.get("results", data) if isinstance(data, dict) else data
@@ -667,7 +667,8 @@ def main():
         result = run_approach(a, context_file, num_runs)
         results.append(result)
 
-    output_dir = str(Path(__file__).parent.parent / "results")
+    output_dir = str(Path(__file__).resolve().parent.parent / "results")
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
     save_results(results, output_dir)
 
 
