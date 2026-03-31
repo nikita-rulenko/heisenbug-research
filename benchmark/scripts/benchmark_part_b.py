@@ -1,4 +1,5 @@
 """Benchmark Part B: Connectivity and search quality scenarios."""
+from __future__ import annotations
 
 import json
 import time

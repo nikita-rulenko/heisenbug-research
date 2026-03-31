@@ -16,9 +16,9 @@
 - **GitHub Stars**: 47.8K+ (крупнейший в категории)
 - **Downloads**: 14M+
 - **API calls**: 35M (Q1 2025) → 186M (Q3 2025) — рост 5x
-- **Финансирование**: $24M (Seed + Series A)
-  - Seed: Kindred Ventures
-  - Series A: Basis Set Ventures
+- **Финансирование**: $24M Series A
+  - Lead: Basis Set Ventures
+  - Ранее: Seed от Kindred Ventures
   - Участники: Peak XV Partners, GitHub Fund, Y Combinator
   - Стратегические: CEO Datadog, Supabase, PostHog, ex-GitHub, Weights & Biases, Scott Belsky, Dharmesh Shah
 - **Источник**: [prnewswire.com, Oct 2025](https://www.prnewswire.com/news-releases/mem0-raises-24m-series-a-to-build-memory-layer-for-ai-agents-302597157.html)
@@ -97,4 +97,4 @@
 | Sub-Second Retrieval | Yes | Conditional | No | No | No |
 | Auto Extraction | Yes | Yes | Yes | No | No |
 | Stars | 47.8K | 4.1K | 21.2K | 1.3K | — |
-| Pricing | Free + $99-499/mo | Free + $25+/mo | Free + $20-200/mo | Free (OSS) | Free (OSS) |
+| Pricing | Free + $19-249/mo | Free + $25+/mo | Free + $20-200/mo | Free (OSS) | Free (OSS) |

@@ -42,7 +42,7 @@
 **За что**: лучшее production-решение для хранения тестовых паттернов. Semantic search, auto-extraction, 90% сокращение токенов (LOCOMO benchmark). Cloud Free tier = 10K memories, достаточно для старта. Интеграция с CrewAI, LangChain, AWS Agent SDK.
 
 **Ограничение**: 
-- Self-hosted = 3 компонента (Vector DB + Graph DB + LLM), нужен DevOps
+- Self-hosted = 2-3 компонента (Vector DB + LLM, опционально Graph DB для Mem0G), нужен DevOps
 - Факты атомарны и плоски — нет онтологической типизации
 - При противоречии — LLM удаляет старый факт, нет audit trail
 - Граф = entity-relationship (кто/что), не каузальный (почему)

@@ -1,10 +1,17 @@
 """Benchmark Part C: Decision Reasoning — can systems store and retrieve the WHY behind decisions."""
+from __future__ import annotations
 
 import json
+import os
 import time
 from benchmark_runner import call_cerebras, ScenarioResult
 
-with open("decision_context.json") as f:
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+_data_dir = os.path.join(os.path.dirname(_script_dir), "data")
+_decision_path = os.path.join(_data_dir, "decision_context.json")
+if not os.path.exists(_decision_path):
+    _decision_path = "decision_context.json"
+with open(_decision_path) as f:
     DECISIONS = json.load(f)
 
 EVAL_PROMPT_C = """You are an expert evaluator for decision reasoning retrieval. Score the ANSWER on 5 criteria (0-5 each):

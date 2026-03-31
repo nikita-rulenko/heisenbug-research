@@ -8,7 +8,21 @@
 агент забывает архитектурные решения, дублирует тесты, путает слои приложения.
 
 Мы **практически** сравнили 5 подходов к хранению и управлению контекстом
-на примере Go-портала с тестовым покрытием (Unit, Integration, API, E2E):
+на примере Go-портала с 175 тестами (241 с подтестами) на 4 уровнях: Unit, Integration, API, UseCase.
+
+### Benchmark v2 — Part A (12 сценариев, 3 прогона, отдельный evaluator)
+
+> Generator: gpt-oss-120b → Evaluator: GLM 4.7 (MoE 358B/32B active) | Шкала 1-4
+
+| # | Подход | Median | Mean ± σ | % |
+|---|--------|--------|----------|---|
+| 1 | **Mem0** (self-hosted) | **125**/192 | 121.33 ± 10.97 | **65.1%** |
+| 2 | **MD-файлы** (.cursor/rules) | **123**/192 | 123.67 ± 2.08 | **64.1%** |
+| 3 | **GitHub Issues** MCP | **122**/192 | 119.67 ± 12.66 | **63.5%** |
+| 4 | **Helixir** (graph + FastThink) | **121**/192 | 118.00 ± 16.70 | **63.0%** |
+| 5 | **Graphiti** (raw fallback) | **107**/192 | 109.67 ± 16.17 | **55.7%** |
+
+### Benchmark v1 — Итого (A+B+C, 500 баллов, один прогон, self-evaluation)
 
 | # | Подход | Vendor Lock | Setup Time | Итого (A+B+C) |
 |---|--------|-------------|------------|----------------|
@@ -92,7 +106,14 @@ Temporal knowledge graph поверх FalkorDB.
 
 ## Бенчмарк
 
-Трёхчастный бенчмарк (500 баллов):
+### v2 (текущий) — Part A
+
+- **12 сценариев**, шкала 1-4, max = 192 балла
+- **3 прогона** с median/mean/stddev
+- **Раздельный evaluator**: Generator (gpt-oss-120b) ≠ Evaluator (GLM 4.7) — устраняет bias self-evaluation
+- **175 тестов** (241 с подтестами), 21 эпизод контекста (~20K chars)
+
+### v1 — Трёхчастный бенчмарк (500 баллов)
 
 | Часть | Что проверяет | Баллов | Сценариев |
 |-------|--------------|--------|-----------|
@@ -100,9 +121,11 @@ Temporal knowledge graph поверх FalkorDB.
 | **B** | Связность фактов (multi-hop, causal chains, contradictions) | 125 | 5 |
 | **C** | Decision reasoning (хранение "почему", альтернативы, trade-offs) | 125 | 5 |
 
-- **LLM**: Cerebras `gpt-oss-120b`
+### Общий стек
+
+- **LLM (generator)**: Cerebras `gpt-oss-120b`
+- **Evaluator (v2)**: Cerebras `zai-glm-4.7` (GLM 4.7 MoE 358B/32B active)
 - **Embeddings**: Ollama `nomic-embed-text`
-- **Evaluator**: LLM-as-Judge (Cerebras, temperature=0)
 - [Дизайн бенчмарка](docs/benchmark/12_benchmark_design.md)
 - [Полные результаты](docs/benchmark/16_benchmark_results.md)
 
@@ -111,7 +134,7 @@ Temporal knowledge graph поверх FalkorDB.
 Go-портал (кофейный магазин) — демо-приложение для исследования:
 
 - **Stack**: Go + Chi + HTMX + SQLite + Clean Architecture
-- **Тесты**: Unit (entity), Integration (repository), API (handler), Usecase
+- **Тесты**: 175 функций (241 с подтестами) — Unit (entity), Integration (repository), API (handler), Usecase
 - **Репозиторий**: [heisenbug-coffee-portal](https://github.com/nikita-rulenko/heisenbug-coffee-portal)
 
 ## Tech Stack исследования

@@ -3,6 +3,7 @@
 For each scenario, retrieves context from the approach's storage, sends it to
 Cerebras LLM with the scenario question, evaluates the response, and records metrics.
 """
+from __future__ import annotations
 
 import json
 import os

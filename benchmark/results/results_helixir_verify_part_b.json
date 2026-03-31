@@ -1,0 +1,85 @@
+{
+  "approach": "helixir_verify",
+  "part": "B",
+  "total_score": 103,
+  "max_score": 125,
+  "percentage": 82.4,
+  "extra": {},
+  "scenarios": [
+    {
+      "id": "G1",
+      "name": "Multi-hop dependency trace",
+      "total": 19,
+      "latency_ms": 2174,
+      "scores": {
+        "hop_accuracy": 4,
+        "chain_completeness": 5,
+        "no_hallucinated_links": 2,
+        "structural_awareness": 5,
+        "actionability": 3,
+        "total": 19,
+        "brief_comment": "The answer correctly identifies the main layers (handler → usecase → repository → entity) and shows good structural insight, but it adds an extra interface layer and many test names that are not in the gold standard, indicating some hallucinated links and reducing overall reliability for direct action."
+      }
+    },
+    {
+      "id": "G2",
+      "name": "Cross-entity impact",
+      "total": 22,
+      "latency_ms": 2362,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 4,
+        "no_hallucinated_links": 4,
+        "structural_awareness": 5,
+        "actionability": 4,
+        "total": 22,
+        "brief_comment": "The answer accurately maps the CategoryID field across layers and shows solid architectural insight. It covers most of the required files, though a few specific test references are implicit rather than explicit, and it introduces some layers (e.g., usecase) that may not exist in the target codebase, slightly lowering completeness and hallucination scores. The description is useful for impact analysis but stops short of a concrete remediation plan, keeping actionability moderate."
+      }
+    },
+    {
+      "id": "G3",
+      "name": "Causal chain: flaky → root cause → fix",
+      "total": 25,
+      "latency_ms": 1843,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 5,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 5,
+        "actionability": 5,
+        "total": 25,
+        "brief_comment": "The answer correctly maps the shared in‑memory SQLite and Cyrillic LIKE issue through the repository, use‑case, and API test layers, identifies all affected integration tests, proposes concrete isolation fixes, and provides ready‑to‑use code snippets."
+      }
+    },
+    {
+      "id": "G4",
+      "name": "Inverse lookup: test → what it validates",
+      "total": 15,
+      "latency_ms": 1627,
+      "scores": {
+        "hop_accuracy": 4,
+        "chain_completeness": 3,
+        "no_hallucinated_links": 2,
+        "structural_awareness": 4,
+        "actionability": 2,
+        "total": 15,
+        "brief_comment": "The answer captures most core entities, endpoints, and business rules and shows a decent layer‑wise flow, but it omits some required helpers (setupTestServer, migrations, seed) and adds extra/unsupported links (GET endpoints, Category.Validate) that reduce completeness and introduce hallucinations, and it lacks concrete actionable steps."
+      }
+    },
+    {
+      "id": "G5",
+      "name": "Contradiction detection",
+      "total": 22,
+      "latency_ms": 1108,
+      "scores": {
+        "hop_accuracy": 5,
+        "chain_completeness": 2,
+        "no_hallucinated_links": 5,
+        "structural_awareness": 5,
+        "actionability": 5,
+        "total": 22,
+        "brief_comment": "The answer correctly pinpoints the problematic TestIntegrationProductSearch and explains its layer‑level dependencies, showing solid structural insight and clear remediation steps. However, it omits discussion of the other two tests (TestIntegrationSeedData and TestAPIOrderFlow) mentioned in the gold standard, so the chain is not fully covered."
+      }
+    }
+  ]
+}

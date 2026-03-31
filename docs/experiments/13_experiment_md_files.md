@@ -2,13 +2,13 @@
 
 **Ссылки и источники:**
 - Cursor Rules: https://docs.cursor.com/context/rules-for-ai
-- Cursor Best Practices (Lee Robinson, Jan 2026): https://cursor.com/blog/best-practices
-- Traycer AGENTS.md: https://docs.traycer.ai/guides/agents-md
+- Cursor Best Practices (Lee Robinson, Jan 2026): https://cursor.com/blog
+- Traycer AGENTS.md: https://docs.traycer.ai/tasks/agents-md
 - BMAD-METHOD: https://github.com/bmadcode/BMAD-METHOD
 - arXiv:2602.11988 (Context Files for Code Generation): https://arxiv.org/abs/2602.11988
 - arXiv:2512.18925 (Spec-Driven Development): https://arxiv.org/abs/2512.18925
 - arXiv:2307.03172 (Lost in the Middle): https://arxiv.org/abs/2307.03172
-- Chroma «Context Rot» (блог): https://www.trychroma.com/blog/context-rot
+- Chroma «Context Rot» (исследование): https://research.trychroma.com/context-rot
 - JetBrains AI research: https://blog.jetbrains.com/ai/
 
 ## Настройка
@@ -78,21 +78,55 @@
   - Структурированный подход к контекст-файлам для AI-агентов
   - Разделение на: overview, architecture, conventions, known issues
 
-## Оценка по бенчмарку (предварительная)
+## Результаты бенчмарка
 
-| Сценарий | Ожидаемая оценка | Комментарий |
-|----------|-----------------|-------------|
+### Benchmark v2 — Part A (12 сценариев, шкала 1-4, отдельный evaluator)
+
+> **Generator**: gpt-oss-120b | **Evaluator**: zai-glm-4.7 (GLM 4.7 MoE 358B/32B active)
+> **Тесты**: 175 функций (241 с подтестами) | **Контекст**: 21 эпизод, ~20K chars
+> **3 прогона**, медианы по сценариям
+
+**Median: 123/192 (64.1%)** | Mean: 123.67 ± 2.08 | Range: 122–126
+
+| Сценарий | Median | Runs | Комментарий |
+|----------|--------|------|-------------|
+| S1: Генерация теста | 0/16 | [0, 15, 0] | Высокая дисперсия — генерация кода наиболее стохастична |
+| S2: Покрытие endpoint | 11/16 | [9, 11, 12] | Стабильно среднее — test-index.md содержит маппинг |
+| S3: Flaky анализ | 13/16 | [16, 0, 13] | Описания достаточно, но иногда полный провал |
+| S4: Рефакторинг | 9/16 | [8, 11, 9] | architecture.mdc описывает связи слоёв |
+| S5: E2E тест | 16/16 | [14, 16, 16] | **Лучший сценарий** — test-patterns.md даёт хорошую базу |
+| S6: Impact analysis | 13/16 | [9, 13, 15] | Улучшение vs v1 благодаря расширенному контексту |
+| S7: Обнаружение дублей | 4/16 | [4, 4, 4] | Ceiling effect — недостаточно контекста без спец. инструментов |
+| S8: Test plan | 13/16 | [16, 13, 12] | Стабильно хорошо |
+| S9: Темпоральный | 4/16 | [5, 4, 4] | MD-файлы не хранят историю |
+| S10: Оптимизация | 14/16 | [15, 14, 14] | Стабильно высокий результат |
+| S11: Coverage matrix | 9/16 | [11, 9, 7] | Средне — нет семантической группировки |
+| S12: Dependencies | 16/16 | [16, 16, 16] | **Идеальный** — все прогоны дали max |
+
+**Ключевое наблюдение v2:** MD-файлы показали **минимальную дисперсию** (σ=2.08) среди всех подходов.
+Все 3 прогона дали 122–126 баллов. Предсказуемость — главное преимущество: весь контекст подаётся
+identically каждый раз, нет стохастичности от retrieval.
+
+---
+
+### Benchmark v1 — Part A (10 сценариев, шкала 0-5, self-evaluation)
+
+**Part A: 145/250 (58.0%)**
+
+| Сценарий | Оценка | Комментарий |
+|----------|--------|-------------|
 | S1: Генерация теста | 20/25 | Видит существующие тесты через test-index.md |
-| S2: Поиск покрытия | 22/25 | test-index.md содержит маппинг |
-| S3: Flaky анализ | 15/25 | Нет каузальных связей, нет истории |
-| S4: Рефакторинг | 18/25 | architecture.mdc описывает связи слоёв |
-| S5: E2E тест | 17/25 | Видит паттерны в test-patterns.md |
-| S6: Impact analysis | 14/25 | Нет связей schema↔test |
-| S7: Обнаружение дублей | 16/25 | Зависит от длины test-index.md |
-| S8: Test plan | 19/25 | architecture.mdc описывает процесс добавления |
-| S9: Темпоральный контекст | 5/25 | MD-файлы не хранят историю |
-| S10: Оптимизация suite | 17/25 | test-patterns.md подсказывает, но нет полной картины |
-| **Итого (ожидание)** | **~163/250** | **~65%** |
+| S2: Поиск покрытия | 14/25 | test-index.md содержит маппинг, но неполный |
+| S3: Flaky анализ | 23/25 | Нет каузальных связей, но описания достаточно |
+| S4: Рефакторинг | 9/25 | architecture.mdc описывает связи слоёв |
+| S5: E2E тест | 23/25 | Видит паттерны в test-patterns.md |
+| S6: Impact analysis | 6/25 | Нет связей schema↔test |
+| S7: Обнаружение дублей | 8/25 | Зависит от длины test-index.md |
+| S8: Test plan | 20/25 | architecture.mdc описывает процесс добавления |
+| S9: Темпоральный контекст | 4/25 | MD-файлы не хранят историю |
+| S10: Оптимизация suite | 18/25 | test-patterns.md подсказывает, но нет полной картины |
+
+**Part B: 78/125 (62.4%)** | **Part C: 121/125 (96.8%)** | **Итого: 344/500 (68.8%)**
 
 ## Выводы
 
