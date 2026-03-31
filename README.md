@@ -177,15 +177,16 @@ heisenbug-research/
 - **Онбординг**: 29K токенов (самый экономный!), $0.018, но accuracy **58.8%** (stale data)
 - [Подробнее](docs/experiments/15_experiment_mem0.md)
 
-### 4. Graphiti (getzep)
+### 4. Graphiti (getzep) — *вне основной презентации*
 
 Temporal knowledge graph поверх FalkorDB.
 
 - **Плюсы**: архитектурно самый продвинутый (episodes, temporal edges, entity extraction)
-- **Минусы**: полный vendor lock на OpenAI Responses API, бенчмарк с raw fallback
+- **Минусы**: полный vendor lock на OpenAI Responses API — **не поддерживает** Cerebras, Ollama и другие провайдеры. Бенчмарк проведён с raw fallback (node-текст без реального графа)
 - **v2**: 248/352 (70.5%) — raw fallback без графа хуже всех
 - **v3**: 261/352 (74.1%, **+3.7%**) — максимальный рост при масштабировании. Node-формат помогает LLM
 - **Онбординг**: 53K токенов, $0.032, accuracy 88.8%
+- **Статус**: результаты включены в исследование для полноты, но Graphiti **не вошёл в презентацию** из-за vendor lock — невозможно провести честное сравнение без реального графового движка
 - [Подробнее](docs/experiments/17_experiment_graphiti.md)
 
 ### 5. Helixir MCP (graph + FastThink + causal reasoning)
@@ -233,6 +234,8 @@ Temporal knowledge graph поверх FalkorDB.
 - **LLM (generator)**: Cerebras `gpt-oss-120b`
 - **Evaluator (v2)**: Cerebras `zai-glm-4.7` (GLM 4.7 MoE 358B/32B active)
 - **Embeddings**: Ollama `nomic-embed-text`
+
+> **Почему Cerebras?** Cerebras — самый быстрый inference-провайдер на рынке (~2000 tok/s output). Для бенчмарка это критично: мы измеряем **скорость извлечения фактов из памяти**, а не латентность модели. Быстрый inference убирает bottleneck LLM и позволяет изолировать влияние именно подхода к контексту. Бонус: низкая цена ($0.60/1M) позволяет делать 3 прогона × 5 подходов × 3 части = 45 запусков без ощутимых расходов.
 - [Дизайн бенчмарка](docs/benchmark/12_benchmark_design.md)
 - [Полные результаты](docs/benchmark/16_benchmark_results.md)
 
