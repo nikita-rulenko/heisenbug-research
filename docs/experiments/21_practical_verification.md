@@ -9,13 +9,16 @@
 ## Методология
 
 - **IDE**: Cursor (Composer mode)
-- **Промты**: 4 стандартизированных XML-промта из `prompts/` (роль QA-инженера, верификация через `go test`)
-- **Проект**: Bean & Brew, 336 функций, ~637 прогонов в `go test -v`
+- **Промты**: [4 стандартизированных XML-промта](https://github.com/nikita-rulenko/heisenbug-coffee-portal/tree/master/prompts) (роль QA-инженера, верификация через `go test`)
+- **Проект**: [Bean & Brew](https://github.com/nikita-rulenko/heisenbug-coffee-portal), 336 функций, ~637 прогонов в `go test -v`
 - **Ограничение MCP**: каждый промт явно запрещает использование других MCP-серверов
 
 ## Результаты по подходам
 
 ### 1. MD-файлы
+
+**Промт:** [onboarding_md_files.md](https://github.com/nikita-rulenko/heisenbug-coffee-portal/blob/master/prompts/onboarding_md_files.md)
+**Контекстные файлы:** [AGENTS.md](https://github.com/nikita-rulenko/heisenbug-coffee-portal/blob/master/AGENTS.md), [.cursor/rules/](https://github.com/nikita-rulenko/heisenbug-coffee-portal/tree/master/.cursor/rules), [docs/](https://github.com/nikita-rulenko/heisenbug-coffee-portal/tree/master/docs)
 
 **Статус:** Корректный онбординг
 
@@ -29,6 +32,10 @@
 Исправлено во всех файлах на «~637 прогонов в `go test -v`».
 
 ### 2. GitHub Issues
+
+**Промт:** [onboarding_github_issues.md](https://github.com/nikita-rulenko/heisenbug-coffee-portal/blob/master/prompts/onboarding_github_issues.md)
+**Issues:** [heisenbug-coffee-portal/issues](https://github.com/nikita-rulenko/heisenbug-coffee-portal/issues)
+**Правила агента:** [.cursor/rules/github.mdc](https://github.com/nikita-rulenko/heisenbug-coffee-portal/blob/master/.cursor/rules/github.mdc)
 
 **Статус:** Корректный онбординг + двусторонняя связь
 
@@ -44,6 +51,9 @@
 Исправлено добавлением явного ограничения «используй ТОЛЬКО этот подход» во все промты.
 
 ### 3. Mem0
+
+**Промт:** [onboarding_mem0.md](https://github.com/nikita-rulenko/heisenbug-coffee-portal/blob/master/prompts/onboarding_mem0.md)
+**Правила агента:** [.cursor/rules/mem0.mdc](https://github.com/nikita-rulenko/heisenbug-coffee-portal/blob/master/.cursor/rules/mem0.mdc)
 
 **Статус:** Онбординг с ложным фактом
 
@@ -63,6 +73,9 @@
 вводя агента в заблуждение. Это идеальная иллюстрация проблемы staleness в семантической памяти.
 
 ### 4. Helixir
+
+**Промт:** [onboarding_helixir.md](https://github.com/nikita-rulenko/heisenbug-coffee-portal/blob/master/prompts/onboarding_helixir.md)
+**Правила агента:** [.cursor/rules/helixir.mdc](https://github.com/nikita-rulenko/heisenbug-coffee-portal/blob/master/.cursor/rules/helixir.mdc)
 
 **Статус:** Онбординг + коррекция данных
 
