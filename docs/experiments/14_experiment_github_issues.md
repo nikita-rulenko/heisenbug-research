@@ -109,6 +109,38 @@ https://github.com/nikita-rulenko/heisenbug-coffee-portal
 
 **Part B: 85/125 (68.0%)** | **Part C: 117/125 (93.6%)** | **Итого: 348/500 (69.6%)**
 
+## Обновления после бенчмарка (2026-04-14)
+
+### Масштабирование Issues
+Проект масштабирован до 336 тестовых функций (~637 прогонов). Issues расширены:
+
+| # | Тема | Статус | Labels |
+|---|------|--------|--------|
+| 1-7 | Test coverage (entity, repository, handler, usecase) | **CLOSED** | test:*, context:coverage |
+| 8 | Architecture documentation | OPEN (living doc) | context:domain |
+| 9 | Test patterns documentation | OPEN (living doc) | context:pattern |
+| 10 | **Handler coverage 67%→80%+** | OPEN | context:coverage |
+| 11 | **t.Parallel() для unit тестов** | OPEN | — |
+| 12 | **E2E browser тесты** | OPEN | — |
+| 13 | **Repository coverage 77.5%→85%+** | OPEN | context:coverage |
+| 14 | **Общий анализ и roadmap** | OPEN | — |
+
+### Новые правила для агента (.cursor/rules/github.mdc)
+Добавлены 3 ключевых блока:
+1. **Staleness detection** — агент проверяет даты в MD и комментариях Issues (порог 7/14 дней)
+2. **Чекбоксы** — агент отмечает `- [x]` при выполнении, это ключевое преимущество Issues перед MD
+3. **Auto-close** — агент закрывает тикет когда все AC выполнены, с итоговым комментарием
+
+### Стоимость обслуживания (Phase 2)
+В отличие от MD, обновление Issues происходит **по ходу работы**: агент добавляет комменты, отмечает чекбоксы, закрывает тикеты. Создание 5 новых тикетов (#10-#14) с acceptance criteria и чекбоксами потребовало одну команду `gh issue create` на каждый.
+
+**Ключевое наблюдение:** Issues — единственный подход, где обновления **видны команде** (не только следующему AI-агенту). Комментарий в #14 виден всем, в отличие от обновления записи в Mem0/Helixir.
+
+### Практическая верификация (Cursor, 2026-04-14)
+Онбординг через Issues-промт: корректные результаты, агент добавил комментарий в #14 (двусторонняя связь), правильно идентифицировал living docs (#8, #9) и не пытался их закрыть. Одна инфра-проблема: GraphQL таймаут при первом вызове `gh issue view`.
+
+Побочный эффект: агент попытался вызвать Helixir MCP, хотя промт этого не требовал. Исправлено добавлением явного ограничения «используй ТОЛЬКО этот подход» в промт.
+
 ## Ссылки
 
 - GitHub Copilot Coding Agent (Issues-based workflow): https://github.blog/changelog/2025-05-19-github-copilot-coding-agent-in-public-preview/

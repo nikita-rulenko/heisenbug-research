@@ -251,6 +251,44 @@ nomic-embed-text (768 dims) плохо различает тематически
 5. **Alpha-качество.** За время исследования вышло 4 версии, каждая с серьёзным фиксом.
    Для production нужна стабилизация extraction и speed-up FastThink.
 
+## Обновления после бенчмарка (2026-04-14)
+
+### Обновление данных в Helixir
+Проект масштабирован до 336 тестовых функций (~637 прогонов). Обновление Helixir:
+- Обновлены устаревшие записи через `update_memory` (62→336 тестов, coverage по слоям)
+- Добавлены новые факты: known bugs (duplicate slug, float precision, Unicode LIKE), missing coverage
+- Исправлен ложный факт о shared DB (`mem_a5945016b15a`) — `update_memory` сработал корректно
+- Создана reasoning chain «onboarding-update-v2» через FastThink с актуальными метриками
+
+### Преимущество: update_memory
+В отличие от Mem0 (где `update_memory` отсутствует в MCP и дедупликация блокирует `add_memory`),
+Helixir позволяет точечно исправлять ошибочные факты. Это критически важно для staleness problem:
+ложный факт с высоким confidence score хуже, чем отсутствие данных.
+
+### Проблема: FastThink session timeout
+При обновлении данных первая сессия FastThink (`onboarding-update-2026-04-14`) истекла между
+сообщениями в чате. `think_conclude` вернул «Session not found». Пришлось создать новую сессию
+(`onboarding-update-v2`) и повторить цепочку. Рекомендация: выполнять весь цикл
+think_start → think_add → think_conclude → think_commit в рамках одного взаимодействия.
+
+### Стоимость обслуживания (Phase 2)
+Обновление Helixir потребовало:
+- `search_memory` для поиска устаревших записей
+- `update_memory` × 5 для обновления фактов
+- `add_memory` × 3 для новых фактов
+- FastThink chain (think_start → think_add × 3 → think_conclude → think_commit) — с одной
+  пересозданной сессией из-за таймаута
+
+**Сравнение с Mem0:** Helixir дороже по токенам (больше MCP-вызовов), но предсказуемее —
+`update_memory` гарантированно обновляет запись, в отличие от Mem0, где `add_memory` может
+вернуть «Added 0 memories» из-за дедупликации.
+
+### Практическая верификация (Cursor, 2026-04-14)
+Онбординг через Helixir-промт: агент загрузил данные через 4 типа поиска (search_memory,
+search_reasoning_chain, search_by_concept, search_incomplete_thoughts), нашёл и продолжил
+reasoning chain. Верификация через `go test` подтвердила корректность данных после обновления.
+Агент создал новую reasoning chain с результатами верификации.
+
 ## Ссылки
 
 - Helixir: https://github.com/nikita-rulenko/Helixir
