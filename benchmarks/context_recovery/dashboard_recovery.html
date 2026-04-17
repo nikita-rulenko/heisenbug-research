@@ -9,6 +9,7 @@
     --card: #161b22;
     --border: #30363d;
     --text: #c9d1d9;
+    --muted: #8b949e;
     --accent: #58a6ff;
     --green: #3fb950;
     --yellow: #d29922;
@@ -31,16 +32,88 @@
   .subtitle {
     text-align: center;
     font-size: 14px;
-    color: #8b949e;
-    margin-bottom: 32px;
+    color: var(--muted);
+    margin-bottom: 24px;
   }
 
-  /* Split-screen cards */
+  /* Control bar */
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+  }
+  .btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font: inherit;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.05s;
+  }
+  .btn:hover:not(:disabled) { opacity: 0.85; }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.stop { background: var(--red); color: #fff; }
+
+  .checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+  }
+  .checkbox-wrap input { cursor: pointer; }
+  .checkbox-wrap .hint {
+    color: var(--yellow);
+    font-size: 11px;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    min-height: 24px;
+  }
+  .status .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+  .status.idle .dot { background: var(--muted); }
+  .status.running .dot {
+    background: var(--red);
+    animation: pulse 1.2s infinite;
+  }
+  .status.complete .dot { background: var(--green); }
+  .status.error .dot { background: var(--red); animation: none; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  /* Cards */
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 16px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
   .card {
     background: var(--card);
@@ -48,14 +121,14 @@
     border-radius: 12px;
     padding: 20px;
     position: relative;
+    transition: border-color 0.3s, box-shadow 0.3s;
   }
-  .card h2 {
-    font-size: 16px;
-    margin-bottom: 16px;
-    color: var(--accent);
+  .card.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
   }
-  .card.best { border-color: var(--green); }
-  .card.best::after {
+  .card.done.best { border-color: var(--green); }
+  .card.done.best::after {
     content: 'BEST';
     position: absolute;
     top: 12px;
@@ -67,30 +140,39 @@
     padding: 2px 8px;
     border-radius: 4px;
   }
-
-  .metric {
+  .card h2 {
+    font-size: 16px;
+    margin-bottom: 16px;
     display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
+    align-items: center;
+    gap: 8px;
   }
-  .metric:last-child { border-bottom: none; }
-  .metric .label { color: #8b949e; }
-  .metric .value { font-weight: bold; }
-  .metric .value.green { color: var(--green); }
-  .metric .value.yellow { color: var(--yellow); }
-  .metric .value.red { color: var(--red); }
+  .card h2 .spinner {
+    display: none;
+    width: 12px;
+    height: 12px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .card.active h2 .spinner { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Token counter animation */
   .token-counter {
     font-size: 32px;
     font-weight: bold;
     text-align: center;
-    margin: 8px 0 16px;
+    margin: 8px 0 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .token-label {
+    font-size: 11px;
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 12px;
   }
 
-  /* Accuracy bar */
   .bar-container {
     background: #21262d;
     border-radius: 6px;
@@ -101,7 +183,7 @@
   .bar {
     height: 100%;
     border-radius: 6px;
-    transition: width 1.5s ease-out;
+    transition: width 0.5s ease-out, background 0.3s;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -109,7 +191,20 @@
     font-size: 12px;
     font-weight: bold;
     color: var(--bg);
+    width: 0;
+    background: var(--muted);
   }
+
+  .metric {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .metric:last-child { border-bottom: none; }
+  .metric .label { color: var(--muted); }
+  .metric .value { font-weight: bold; font-variant-numeric: tabular-nums; }
 
   /* Comparison table */
   .table-wrap {
@@ -136,48 +231,59 @@
   td {
     padding: 10px 12px;
     border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
   }
   tr:last-child td { border-bottom: none; }
-  tr.highlight { background: rgba(56, 139, 253, 0.1); }
+  tr.highlight { background: rgba(63, 185, 80, 0.08); }
 
   .footer {
     text-align: center;
     color: #484f58;
     font-size: 12px;
     margin-top: 24px;
+    line-height: 1.6;
   }
+  .footer a { color: var(--muted); }
 
-  /* Live indicator */
-  .live {
+  .source-badge {
     display: inline-block;
-    width: 8px;
-    height: 8px;
-    background: var(--red);
-    border-radius: 50%;
-    margin-right: 8px;
-    animation: pulse 1.5s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+    background: rgba(188, 140, 255, 0.12);
+    color: var(--purple);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    margin-left: 8px;
   }
 </style>
 </head>
 <body>
 
-<h1><span class="live"></span>Context Recovery Benchmark</h1>
+<h1>Context Recovery Benchmark</h1>
 <p class="subtitle">Heisenbug 2026 — Cost of AI Agent Onboarding</p>
+
+<div class="controls">
+  <button id="runBtn" class="btn">▶ Run Benchmark</button>
+  <label class="checkbox-wrap" title="Запустить настоящий прогон через runner.py (требует Mem0+Helixir+Ollama+Cerebras key)">
+    <input type="checkbox" id="liveChk">
+    <span>refresh_bench</span>
+    <span class="hint">(live run — needs infra)</span>
+  </label>
+  <div class="status idle" id="status">
+    <span class="dot"></span>
+    <span class="text">idle — press Run to start</span>
+  </div>
+</div>
 
 <div class="grid" id="cards"></div>
 
 <div class="table-wrap">
-  <table id="comparison">
+  <table>
     <thead>
       <tr>
         <th>Approach</th>
         <th>Tokens</th>
         <th>Time</th>
-        <th>Tool Calls</th>
+        <th>Tool calls</th>
         <th>Accuracy</th>
         <th>Cost ($)</th>
         <th>Cost/Perf</th>
@@ -187,90 +293,248 @@
   </table>
 </div>
 
-<p class="footer">Generator: gpt-oss-120b | Evaluator: zai-glm-4.7 | 3 runs, median | 5 questions, 1-4 scale</p>
+<p class="footer">
+  Generator: gpt-oss-120b · Evaluator: zai-glm-4.7 · 3 runs, median · 5 questions, 1–4 scale<br>
+  Replay data: <code>results/recovery_comparison.json</code> · Live mode spawns <code>runner.py all</code>
+</p>
 
 <script>
-// Load results from recovery_comparison.json (or use sample data)
-const SAMPLE_DATA = {
-  approaches: {
-    "md_files":      { total_tokens: 18400, total_time_ms: 3200, tool_calls: 1,  accuracy_pct: 82.5, cost_estimate_usd: 0.011040, cost_performance_ratio: 5980.0 },
-    "github_issues": { total_tokens: 19200, total_time_ms: 3400, tool_calls: 1,  accuracy_pct: 80.0, cost_estimate_usd: 0.011520, cost_performance_ratio: 5556.0 },
-    "mem0":          { total_tokens: 8600,  total_time_ms: 4800, tool_calls: 6,  accuracy_pct: 72.5, cost_estimate_usd: 0.005160, cost_performance_ratio: 11240.0 },
-    "helixir_mcp":   { total_tokens: 14200, total_time_ms: 7200, tool_calls: 15, accuracy_pct: 90.0, cost_estimate_usd: 0.008520, cost_performance_ratio: 8451.0 },
-  }
-};
-
+const ORDER = ["md_files", "github_issues", "mem0", "helixir_mcp"];
 const LABELS = {
-  "md_files": "MD-files",
-  "github_issues": "GitHub Issues",
-  "mem0": "Mem0",
-  "helixir_mcp": "Helixir MCP",
+  md_files:      "MD-files",
+  github_issues: "GitHub Issues",
+  mem0:          "Mem0",
+  helixir_mcp:   "Helixir MCP",
+};
+const COLORS = {
+  md_files:      "#58a6ff",
+  github_issues: "#d29922",
+  mem0:          "#f778ba",
+  helixir_mcp:   "#3fb950",
 };
 
-const COLORS = {
-  "md_files": "#58a6ff",
-  "github_issues": "#d29922",
-  "mem0": "#f778ba",
-  "helixir_mcp": "#3fb950",
+const ZERO = {
+  total_tokens: 0, total_time_ms: 0, tool_calls: 0,
+  accuracy_pct: 0, cost_estimate_usd: 0, cost_performance_ratio: 0,
 };
+
+const state = {};   // key -> current displayed metrics
+const final = {};   // key -> final metrics once approach_complete arrives
+let evtSource = null;
+let running = false;
+
+const cardsEl  = document.getElementById('cards');
+const tbodyEl  = document.getElementById('tableBody');
+const statusEl = document.getElementById('status');
+const runBtn   = document.getElementById('runBtn');
+const liveChk  = document.getElementById('liveChk');
+
+function fmtInt(n) { return Math.round(n).toLocaleString('en-US'); }
+function fmtTime(ms) { return (ms / 1000).toFixed(1) + 's'; }
+function fmtCost(v) { return '$' + v.toFixed(4); }
+function fmtPct(v) { return v.toFixed(1) + '%'; }
 
 function barColor(pct) {
   if (pct >= 85) return 'var(--green)';
   if (pct >= 70) return 'var(--yellow)';
-  return 'var(--red)';
+  if (pct > 0)   return 'var(--red)';
+  return 'var(--muted)';
 }
 
-function render(data) {
-  const entries = Object.entries(data.approaches);
-  const maxAcc = Math.max(...entries.map(([, v]) => v.accuracy_pct));
-  const cardsEl = document.getElementById('cards');
-  const tbodyEl = document.getElementById('tableBody');
+function setStatus(kind, text) {
+  statusEl.className = 'status ' + kind;
+  statusEl.querySelector('.text').textContent = text;
+}
 
-  // Cards
+function buildCards() {
   cardsEl.innerHTML = '';
-  for (const [key, m] of entries) {
-    const isBest = m.accuracy_pct === maxAcc;
+  for (const key of ORDER) {
+    state[key] = { ...ZERO };
     const card = document.createElement('div');
-    card.className = 'card' + (isBest ? ' best' : '');
+    card.className = 'card';
+    card.id = 'card-' + key;
     card.innerHTML = `
-      <h2 style="color:${COLORS[key]}">${LABELS[key] || key}</h2>
-      <div class="token-counter" style="color:${COLORS[key]}">${m.total_tokens.toLocaleString()}</div>
-      <div style="font-size:11px;text-align:center;color:#8b949e;margin-bottom:12px">tokens</div>
+      <h2 style="color:${COLORS[key]}">
+        ${LABELS[key]} <span class="spinner"></span>
+      </h2>
+      <div class="token-counter" style="color:${COLORS[key]}" data-field="tokens">0</div>
+      <div class="token-label">tokens</div>
       <div class="bar-container">
-        <div class="bar" style="width:${m.accuracy_pct}%;background:${barColor(m.accuracy_pct)}">${m.accuracy_pct}%</div>
+        <div class="bar" data-field="bar">0%</div>
       </div>
-      <div class="metric"><span class="label">Time</span><span class="value">${(m.total_time_ms/1000).toFixed(1)}s</span></div>
-      <div class="metric"><span class="label">Tool calls</span><span class="value">${m.tool_calls}</span></div>
-      <div class="metric"><span class="label">Cost</span><span class="value">$${m.cost_estimate_usd.toFixed(4)}</span></div>
-      <div class="metric"><span class="label">Cost/Perf</span><span class="value ${isBest ? 'green' : ''}">${m.cost_performance_ratio.toFixed(0)}</span></div>
+      <div class="metric"><span class="label">Time</span>       <span class="value" data-field="time">0.0s</span></div>
+      <div class="metric"><span class="label">Tool calls</span> <span class="value" data-field="calls">0</span></div>
+      <div class="metric"><span class="label">Cost</span>       <span class="value" data-field="cost">$0.0000</span></div>
+      <div class="metric"><span class="label">Cost/Perf</span>  <span class="value" data-field="cpr">0</span></div>
     `;
     cardsEl.appendChild(card);
   }
+  refreshTable();
+}
 
-  // Table
+function refreshTable() {
+  // Determine current best (max accuracy among approaches that have any data)
+  const withData = ORDER.filter(k => state[k] && state[k].accuracy_pct > 0);
+  const maxAcc = withData.length ? Math.max(...withData.map(k => state[k].accuracy_pct)) : 0;
+
   tbodyEl.innerHTML = '';
-  for (const [key, m] of entries) {
-    const isBest = m.accuracy_pct === maxAcc;
+  for (const key of ORDER) {
+    const m = state[key] || ZERO;
     const tr = document.createElement('tr');
-    if (isBest) tr.className = 'highlight';
+    if (m.accuracy_pct > 0 && m.accuracy_pct === maxAcc) tr.className = 'highlight';
     tr.innerHTML = `
-      <td style="color:${COLORS[key]};font-weight:bold">${LABELS[key] || key}</td>
-      <td>${m.total_tokens.toLocaleString()}</td>
-      <td>${(m.total_time_ms/1000).toFixed(1)}s</td>
-      <td>${m.tool_calls}</td>
-      <td style="color:${barColor(m.accuracy_pct)};font-weight:bold">${m.accuracy_pct}%</td>
-      <td>$${m.cost_estimate_usd.toFixed(4)}</td>
-      <td>${m.cost_performance_ratio.toFixed(0)}</td>
+      <td style="color:${COLORS[key]};font-weight:bold">${LABELS[key]}</td>
+      <td>${fmtInt(m.total_tokens)}</td>
+      <td>${fmtTime(m.total_time_ms)}</td>
+      <td>${m.tool_calls || 0}</td>
+      <td style="color:${barColor(m.accuracy_pct)};font-weight:bold">${fmtPct(m.accuracy_pct)}</td>
+      <td>${fmtCost(m.cost_estimate_usd)}</td>
+      <td>${Math.round(m.cost_performance_ratio).toLocaleString('en-US')}</td>
     `;
     tbodyEl.appendChild(tr);
   }
 }
 
-// Try to load real data, fall back to sample
-fetch('./results/recovery_comparison.json')
-  .then(r => r.ok ? r.json() : SAMPLE_DATA)
-  .then(render)
-  .catch(() => render(SAMPLE_DATA));
+function applyCard(key, m) {
+  const card = document.getElementById('card-' + key);
+  if (!card) return;
+  card.querySelector('[data-field=tokens]').textContent = fmtInt(m.total_tokens);
+  card.querySelector('[data-field=time]').textContent   = fmtTime(m.total_time_ms);
+  card.querySelector('[data-field=calls]').textContent  = m.tool_calls || 0;
+  card.querySelector('[data-field=cost]').textContent   = fmtCost(m.cost_estimate_usd || 0);
+  card.querySelector('[data-field=cpr]').textContent    = Math.round(m.cost_performance_ratio || 0).toLocaleString('en-US');
+  const bar = card.querySelector('[data-field=bar]');
+  bar.style.width = (m.accuracy_pct || 0) + '%';
+  bar.style.background = barColor(m.accuracy_pct || 0);
+  bar.textContent = m.accuracy_pct ? fmtPct(m.accuracy_pct) : '';
+}
+
+function setActive(key, on) {
+  for (const k of ORDER) {
+    const c = document.getElementById('card-' + k);
+    if (!c) continue;
+    if (k === key) c.classList.toggle('active', on);
+    else c.classList.remove('active');
+  }
+}
+
+function markBest() {
+  const withData = ORDER.filter(k => final[k]);
+  if (withData.length === 0) return;
+  const maxAcc = Math.max(...withData.map(k => final[k].accuracy_pct));
+  for (const k of ORDER) {
+    const c = document.getElementById('card-' + k);
+    if (!c) continue;
+    c.classList.add('done');
+    c.classList.toggle('best', !!final[k] && final[k].accuracy_pct === maxAcc);
+  }
+}
+
+function handleEvent(evt) {
+  switch (evt.type) {
+    case 'start': {
+      const tag = evt.mode === 'live'
+        ? 'LIVE — calling Cerebras + MCP servers…'
+        : 'replay — playing snapshot from results/recovery_comparison.json';
+      setStatus('running', tag);
+      break;
+    }
+    case 'approach_start': {
+      setActive(evt.approach, true);
+      setStatus('running', `[${LABELS[evt.approach] || evt.approach}] retrieving context…`);
+      break;
+    }
+    case 'approach_progress': {
+      const m = state[evt.approach] || (state[evt.approach] = { ...ZERO });
+      m.total_tokens  = evt.tokens ?? m.total_tokens;
+      m.total_time_ms = evt.time_ms ?? m.total_time_ms;
+      m.tool_calls    = evt.tool_calls_done ?? m.tool_calls;
+      applyCard(evt.approach, m);
+      refreshTable();
+      break;
+    }
+    case 'approach_complete': {
+      final[evt.approach] = evt.metrics;
+      state[evt.approach] = { ...evt.metrics };
+      applyCard(evt.approach, evt.metrics);
+      setActive(evt.approach, false);
+      refreshTable();
+      markBest();
+      break;
+    }
+    case 'log': {
+      // Don't spam status for every log line; keep stamp under cards via console.
+      console.log('[runner]', evt.line);
+      break;
+    }
+    case 'error': {
+      setStatus('error', 'error: ' + evt.message);
+      stopRun();
+      break;
+    }
+    case 'complete': {
+      const tag = evt.mode === 'live'
+        ? `complete (live, exit=${evt.exit_code ?? 0})`
+        : 'complete (replay)';
+      setStatus('complete', tag);
+      stopRun();
+      break;
+    }
+  }
+}
+
+function startRun() {
+  if (running) return;
+  running = true;
+  runBtn.textContent = '■ Stop';
+  runBtn.classList.add('stop');
+  liveChk.disabled = true;
+
+  buildCards();
+  for (const k of ORDER) final[k] = null;
+
+  const live = liveChk.checked ? '1' : '0';
+  evtSource = new EventSource(`/events?live=${live}`);
+  evtSource.onmessage = (e) => {
+    try { handleEvent(JSON.parse(e.data)); }
+    catch (err) { console.error('bad event', e.data, err); }
+  };
+  evtSource.onerror = () => {
+    if (running) {
+      // EventSource emits onerror on normal stream end too; only flag if we
+      // never got a 'complete' event.
+      setTimeout(() => {
+        if (running) {
+          setStatus('error', 'connection lost');
+          stopRun();
+        }
+      }, 200);
+    }
+  };
+}
+
+function stopRun() {
+  running = false;
+  runBtn.textContent = '▶ Run Benchmark';
+  runBtn.classList.remove('stop');
+  liveChk.disabled = false;
+  if (evtSource) {
+    evtSource.close();
+    evtSource = null;
+  }
+}
+
+runBtn.addEventListener('click', () => {
+  if (running) {
+    stopRun();
+    setStatus('idle', 'stopped — press Run to restart');
+  } else {
+    startRun();
+  }
+});
+
+// Initial paint: all-zero cards, idle status.
+buildCards();
 </script>
 
 </body>

@@ -28,6 +28,17 @@ EVALUATOR_MODEL = "zai-glm-4.7"
 
 NUM_RUNS = 3
 
+# When set by server.py the runner emits machine-readable progress lines
+# (`[EVENT] {...}`) for the dashboard SSE consumer.
+EMIT_EVENTS = os.environ.get("RECOVERY_EMIT_EVENTS") == "1"
+
+
+def emit_event(payload: dict) -> None:
+    """Print a one-line JSON event for the live-mode SSE bridge."""
+    if not EMIT_EVENTS:
+        return
+    print("[EVENT] " + json.dumps(payload, ensure_ascii=False), flush=True)
+
 # Helixir MCP binary
 HELIXIR_MCP_BIN = "/Users/nikitarulenko/Documents/PROJ/helixir-rs/helixir/target/release/helixir-mcp"
 HELIXIR_ENV = {
@@ -496,6 +507,7 @@ def run_approach(approach, context_file, num_runs=NUM_RUNS):
     print(f"\n{'='*60}")
     print(f"Approach: {approach}")
     print(f"{'='*60}")
+    emit_event({"type": "approach_start", "approach": approach})
 
     # Phase 1: Onboarding
     print(f"\n  Phase 1: Onboarding...")
@@ -509,9 +521,18 @@ def run_approach(approach, context_file, num_runs=NUM_RUNS):
           f"(~{onboard_metrics['context_tokens_est']:,} tokens)")
     print(f"    Tool calls: {onboard_metrics['tool_calls']}")
     print(f"    Retrieval time: {onboard_metrics['retrieval_time_ms']}ms")
+    emit_event({
+        "type": "approach_progress",
+        "approach": approach,
+        "tokens": int(onboard_metrics["context_tokens_est"]),
+        "time_ms": int(onboard_metrics["retrieval_time_ms"]),
+        "tool_calls_done": int(onboard_metrics["tool_calls"]),
+    })
 
     # Phase 2: Verification (multiple runs)
     all_runs = []
+    cumulative_tokens = onboard_metrics["context_tokens_est"]
+    cumulative_time = onboard_metrics["retrieval_time_ms"]
     for run_id in range(1, num_runs + 1):
         print(f"\n  Phase 2: Verification run {run_id}/{num_runs}")
         results, run_metrics = run_verification(context, run_id)
@@ -523,6 +544,15 @@ def run_approach(approach, context_file, num_runs=NUM_RUNS):
             "total_score": run_total,
         })
         print(f"    Run {run_id} total: {run_total}/80")
+        cumulative_tokens += run_metrics["total_input_tokens"] + run_metrics["total_output_tokens"]
+        cumulative_time += run_metrics["total_time_ms"]
+        emit_event({
+            "type": "approach_progress",
+            "approach": approach,
+            "tokens": int(cumulative_tokens),
+            "time_ms": int(cumulative_time),
+            "tool_calls_done": int(onboard_metrics["tool_calls"]),
+        })
 
     # Statistics
     totals = [r["total_score"] for r in all_runs]
@@ -576,6 +606,11 @@ def run_approach(approach, context_file, num_runs=NUM_RUNS):
     print(f"    Total time: {aggregate['total_time_ms']}ms")
     print(f"    Cost: ${aggregate['cost_estimate_usd']:.6f}")
     print(f"    Cost/Perf: {aggregate['cost_performance_ratio']}")
+    emit_event({
+        "type": "approach_complete",
+        "approach": approach,
+        "metrics": aggregate,
+    })
 
     return ApproachResult(
         approach=approach,
