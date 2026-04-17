@@ -26,7 +26,6 @@
 | 13 | [MD-файлы](experiments/13_experiment_md_files.md) | `.cursor/rules` + `AGENTS.md` | Простейший setup, деградация на связности |
 | 14 | [GitHub Issues](experiments/14_experiment_github_issues.md) | GitHub MCP + Issues | Структурированно, но без семантики |
 | 15 | [Mem0](experiments/15_experiment_mem0.md) | Self-hosted + pgvector | 6 патчей, vendor lock, но семантика работает |
-| 17 | [Graphiti](experiments/17_experiment_graphiti.md) | FalkorDB + getzep SDK | Vendor lock на OpenAI Responses API |
 | 18 | [Helixir Roadmap](experiments/18_helixir_issues_and_roadmap.md) | HelixDB + FastThink | Graph reasoning работает, extraction нестабилен |
 
 ### Методология бенчмарка (`methodology/`)
@@ -42,7 +41,7 @@
 
 | Документ | Описание |
 |----------|----------|
-| [v2 results](results/v2_results.md) | 175-тестовый прогон: 5 подходов × Part A+B+C, headline |
+| [v2 results](results/v2_results.md) | 175-тестовый прогон: 4 подхода × Part A+B+C, headline |
 | [v3 results](results/v3_results.md) | 637-тестовый прогон: что изменилось, stale memory эффект |
 | [Context recovery](results/context_recovery.md) | Онбординг-бенчмарк: accuracy + стоимость токенов по подходам |
 | [v4 task-spec results](results/v4_taskspec_results.md) | Planner+critic прогон (после запуска) |

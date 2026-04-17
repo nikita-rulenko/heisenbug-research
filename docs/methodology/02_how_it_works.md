@@ -13,7 +13,7 @@
    возвращает 4 балла (1–4 каждый).
 4. Суммируем, берём медиану по 3 прогонам, считаем процент от 352.
 
-Важно: в v2/v3 context_text **одинаковый для всех 5 подходов** — это
+Важно: в v2/v3 context_text **одинаковый для всех 4 подходов** — это
 известное ограничение, разбор в [`03_phase4_plan.md`](03_phase4_plan.md#11-один-и-тот-же-контекст-для-всех-подходов).
 
 ---
@@ -364,8 +364,8 @@ user:   <prompt из сценария>
 ```
 
 `context_text` — это склейка всех episodes из `benchmarks/shared/data/test_context.json`.
-В v2/v3 этот текст **одинаковый для всех 5 подходов** (`md_files`, `github_issues`,
-`mem0`, `graphiti`, `helixir`). Это не имитация настоящего retrieval — это
+В v2/v3 этот текст **одинаковый для всех 4 подходов** (`md_files`, `github_issues`,
+`mem0`, `helixir`). Это не имитация настоящего retrieval — это
 сводный «идеальный» контекст. Честный per-approach retrieval есть только в
 [Context Recovery benchmark](../results/context_recovery.md) и будет в [v4
 task-spec benchmark](04_v4_taskspec_design.md).
@@ -414,7 +414,7 @@ Temperature evaluator-а — `0.0` (детерминизм). Модель — `z
 - `benchmarks/shared/data/test_context.json` — episodes для context_text
 - `benchmarks/shared/data/decision_context.json` — 5 decisions для Part C
 - `benchmarks/v2/helixir_mcp.py` — обёртка для helixir через MCP
-  (остальные 4 подхода получают одинаковый context_text)
+  (остальные 3 подхода получают одинаковый context_text)
 
 ## Известные ограничения этой оценки
 

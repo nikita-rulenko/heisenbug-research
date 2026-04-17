@@ -1,10 +1,11 @@
 # Эксперимент 5: Helixir — Графовая память с reasoning pipeline
 
 ## TL;DR
-Helixir — графовая память поверх HelixDB с FastThink reasoning pipeline. Единственная из
-пяти систем, где работают и семантический поиск, и graph relations, и каузальные цепочки —
-без vendor lock-in. Потребовал 4 итерации (v0.2.2 → v0.3.1-fix) для выхода на рабочий уровень.
-Итого: **78.4% (v0.3.1)** / **71.8% (v0.3.1-fix)** по трёхчастному бенчмарку.
+Helixir — графовая память поверх HelixDB с FastThink reasoning pipeline. Единственная
+из сравниваемых систем, где работают и семантический поиск, и graph relations, и
+каузальные цепочки — без vendor lock-in. Потребовал 4 итерации (v0.2.2 → v0.3.1-fix)
+для выхода на рабочий уровень. Итого: **78.4% (v0.3.1)** / **71.8% (v0.3.1-fix)**
+по трёхчастному бенчмарку.
 
 ## Инфраструктура
 
@@ -50,7 +51,7 @@ EMBEDDING_MODEL=nomic-embed-text
 | S5: E2E тест | 9/16 | [16, 9, 5] | Сильная дисперсия — от 5 до 16 |
 | S6: Impact analysis | 11/16 | [11, 9, 16] | Выше GH Issues (9) благодаря graph relations |
 | S7: Обнаружение дублей | 4/16 | [4, 4, 4] | Ceiling effect |
-| S8: Test plan | 12/16 | [15, 11, 12] | На уровне Graphiti |
+| S8: Test plan | 12/16 | [15, 11, 12] | Средний результат |
 | S9: Темпоральный | 4/16 | [4, 4, 4] | Нет temporal features — ожидаемый провал |
 | S10: Оптимизация | 14/16 | [14, 14, 14] | **Идеально стабильный** — все прогоны одинаковы |
 | S11: Coverage matrix | 8/16 | [11, 8, 7] | Ниже Mem0 (13) |
@@ -69,7 +70,6 @@ scores, которые варьируются между прогонами. В 
 | Подход | Score | % |
 |--------|-------|---|
 | Helixir v0.3.1 | **165/250** | **66.0%** |
-| Graphiti (raw) | 157/250 | 62.8% |
 | GitHub Issues | 146/250 | 58.4% |
 | MD-файлы | 145/250 | 58.0% |
 | Mem0 | 138/250 | 55.2% |
@@ -84,7 +84,6 @@ Cerebras gpt-oss-120b (temperature=0.2). Один прогон; при 3+ про
 |--------|-------|---|------------|------------|
 | Helixir v0.3.1 | **105/125** | **84.0%** | 77ms | 82ms |
 | Helixir v0.3.1-fix | **104/125** | **83.2%** | 77ms | 82ms |
-| Graphiti (raw) | 98/125 | 78.4% | N/A | N/A |
 | Mem0 | 88/125 | 70.4% | 101ms | 213ms |
 | GitHub Issues | 85/125 | 68.0% | N/A | N/A |
 | MD-файлы | 78/125 | 62.4% | N/A | N/A |
@@ -98,7 +97,6 @@ Helixir стабильно лидирует в Part B: multi-hop reasoning и co
 |--------|-------|---|----------|
 | Helixir v0.3.1-fix | **123/125** | **98.4%** | FastThink pipeline |
 | Mem0 | 123/125 | 98.4% | add_memory (text) |
-| Graphiti (raw) | 123/125 | 98.4% | raw text dump |
 | Helixir v0.3.1 | 122/125 | 97.6% | FastThink pipeline |
 | MD-файлы | 121/125 | 96.8% | raw text dump |
 | GitHub Issues | 117/125 | 93.6% | raw text dump |
@@ -111,7 +109,6 @@ Helixir стабильно лидирует в Part B: multi-hop reasoning и co
 | Подход | A | B | C | Итого | % |
 |--------|---|---|---|-------|---|
 | Helixir v0.3.1 | 165 | 105 | 122 | **392** | **78.4%** |
-| Graphiti (raw) | 157 | 98 | 123 | 378 | 75.6% |
 | Helixir v0.3.1-fix | 132 | 104 | 123 | 359 | 71.8% |
 | Mem0 | 138 | 88 | 123 | 349 | 69.8% |
 | GitHub Issues | 146 | 85 | 117 | 348 | 69.6% |
@@ -124,15 +121,13 @@ Helixir стабильно лидирует в Part B: multi-hop reasoning и co
 | Система | Graph relations | Реально работают |
 |---------|----------------|-----------------|
 | Helixir v0.3.1-fix | IMPLIES / BECAUSE / CONTRADICTS | **Да** (14 relations, deepest_chain=3) |
-| Graphiti | Entity/Relation extraction | **Нет** (vendor lock на OpenAI) |
 | Mem0 | Mem0g (Neo4j graph store) | **Нет** (dependency hell, langchain-neo4j) |
 | GitHub Issues | Нет | — |
 | MD-файлы | Нет | — |
 
 В рамках нашего эксперимента (Cerebras + Ollama, без OpenAI key) graph relations удалось
-построить только в Helixir. Graphiti архитектурно способен, но заблокирован OpenAI Responses API.
-Mem0g (Neo4j graph store) не удалось поднять из-за отсутствия langchain-neo4j в Docker-образе.
-При наличии OpenAI API key результат Graphiti и Mem0g мог бы быть другим.
+построить только в Helixir. Mem0g (Neo4j graph store) не удалось поднять из-за
+отсутствия langchain-neo4j в Docker-образе.
 
 ### 2. FastThink — структурированный reasoning pipeline
 
@@ -147,8 +142,8 @@ think_start("Почему Clean Architecture?")
   → concepts_mapped: 1
 ```
 
-В остальных протестированных системах structured reasoning pipeline отсутствует: Mem0 сохраняет
-решения как flat text, Graphiti мог бы строить temporal episode chains, но не работает без OpenAI.
+В остальных протестированных системах structured reasoning pipeline отсутствует: Mem0
+сохраняет решения как flat text.
 
 ### 3. search_reasoning_chain — каузальный поиск
 
@@ -171,7 +166,6 @@ MD-файлы и Issues подают весь текст целиком. Helixir
 |---------|----------|--------|----------------|
 | Helixir | **Да** | **Да** | **Да** |
 | Mem0 | Частично (11/50+ фактов) | Да (embeddings) | Нет (tool call format) |
-| Graphiti | Нет | Да (embeddings) | Нет (Responses API) |
 
 Helixir работает с Cerebras + Ollama без единого патча. Mem0 потребовал 6 патчей и всё равно
 извлекает в ~5x меньше фактов из-за несовместимости tool call формата.
@@ -217,25 +211,24 @@ nomic-embed-text (768 dims) плохо различает тематически
 
 ## Сравнение с другими подходами
 
-| Критерий | MD | Issues | Mem0 | Graphiti | Helixir |
-|----------|-----|--------|------|----------|---------|
-| Score A+B+C | 68.8% | 69.6% | 69.8% | 75.6% | **78.4%** |
-| Graph relations | Нет | Нет | Нет* | Нет** | **Да (14)** |
-| Reasoning chains | Нет | Нет | Нет | Нет** | **Да** |
-| Semantic search | Нет | Нет | **Да** | Нет** | **Да** |
-| LLM-агностичность | N/A | N/A | Плохая | **Нет** | **Да** |
-| Setup time | 5 мин | 15 мин | ~6 ч | ~30 мин | ~1 ч |
-| Vendor lock | Нет | GitHub | OpenAI | OpenAI | **Нет** |
-| Зрелость | Stable | Stable | Beta | Beta | **Alpha** |
+| Критерий | MD | Issues | Mem0 | Helixir |
+|----------|-----|--------|------|---------|
+| Score A+B+C | 68.8% | 69.6% | 69.8% | **78.4%** |
+| Graph relations | Нет | Нет | Нет* | **Да (14)** |
+| Reasoning chains | Нет | Нет | Нет | **Да** |
+| Semantic search | Нет | Нет | **Да** | **Да** |
+| LLM-агностичность | N/A | N/A | Плохая | **Да** |
+| Setup time | 5 мин | 15 мин | ~6 ч | ~1 ч |
+| Vendor lock | Нет | GitHub | OpenAI | **Нет** |
+| Зрелость | Stable | Stable | Beta | **Alpha** |
 
 \* Mem0g (Neo4j graph store) не поднялся из-за dependency hell.
-\** Graphiti способен, но заблокирован OpenAI Responses API.
 
 ## Ключевые выводы
 
-1. **Единственный работающий graph reasoning.** Из трёх систем с graph-функциональностью
-   (Graphiti, Mem0g, Helixir) только Helixir реально построил граф и использует его при поиске.
-   Это не заслуга Helixir per se — Graphiti и Mem0g заблокированы vendor lock-in.
+1. **Единственный работающий graph reasoning.** Из систем с graph-функциональностью
+   (Mem0g, Helixir) только Helixir реально построил граф и использует его при поиске.
+   Это не заслуга Helixir per se — Mem0g заблокирован vendor lock-in / dependency hell.
 
 2. **raw_input fallback — ключ к выживаемости.** v0.3.1 показал, что при малом контексте
    сохранение оригинального текста (когда extraction провалилась) важнее, чем quality extraction.
