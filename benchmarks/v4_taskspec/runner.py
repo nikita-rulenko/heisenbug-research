@@ -38,11 +38,23 @@ import httpx
 CEREBRAS_API_KEY = os.environ.get("CEREBRAS_API_KEY", "")
 CEREBRAS_BASE_URL = "https://api.cerebras.ai/v1"
 
-# Only Cerebras is used (budget). Three different model families chosen
-# from what Cerebras actually serves, to mitigate evaluator bias.
-PLANNER_MODEL = "qwen-3-235b-a22b-instruct-2507"  # Qwen (Alibaba) — preview
-CRITIC_MODEL = "zai-glm-4.7"                      # GLM (Z.AI) — preview
-SPOT_CHECKER_MODEL = "gpt-oss-120b"                # OpenAI OSS — production
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
+
+# Three different model families + two providers, chosen to mitigate
+# evaluator bias. GLM was considered for the critic role but dropped —
+# as a reasoning model it consumed the token budget on internal thoughts
+# and returned an empty `content` field on complex critic tasks.
+PLANNER_MODEL = "gpt-oss-120b"                      # OpenAI OSS, Cerebras — production
+CRITIC_MODEL = "qwen-3-235b-a22b-instruct-2507"     # Qwen (Alibaba), Cerebras — preview
+SPOT_CHECKER_MODEL = "deepseek-chat"                # DeepSeek V3.2, deepseek.com — non-thinking
+
+# Which provider each model runs on.
+MODEL_PROVIDER = {
+    PLANNER_MODEL: "cerebras",
+    CRITIC_MODEL: "cerebras",
+    SPOT_CHECKER_MODEL: "deepseek",
+}
 
 APPROACHES = ["md_files", "github_issues", "mem0", "graphiti", "helixir"]
 
@@ -62,33 +74,59 @@ def _client() -> httpx.Client:
 
 
 def call_llm(messages: list[dict], model: str, temperature: float = 0.2,
-             max_tokens: int = 4000) -> tuple[str, int]:
-    """One-shot LLM call. Returns (content, latency_ms)."""
-    if not CEREBRAS_API_KEY:
-        raise RuntimeError("CEREBRAS_API_KEY env var is not set")
+             max_tokens: int = 4000, max_retries: int = 4) -> tuple[str, int]:
+    """One-shot LLM call with provider routing and retries. Returns (content, latency_ms)."""
+    provider = MODEL_PROVIDER.get(model)
+    if provider == "cerebras":
+        base_url, api_key = CEREBRAS_BASE_URL, CEREBRAS_API_KEY
+        if not api_key:
+            raise RuntimeError("CEREBRAS_API_KEY env var is not set")
+    elif provider == "deepseek":
+        base_url, api_key = DEEPSEEK_BASE_URL, DEEPSEEK_API_KEY
+        if not api_key:
+            raise RuntimeError("DEEPSEEK_API_KEY env var is not set")
+    else:
+        raise ValueError(f"no provider mapping for model {model}")
 
-    t0 = time.time()
     payload = {
         "model": model,
         "messages": messages,
         "temperature": temperature,
         "max_tokens": max_tokens,
     }
-    # zai-glm-4.7 reasoning model wants max_completion_tokens
-    if model == CRITIC_MODEL:
-        payload["max_completion_tokens"] = max_tokens
-        del payload["max_tokens"]
 
-    with _client() as cl:
-        resp = cl.post(
-            f"{CEREBRAS_BASE_URL}/chat/completions",
-            headers={"Authorization": f"Bearer {CEREBRAS_API_KEY}"},
-            json=payload,
-        )
-        resp.raise_for_status()
-        msg = resp.json()["choices"][0]["message"]
-        content = (msg.get("content") or "").strip()
-    return content, int((time.time() - t0) * 1000)
+    t0 = time.time()
+    last_exc = None
+    for attempt in range(max_retries):
+        try:
+            with _client() as cl:
+                resp = cl.post(
+                    f"{base_url}/chat/completions",
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    json=payload,
+                )
+            if resp.status_code >= 500 or resp.status_code == 429:
+                # Retry on transient errors.
+                raise httpx.HTTPStatusError(
+                    f"transient {resp.status_code}", request=resp.request, response=resp,
+                )
+            resp.raise_for_status()
+            msg = resp.json()["choices"][0]["message"]
+            content = (msg.get("content") or "").strip()
+            # Fallback: some reasoning providers put their only textual output in
+            # `reasoning` when the content channel is empty — accept it rather
+            # than report a 0-char answer.
+            if not content:
+                content = (msg.get("reasoning") or msg.get("reasoning_content") or "").strip()
+            return content, int((time.time() - t0) * 1000)
+        except (httpx.HTTPStatusError, httpx.RemoteProtocolError,
+                httpx.ReadTimeout, httpx.ConnectError) as e:
+            last_exc = e
+            wait = 2 ** attempt
+            print(f"    [retry {attempt+1}/{max_retries}] {type(e).__name__}: "
+                  f"sleeping {wait}s", flush=True)
+            time.sleep(wait)
+    raise RuntimeError(f"LLM call failed after {max_retries} retries: {last_exc}")
 
 
 # ---------- Context loading ----------
@@ -288,11 +326,18 @@ class SpecResult:
     timestamp: str = ""
 
 
-def run(tasks_path: Path, seed: int = 42, spot_check_ratio: float = 0.1) -> list[SpecResult]:
+def run(tasks_path: Path, seed: int = 42, spot_check_ratio: float = 0.1,
+        checkpoint_path: Path | None = None) -> list[SpecResult]:
     with open(tasks_path) as f:
         tasks = json.load(f)
 
     random.seed(seed)
+
+    def checkpoint(specs: list[SpecResult], phase: str):
+        if checkpoint_path is None:
+            return
+        save(specs, checkpoint_path)
+        print(f"    [checkpoint:{phase}] -> {checkpoint_path.name}", flush=True)
 
     # Phase 1: generate all specs (per approach)
     specs: list[SpecResult] = []
@@ -310,26 +355,30 @@ def run(tasks_path: Path, seed: int = 42, spot_check_ratio: float = 0.1) -> list
                 planner_latency_ms=planner_ms,
                 timestamp=datetime.utcnow().isoformat(),
             ))
-            print(f"[plan] {task['id']} / {approach}: {planner_ms}ms")
+            print(f"[plan] {task['id']} / {approach}: {planner_ms}ms "
+                  f"({len(spec_md)} chars)", flush=True)
+            checkpoint(specs, "plan")
 
     # Phase 2: critic ISOLATED over anonymized specs in random order
     crit_order = specs[:]
     random.shuffle(crit_order)  # order bias removal
     # Anonymize: pass only spec_md + context to critic; keep approach id in
     # our own bookkeeping only.
+    project_ctx = load_approach_context("md_files")  # ground truth = md baseline
     for s in crit_order:
-        project_ctx = load_approach_context("md_files")  # ground truth = md baseline
         s.critic = critique_spec_isolated(s.spec_md, project_ctx)
         print(f"[crit] {s.task_id} / {s.approach}: "
-              f"{s.critic['total_criticality']} ({s.critic['num_questions']} qs)")
+              f"{s.critic['total_criticality']} ({s.critic['num_questions']} qs)",
+              flush=True)
+        checkpoint(specs, "crit")
 
     # Phase 3: spot-checker on 10% sample
     sample = random.sample(specs, max(1, int(len(specs) * spot_check_ratio)))
-    project_ctx = load_approach_context("md_files")
     for s in sample:
         s.spot_check = spot_check(s.spec_md, project_ctx)
         print(f"[spot] {s.task_id} / {s.approach}: "
-              f"{s.spot_check['total_criticality']}")
+              f"{s.spot_check['total_criticality']}", flush=True)
+        checkpoint(specs, "spot")
 
     return specs
 
@@ -370,10 +419,10 @@ def main():
     seed = int(sys.argv[2]) if len(sys.argv) > 2 else 42
     ratio = float(sys.argv[3]) if len(sys.argv) > 3 else 0.1
 
-    specs = run(tasks_path, seed=seed, spot_check_ratio=ratio)
     out = RESULTS_DIR / f"v4_taskspec_{int(time.time())}.json"
+    specs = run(tasks_path, seed=seed, spot_check_ratio=ratio, checkpoint_path=out)
     save(specs, out)
-    print(f"\nSaved -> {out}")
+    print(f"\nSaved -> {out}", flush=True)
 
 
 if __name__ == "__main__":
