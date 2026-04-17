@@ -295,8 +295,33 @@
 
 <p class="footer">
   Generator: gpt-oss-120b · Evaluator: zai-glm-4.7 · 3 runs, median · 5 questions, 1–4 scale<br>
-  Replay data: <code>results/recovery_comparison.json</code> · Live mode spawns <code>runner.py all</code>
+  Replay data: <code>results/recovery_comparison.json</code> · Live mode needs <code>python3 server.py</code>
 </p>
+
+<script type="application/json" id="seedData">
+{
+  "_source": "v3 narrative snapshot from commit 5a6ce46 (March 2026 docs/results/v3_results.md).",
+  "timestamp": "2026-03-31T11:46:20+03:00",
+  "approaches": {
+    "md_files": {
+      "total_tokens": 53195, "total_time_ms": 8200, "tool_calls": 1,
+      "accuracy_pct": 88.8, "cost_estimate_usd": 0.031917, "cost_performance_ratio": 2225.0
+    },
+    "github_issues": {
+      "total_tokens": 54397, "total_time_ms": 8500, "tool_calls": 1,
+      "accuracy_pct": 88.8, "cost_estimate_usd": 0.032638, "cost_performance_ratio": 2175.0
+    },
+    "mem0": {
+      "total_tokens": 29638, "total_time_ms": 8700, "tool_calls": 6,
+      "accuracy_pct": 58.8, "cost_estimate_usd": 0.017783, "cost_performance_ratio": 2643.0
+    },
+    "helixir_mcp": {
+      "total_tokens": 170668, "total_time_ms": 20800, "tool_calls": 15,
+      "accuracy_pct": 75.0, "cost_estimate_usd": 0.102401, "cost_performance_ratio": 586.0
+    }
+  }
+}
+</script>
 
 <script>
 const ORDER = ["md_files", "github_issues", "mem0", "helixir_mcp"];
@@ -322,6 +347,13 @@ const state = {};   // key -> current displayed metrics
 const final = {};   // key -> final metrics once approach_complete arrives
 let evtSource = null;
 let running = false;
+let replayTimers = [];  // setTimeout handles so Stop can cancel mid-replay
+
+// Embedded seed data — makes replay work from file:// without a server.
+const SEED = (() => {
+  try { return JSON.parse(document.getElementById('seedData').textContent); }
+  catch (e) { console.error('seed JSON parse failed', e); return { approaches: {} }; }
+})();
 
 const cardsEl  = document.getElementById('cards');
 const tbodyEl  = document.getElementById('tableBody');
@@ -493,24 +525,8 @@ function startRun() {
   buildCards();
   for (const k of ORDER) final[k] = null;
 
-  const live = liveChk.checked ? '1' : '0';
-  evtSource = new EventSource(`/events?live=${live}`);
-  evtSource.onmessage = (e) => {
-    try { handleEvent(JSON.parse(e.data)); }
-    catch (err) { console.error('bad event', e.data, err); }
-  };
-  evtSource.onerror = () => {
-    if (running) {
-      // EventSource emits onerror on normal stream end too; only flag if we
-      // never got a 'complete' event.
-      setTimeout(() => {
-        if (running) {
-          setStatus('error', 'connection lost');
-          stopRun();
-        }
-      }, 200);
-    }
-  };
+  if (liveChk.checked) startLive();
+  else startReplay();
 }
 
 function stopRun() {
@@ -518,10 +534,99 @@ function stopRun() {
   runBtn.textContent = '▶ Run Benchmark';
   runBtn.classList.remove('stop');
   liveChk.disabled = false;
-  if (evtSource) {
-    evtSource.close();
-    evtSource = null;
+  if (evtSource) { evtSource.close(); evtSource = null; }
+  for (const t of replayTimers) clearTimeout(t);
+  replayTimers = [];
+}
+
+// ─── Replay mode: purely client-side animation over the embedded seed ───
+
+function scheduleEvent(delay, evt) {
+  const h = setTimeout(() => { if (running) handleEvent(evt); }, delay);
+  replayTimers.push(h);
+}
+
+function startReplay() {
+  setStatus('running', 'replay — playing snapshot from ' + (SEED._source || 'embedded seed'));
+  scheduleEvent(0, { type: 'start', mode: 'replay' });
+
+  const approaches = SEED.approaches || {};
+  let cursor = 300;  // ms offset into the schedule
+
+  for (const key of ORDER) {
+    const m = approaches[key];
+    if (!m) continue;
+
+    // Compress real wall-clock into a stage-friendly window (2–6s per approach).
+    const wallMs = Math.max(2000, Math.min(6000, (m.total_time_ms || 3000) / 4));
+    const steps = 24;
+    const stepDt = wallMs / steps;
+
+    scheduleEvent(cursor, { type: 'approach_start', approach: key, tool_calls: m.tool_calls || 0 });
+
+    for (let i = 1; i <= steps; i++) {
+      const frac = i / steps;
+      scheduleEvent(cursor + i * stepDt, {
+        type: 'approach_progress',
+        approach: key,
+        tokens:           Math.round((m.total_tokens     || 0) * frac),
+        time_ms:          Math.round((m.total_time_ms    || 0) * frac),
+        tool_calls_done:  Math.round((m.tool_calls       || 0) * frac),
+      });
+    }
+
+    cursor += wallMs;
+    scheduleEvent(cursor, { type: 'approach_complete', approach: key, metrics: m });
+    cursor += 400;  // small gap between approaches
   }
+
+  scheduleEvent(cursor, { type: 'complete', mode: 'replay' });
+}
+
+// ─── Live mode: SSE from server.py (requires `python3 server.py` running) ───
+
+function startLive() {
+  // EventSource only works over http(s); file:// will fail instantly.
+  if (location.protocol === 'file:') {
+    setStatus('error', 'live mode requires server.py — open http://localhost:8765/ instead');
+    stopRun();
+    return;
+  }
+
+  setStatus('running', 'connecting to server.py…');
+
+  let gotAnyMessage = false;
+  const connectTimeout = setTimeout(() => {
+    if (!gotAnyMessage && running) {
+      setStatus('error', 'server not responding — is python3 server.py running?');
+      stopRun();
+    }
+  }, 3000);
+
+  try {
+    evtSource = new EventSource('/events?live=1');
+  } catch (e) {
+    clearTimeout(connectTimeout);
+    setStatus('error', 'EventSource failed: ' + e.message);
+    stopRun();
+    return;
+  }
+
+  evtSource.onmessage = (e) => {
+    gotAnyMessage = true;
+    clearTimeout(connectTimeout);
+    try { handleEvent(JSON.parse(e.data)); }
+    catch (err) { console.error('bad event', e.data, err); }
+  };
+  evtSource.onerror = () => {
+    // EventSource fires onerror on normal stream close too. Only flag if we
+    // never saw any real message.
+    if (!gotAnyMessage && running) {
+      clearTimeout(connectTimeout);
+      setStatus('error', 'cannot reach /events — start python3 server.py first');
+      stopRun();
+    }
+  };
 }
 
 runBtn.addEventListener('click', () => {
