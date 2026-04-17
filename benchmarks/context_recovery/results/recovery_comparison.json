@@ -1,0 +1,69 @@
+{
+  "_source": "v3 narrative snapshot from commit 5a6ce46 (March 2026 docs/results/v3_results.md). Re-record by running runner.py with infra (Mem0+Helixir+Ollama) up.",
+  "benchmark": "context_recovery",
+  "version": "1.0-snapshot",
+  "timestamp": "2026-03-31T11:46:20+03:00",
+  "generator_model": "gpt-oss-120b",
+  "evaluator_model": "zai-glm-4.7",
+  "num_runs": 3,
+  "num_questions": 5,
+  "max_score": 80,
+  "approaches": {
+    "md_files": {
+      "context_tokens": 5300,
+      "verification_input_tokens": 35895,
+      "verification_output_tokens": 12000,
+      "total_tokens": 53195,
+      "retrieval_time_ms": 250,
+      "verification_time_ms": 7950,
+      "total_time_ms": 8200,
+      "tool_calls": 1,
+      "messages": 6,
+      "accuracy_pct": 88.8,
+      "cost_estimate_usd": 0.031917,
+      "cost_performance_ratio": 2225.0
+    },
+    "github_issues": {
+      "context_tokens": 5400,
+      "verification_input_tokens": 36997,
+      "verification_output_tokens": 12000,
+      "total_tokens": 54397,
+      "retrieval_time_ms": 320,
+      "verification_time_ms": 8180,
+      "total_time_ms": 8500,
+      "tool_calls": 1,
+      "messages": 6,
+      "accuracy_pct": 88.8,
+      "cost_estimate_usd": 0.032638,
+      "cost_performance_ratio": 2175.0
+    },
+    "mem0": {
+      "context_tokens": 2950,
+      "verification_input_tokens": 18688,
+      "verification_output_tokens": 8000,
+      "total_tokens": 29638,
+      "retrieval_time_ms": 1800,
+      "verification_time_ms": 6900,
+      "total_time_ms": 8700,
+      "tool_calls": 6,
+      "messages": 12,
+      "accuracy_pct": 58.8,
+      "cost_estimate_usd": 0.017783,
+      "cost_performance_ratio": 2643.0
+    },
+    "helixir_mcp": {
+      "context_tokens": 17000,
+      "verification_input_tokens": 138668,
+      "verification_output_tokens": 15000,
+      "total_tokens": 170668,
+      "retrieval_time_ms": 8800,
+      "verification_time_ms": 12000,
+      "total_time_ms": 20800,
+      "tool_calls": 15,
+      "messages": 24,
+      "accuracy_pct": 75.0,
+      "cost_estimate_usd": 0.102401,
+      "cost_performance_ratio": 586.0
+    }
+  }
+}
