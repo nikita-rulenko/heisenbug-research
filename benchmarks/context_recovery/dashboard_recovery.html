@@ -290,7 +290,7 @@
         <th>Approach</th>
         <th>Tokens</th>
         <th>Time</th>
-        <th>Tool calls</th>
+        <th>Retrieval calls</th>
         <th>Accuracy</th>
         <th>Cost ($)</th>
         <th>Cost/Perf</th>
@@ -312,19 +312,23 @@
   "approaches": {
     "md_files": {
       "total_tokens": 53195, "total_time_ms": 8200, "tool_calls": 1,
-      "accuracy_pct": 88.8, "cost_estimate_usd": 0.031917, "cost_performance_ratio": 2225.0
+      "accuracy_pct": 88.8, "cost_estimate_usd": 0.031917, "cost_performance_ratio": 2225.0,
+      "part_a_pct": 63.0, "part_b_pct": 73.8, "part_c_pct": 95.0
     },
     "github_issues": {
       "total_tokens": 54397, "total_time_ms": 8500, "tool_calls": 1,
-      "accuracy_pct": 88.8, "cost_estimate_usd": 0.032638, "cost_performance_ratio": 2175.0
+      "accuracy_pct": 88.8, "cost_estimate_usd": 0.032638, "cost_performance_ratio": 2175.0,
+      "part_a_pct": 70.3, "part_b_pct": 71.2, "part_c_pct": 93.8
     },
     "mem0": {
       "total_tokens": 29638, "total_time_ms": 8700, "tool_calls": 6,
-      "accuracy_pct": 58.8, "cost_estimate_usd": 0.017783, "cost_performance_ratio": 2643.0
+      "accuracy_pct": 58.8, "cost_estimate_usd": 0.017783, "cost_performance_ratio": 2643.0,
+      "part_a_pct": 65.6, "part_b_pct": 68.8, "part_c_pct": 98.8
     },
     "helixir_mcp": {
       "total_tokens": 170668, "total_time_ms": 20800, "tool_calls": 15,
-      "accuracy_pct": 75.0, "cost_estimate_usd": 0.102401, "cost_performance_ratio": 586.0
+      "accuracy_pct": 75.0, "cost_estimate_usd": 0.102401, "cost_performance_ratio": 586.0,
+      "part_a_pct": 59.9, "part_b_pct": 76.2, "part_c_pct": 98.8
     }
   }
 }
@@ -402,7 +406,7 @@ function buildCards() {
         <div class="bar" data-field="bar">0%</div>
       </div>
       <div class="metric"><span class="label">Time</span>       <span class="value" data-field="time">0.0s</span></div>
-      <div class="metric"><span class="label">Tool calls</span> <span class="value" data-field="calls">0</span></div>
+      <div class="metric"><span class="label">Retrieval calls</span> <span class="value" data-field="calls">0</span></div>
       <div class="metric"><span class="label">Cost</span>       <span class="value" data-field="cost">$0.0000</span></div>
       <div class="metric"><span class="label">Cost/Perf</span>  <span class="value" data-field="cpr">0</span></div>
     `;
@@ -463,6 +467,9 @@ const CATEGORIES = [
   { key: 'total_time_ms',          label: 'Fastest',   best: 'min' },
   { key: 'cost_estimate_usd',      label: 'Cheapest',  best: 'min' },
   { key: 'cost_performance_ratio', label: 'Best CPR',  best: 'max' },
+  { key: 'part_a_pct',             label: 'Facts',     best: 'max' },
+  { key: 'part_b_pct',             label: 'Reasoning', best: 'max' },
+  { key: 'part_c_pct',             label: 'Decisions', best: 'max' },
 ];
 
 function markBest() {
