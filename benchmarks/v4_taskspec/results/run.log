@@ -1,7 +1,5 @@
     [retry 1/4] HTTPStatusError: sleeping 1s
     [retry 2/4] HTTPStatusError: sleeping 2s
-[plan] T1_coupons / graphiti: 8057ms (4840 chars)
-    [checkpoint:plan] -> v4_taskspec_1776436290.json
 [plan] T1_coupons / github_issues: 2467ms (4920 chars)
     [checkpoint:plan] -> v4_taskspec_1776436290.json
 [plan] T1_coupons / mem0: 3135ms (4801 chars)
@@ -11,8 +9,6 @@
     [checkpoint:plan] -> v4_taskspec_1776436290.json
 [plan] T1_coupons / md_files: 2063ms (4703 chars)
     [checkpoint:plan] -> v4_taskspec_1776436290.json
-[plan] T2_newsitem_to_article / graphiti: 2330ms (4403 chars)
-    [checkpoint:plan] -> v4_taskspec_1776436290.json
 [plan] T2_newsitem_to_article / mem0: 2086ms (4636 chars)
     [checkpoint:plan] -> v4_taskspec_1776436290.json
 [plan] T2_newsitem_to_article / md_files: 2514ms (4831 chars)
@@ -20,8 +16,6 @@
 [plan] T2_newsitem_to_article / helixir: 2258ms (5510 chars)
     [checkpoint:plan] -> v4_taskspec_1776436290.json
 [plan] T2_newsitem_to_article / github_issues: 2383ms (4266 chars)
-    [checkpoint:plan] -> v4_taskspec_1776436290.json
-[plan] T3_sqlite_concurrent_writes / graphiti: 2187ms (4084 chars)
     [checkpoint:plan] -> v4_taskspec_1776436290.json
 [plan] T3_sqlite_concurrent_writes / github_issues: 1996ms (4791 chars)
     [checkpoint:plan] -> v4_taskspec_1776436290.json
@@ -35,8 +29,6 @@
     [checkpoint:plan] -> v4_taskspec_1776436290.json
 [plan] T4_build_tags_split / mem0: 3246ms (5495 chars)
     [checkpoint:plan] -> v4_taskspec_1776436290.json
-[plan] T4_build_tags_split / graphiti: 2630ms (3444 chars)
-    [checkpoint:plan] -> v4_taskspec_1776436290.json
 [plan] T4_build_tags_split / helixir: 2069ms (4620 chars)
     [checkpoint:plan] -> v4_taskspec_1776436290.json
     [retry 1/4] HTTPStatusError: sleeping 1s
@@ -46,8 +38,6 @@
     [retry 2/4] HTTPStatusError: sleeping 2s
 [plan] T5_product_soft_delete / helixir: 7051ms (4617 chars)
     [checkpoint:plan] -> v4_taskspec_1776436290.json
-[plan] T5_product_soft_delete / graphiti: 2254ms (4048 chars)
-    [checkpoint:plan] -> v4_taskspec_1776436290.json
 [plan] T5_product_soft_delete / mem0: 2051ms (4990 chars)
     [checkpoint:plan] -> v4_taskspec_1776436290.json
 [plan] T5_product_soft_delete / md_files: 2078ms (4078 chars)
@@ -56,11 +46,7 @@
     [checkpoint:plan] -> v4_taskspec_1776436290.json
 [crit] T4_build_tags_split / helixir: 49 (20 qs)
     [checkpoint:crit] -> v4_taskspec_1776436290.json
-[crit] T5_product_soft_delete / graphiti: 32 (15 qs)
-    [checkpoint:crit] -> v4_taskspec_1776436290.json
 [crit] T4_build_tags_split / md_files: 51 (20 qs)
-    [checkpoint:crit] -> v4_taskspec_1776436290.json
-[crit] T3_sqlite_concurrent_writes / graphiti: 48 (20 qs)
     [checkpoint:crit] -> v4_taskspec_1776436290.json
 [crit] T5_product_soft_delete / md_files: 49 (20 qs)
     [checkpoint:crit] -> v4_taskspec_1776436290.json
@@ -84,10 +70,6 @@
     [checkpoint:crit] -> v4_taskspec_1776436290.json
 [crit] T3_sqlite_concurrent_writes / github_issues: 33 (14 qs)
     [checkpoint:crit] -> v4_taskspec_1776436290.json
-[crit] T2_newsitem_to_article / graphiti: 53 (20 qs)
-    [checkpoint:crit] -> v4_taskspec_1776436290.json
-[crit] T1_coupons / graphiti: 7 (3 qs)
-    [checkpoint:crit] -> v4_taskspec_1776436290.json
 [crit] T2_newsitem_to_article / helixir: 46 (20 qs)
     [checkpoint:crit] -> v4_taskspec_1776436290.json
 [crit] T3_sqlite_concurrent_writes / helixir: 38 (15 qs)
@@ -95,8 +77,6 @@
 [crit] T2_newsitem_to_article / md_files: 47 (20 qs)
     [checkpoint:crit] -> v4_taskspec_1776436290.json
 [crit] T3_sqlite_concurrent_writes / md_files: 36 (15 qs)
-    [checkpoint:crit] -> v4_taskspec_1776436290.json
-[crit] T4_build_tags_split / graphiti: 35 (15 qs)
     [checkpoint:crit] -> v4_taskspec_1776436290.json
 [crit] T5_product_soft_delete / github_issues: 49 (20 qs)
     [checkpoint:crit] -> v4_taskspec_1776436290.json
