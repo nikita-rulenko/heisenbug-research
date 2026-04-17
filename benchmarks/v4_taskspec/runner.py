@@ -38,9 +38,11 @@ import httpx
 CEREBRAS_API_KEY = os.environ.get("CEREBRAS_API_KEY", "")
 CEREBRAS_BASE_URL = "https://api.cerebras.ai/v1"
 
-PLANNER_MODEL = "qwen-3-235b-a22b-thinking-2507"
-CRITIC_MODEL = "zai-glm-4.7"
-SPOT_CHECKER_MODEL = "deepseek-r1-distill-llama-70b"
+# Only Cerebras is used (budget). Three different model families chosen
+# from what Cerebras actually serves, to mitigate evaluator bias.
+PLANNER_MODEL = "qwen-3-235b-a22b-instruct-2507"  # Qwen (Alibaba) — preview
+CRITIC_MODEL = "zai-glm-4.7"                      # GLM (Z.AI) — preview
+SPOT_CHECKER_MODEL = "gpt-oss-120b"                # OpenAI OSS — production
 
 APPROACHES = ["md_files", "github_issues", "mem0", "graphiti", "helixir"]
 
