@@ -7,7 +7,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from benchmark_part_b import GRAPH_SCENARIOS, run_part_b, call_cerebras, evaluate_b, ScenarioResult
+from part_b import GRAPH_SCENARIOS, run_part_b, call_cerebras, evaluate_b, ScenarioResult
 
 INFRA = os.path.dirname(os.path.abspath(__file__))
 RESULTS = {}

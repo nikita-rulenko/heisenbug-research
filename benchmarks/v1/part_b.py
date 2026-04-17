@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import time
-from benchmark_runner import call_cerebras, evaluate, ScenarioResult, save_results
+from runner import call_cerebras, evaluate, ScenarioResult, save_results
 
 GRAPH_SCENARIOS = [
     {

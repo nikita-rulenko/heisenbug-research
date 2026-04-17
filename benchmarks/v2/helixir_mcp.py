@@ -18,12 +18,12 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
 
-from benchmark_runner_v2 import (
+from runner import (
     call_llm, _extract_scores_json, evaluate_v2,
     SCENARIOS, GENERATOR_MODEL, EVALUATOR_MODEL,
 )
-from benchmark_part_b_v2 import GRAPH_SCENARIOS, EVAL_PROMPT_B_V2
-from benchmark_part_c_v2 import DECISIONS, EVAL_PROMPT_C_V2
+from part_b import GRAPH_SCENARIOS, EVAL_PROMPT_B_V2
+from part_c import DECISIONS, EVAL_PROMPT_C_V2
 
 NUM_RUNS = 3
 USER_ID = "bench"

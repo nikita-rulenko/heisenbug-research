@@ -190,7 +190,7 @@ def save_results(approach: str, results: list[ScenarioResult], extra_meta: dict 
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 2:
-        print("Usage: python benchmark_runner.py <approach> [context_file]")
+        print("Usage: python runner.py <approach> [context_file]")
         print("Approaches: md_files, github_issues, mem0, graphiti, helixir")
         sys.exit(1)
 

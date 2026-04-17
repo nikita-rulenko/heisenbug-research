@@ -1,5 +1,5 @@
 """Run benchmark with MD files context."""
-from benchmark_runner import SCENARIOS, call_cerebras, evaluate, ScenarioResult, save_results
+from runner import SCENARIOS, call_cerebras, evaluate, ScenarioResult, save_results
 
 with open("/tmp/md_context.txt") as f:
     context = f.read()

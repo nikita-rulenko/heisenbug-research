@@ -270,7 +270,7 @@ function render(data) {
 }
 
 // Try to load real data, fall back to sample
-fetch('../../benchmark/results/recovery_comparison.json')
+fetch('./results/recovery_comparison.json')
   .then(r => r.ok ? r.json() : SAMPLE_DATA)
   .then(render)
   .catch(() => render(SAMPLE_DATA));

@@ -1,4 +1,4 @@
-"""Benchmark Part C v2: Decision Reasoning — separate evaluator, 3 runs.
+"""Benchmark Part B v2: Connectivity and graph reasoning — separate evaluator, 3 runs.
 
 Generator: Cerebras gpt-oss-120b
 Evaluator: Cerebras zai-glm-4.7 (GLM 4.7 MoE 358B/32B active)
@@ -8,30 +8,53 @@ Scoring: 1-4 scale, 4 criteria, 5 scenarios = 80 max per run.
 from __future__ import annotations
 
 import json
-import os
 import statistics
 import time
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
 
-from benchmark_runner_v2 import (
+from runner import (
     call_llm, _extract_scores_json,
     GENERATOR_MODEL, EVALUATOR_MODEL,
 )
 
 NUM_RUNS = 3
 
-# Load decisions
-_script_dir = os.path.dirname(os.path.abspath(__file__))
-_data_dir = os.path.join(os.path.dirname(_script_dir), "data")
-_decision_path = os.path.join(_data_dir, "decision_context.json")
-if not os.path.exists(_decision_path):
-    _decision_path = "decision_context.json"
-with open(_decision_path) as f:
-    DECISIONS = json.load(f)
+GRAPH_SCENARIOS = [
+    {
+        "id": "G1",
+        "name": "Multi-hop dependency trace",
+        "prompt": "Покажи полную цепочку зависимостей от handler/order.go до entity/order.go через все слои. Какие тесты покрывают каждый слой?",
+        "gold": "handler/order.go -> OrderUsecase (usecase/order.go) -> OrderRepository (repository/sqlite/order.go) -> Order entity (entity/order.go). Тесты: TestAPIOrderFlow/Cancel/Complete -> TestUsecaseOrderCreate/Cancel -> TestIntegrationOrderCRUD/StatusUpdate/CancelFlow/CompleteFlow -> TestUnitOrderCalculateTotal/CanCancel/CanComplete/Validate."
+    },
+    {
+        "id": "G2",
+        "name": "Cross-entity impact",
+        "prompt": "Если удалить поле CategoryID из Product — какие сущности, тесты и API endpoints это затронет? Проследи все связи.",
+        "gold": "entity/product.go (Validate), repository/sqlite/product.go (INSERT/UPDATE/Scan), handler/product.go (JSON), TestUnitProductValidate, TestIntegrationProductCRUD, TestAPIProductCRUD, TestAPIOrderFlow (creates product with CategoryID), seed.go. Not affected: news, order (except OrderFlow)."
+    },
+    {
+        "id": "G3",
+        "name": "Causal chain: flaky -> root cause -> fix",
+        "prompt": "TestIntegrationProductSearch flaky. Проследи цепочку: root cause -> какие ещё тесты уязвимы к той же причине -> как исправить системно.",
+        "gold": "Root cause: shared in-memory SQLite + LIKE with Cyrillic. Vulnerable: all Integration tests with setupTestDB() without isolation. Fix: separate DB per test, or t.Cleanup with truncate, or build tag."
+    },
+    {
+        "id": "G4",
+        "name": "Inverse lookup: test -> what it validates",
+        "prompt": "Для теста TestAPIOrderFlow — перечисли ВСЕ сущности, endpoints, бизнес-правила и helper-функции, которые он косвенно валидирует.",
+        "gold": "Entities: Category, Product, Order, OrderItem. Endpoints: POST /categories, POST /products, POST /orders. Business rules: Order.CalculateTotal, Product.Validate, Order.Validate. Helpers: setupTestServer, respondJSON, parseID. Indirect: migrations.go, seed.go."
+    },
+    {
+        "id": "G5",
+        "name": "Contradiction detection",
+        "prompt": "В проекте есть правило: тесты не должны зависеть от порядка выполнения. Найди все тесты, которые нарушают это правило.",
+        "gold": "TestIntegrationProductSearch (INSERT order), TestIntegrationSeedData (seed), TestAPIOrderFlow (sequential POST — but E2E, acceptable). Usecase tests with real DB potentially depend on order."
+    }
+]
 
-EVAL_PROMPT_C_V2 = """You are an expert evaluator for decision reasoning retrieval. Your job is to assess whether an AI assistant correctly recovers the rationale behind architectural decisions.
+EVAL_PROMPT_B_V2 = """You are an expert evaluator for graph-based reasoning in software testing. Your job is to objectively assess an AI assistant's answer about dependency chains and test relationships.
 
 IMPORTANT BIAS DISCLAIMERS:
 - Do NOT prefer longer answers over shorter ones.
@@ -42,10 +65,10 @@ Score the ANSWER on 4 criteria using a 1-4 scale:
 1 = Incorrect/Missing, 2 = Partially correct, 3 = Mostly correct, 4 = Fully correct
 
 Criteria:
-1. **Accuracy** (1-4): Is the rationale correct? Does it match the actual reasoning, not hallucinated?
-2. **Completeness** (1-4): Are ALL key points covered — alternatives, trade-offs, reasoning chain?
-3. **Context Utilization** (1-4): Does the answer reference real project specifics (not generic advice)?
-4. **Actionability** (1-4): Can someone use this answer to understand and defend the decision?
+1. **Accuracy** (1-4): Are the connections/chains traced correctly? No made-up links.
+2. **Completeness** (1-4): Are ALL links in the chain found? All affected items listed?
+3. **Context Utilization** (1-4): Does the answer use real project context (not generic advice)?
+4. **Actionability** (1-4): Can a developer act on this answer to trace/fix the actual issue?
 
 GOLD STANDARD (reference answer):
 {gold}
@@ -79,9 +102,9 @@ class RunResult:
     timestamp: str = ""
 
 
-def evaluate_c_v2(answer: str, gold: str) -> tuple[dict, str]:
-    """Use GLM 4.7 as judge for Part C."""
-    prompt = EVAL_PROMPT_C_V2.format(gold=gold, answer=answer)
+def evaluate_b_v2(answer: str, gold: str) -> tuple[dict, str]:
+    """Use GLM 4.7 as judge for Part B."""
+    prompt = EVAL_PROMPT_B_V2.format(gold=gold, answer=answer)
     content, reasoning, _ = call_llm(
         [{"role": "user", "content": prompt}],
         model=EVALUATOR_MODEL,
@@ -104,31 +127,26 @@ def evaluate_c_v2(answer: str, gold: str) -> tuple[dict, str]:
     return fallback, reasoning
 
 
-def run_single_c(approach: str, context_text: str, run_id: int) -> RunResult:
+def run_single_b(approach: str, context_text: str, run_id: int) -> RunResult:
     system_msg = (
         "You are an AI assistant helping with the Bean & Brew Go coffee shop project.\n\n"
-        f"Here is the project context (including architectural decisions and their reasoning):\n\n{context_text}\n\n"
-        "When asked about decisions, provide:\n"
-        "1. The decision itself\n"
-        "2. The reasoning/rationale behind it\n"
-        "3. Alternatives that were considered and why they were rejected\n"
-        "4. Trade-offs that were accepted\n\n"
-        "Answer based ONLY on the provided context."
+        f"Here is the project context:\n\n{context_text}\n\n"
+        "Answer questions about the project based ONLY on this context. "
+        "Trace connections between layers, entities, and tests precisely."
     )
 
     results = []
-    for d in DECISIONS:
-        sid = d["id"]
-        print(f"  R{run_id} [{sid}] {d['decision'][:50]}...", end="", flush=True)
+    for s in GRAPH_SCENARIOS:
+        print(f"  R{run_id} [{s['id']}] {s['name']}...", end="", flush=True)
         answer, _, latency = call_llm([
             {"role": "system", "content": system_msg},
-            {"role": "user", "content": d["question"]},
+            {"role": "user", "content": s["prompt"]}
         ])
-        scores, eval_reasoning = evaluate_c_v2(answer, d["gold"])
+        scores, eval_reasoning = evaluate_b_v2(answer, s["gold"])
         total = scores.get("total", 0)
         r = ScenarioResult(
-            scenario_id=sid,
-            scenario_name=d["decision"],
+            scenario_id=s["id"],
+            scenario_name=s["name"],
             answer=answer,
             latency_ms=latency,
             scores=scores,
@@ -179,18 +197,18 @@ def compute_stats(runs: list[RunResult]) -> dict:
 
 def save_results(approach: str, runs: list[RunResult], stats: dict):
     max_per_scenario = 16
-    max_total = max_per_scenario * len(DECISIONS)
+    max_total = max_per_scenario * len(GRAPH_SCENARIOS)
     median_total = stats["overall"]["median"]
 
     data = {
         "version": "2.0",
-        "part": "C",
+        "part": "B",
         "approach": approach,
         "timestamp": datetime.now().isoformat(),
         "generator_model": GENERATOR_MODEL,
         "evaluator_model": EVALUATOR_MODEL,
         "num_runs": len(runs),
-        "num_scenarios": len(DECISIONS),
+        "num_scenarios": len(GRAPH_SCENARIOS),
         "scoring": {"scale": "1-4", "criteria": 4, "max_per_scenario": max_per_scenario, "max_total": max_total},
         "statistics": stats,
         "median_total": median_total,
@@ -206,11 +224,11 @@ def save_results(approach: str, runs: list[RunResult], stats: dict):
         ],
     }
 
-    path = f"results_v2_{approach}_part_c.json"
+    path = f"results_v2_{approach}_part_b.json"
     with open(path, "w") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
     print(f"\n{'='*60}")
-    print(f"Part C v2 results saved to {path}")
+    print(f"Part B v2 results saved to {path}")
     print(f"  Median: {median_total}/{max_total} ({data['median_percentage']}%)")
     print(f"  Mean: {stats['overall']['mean']} +/- {stats['overall']['stddev']}")
     print(f"  Range: {stats['overall']['min']} - {stats['overall']['max']}")
@@ -221,42 +239,36 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: python benchmark_part_c_v2.py <approach> [context_file] [num_runs]")
+        print("Usage: python part_b.py <approach> [context_file] [num_runs]")
         sys.exit(1)
 
     approach = sys.argv[1]
-    context_file = sys.argv[2] if len(sys.argv) > 2 else "../data/test_context.json"
+    context_file = sys.argv[2] if len(sys.argv) > 2 else "../shared/data/test_context.json"
     num_runs = int(sys.argv[3]) if len(sys.argv) > 3 else NUM_RUNS
 
     ctx_path = Path(context_file)
     if not ctx_path.exists():
         ctx_path = Path(__file__).parent / context_file
     if not ctx_path.exists():
-        ctx_path = Path(__file__).parent.parent / "data" / "test_context.json"
+        ctx_path = Path(__file__).parent.parent / "shared" / "data" / "test_context.json"
 
     with open(ctx_path) as f:
         episodes = json.load(f)
     context_text = "\n\n".join(f"### {ep['name']}\n{ep['content']}" for ep in episodes)
 
-    # Append decision context
-    decision_text = "\n\n### Architectural Decisions\n"
-    for d in DECISIONS:
-        decision_text += f"\n**{d['decision']}**: {d['reasoning']}\n"
-    context_text += decision_text
-
     print(f"\n{'='*60}")
-    print(f"Benchmark Part C v2: {approach}")
-    print(f"  Context: {len(context_text):,} chars")
+    print(f"Benchmark Part B v2: {approach}")
+    print(f"  Context: {len(context_text):,} chars ({len(episodes)} episodes)")
     print(f"  Generator: {GENERATOR_MODEL} | Evaluator: {EVALUATOR_MODEL}")
-    print(f"  Runs: {num_runs} | Decisions: {len(DECISIONS)} | Max: {16 * len(DECISIONS)}/run")
+    print(f"  Runs: {num_runs} | Scenarios: {len(GRAPH_SCENARIOS)} | Max: {16 * len(GRAPH_SCENARIOS)}/run")
     print(f"{'='*60}\n")
 
     runs = []
     for i in range(1, num_runs + 1):
         print(f"\n--- Run {i}/{num_runs} ---")
-        run = run_single_c(approach, context_text, i)
+        run = run_single_b(approach, context_text, i)
         runs.append(run)
-        print(f"  Run {i} total: {run.total}/{16 * len(DECISIONS)}")
+        print(f"  Run {i} total: {run.total}/{16 * len(GRAPH_SCENARIOS)}")
 
     stats = compute_stats(runs)
     save_results(approach, runs, stats)

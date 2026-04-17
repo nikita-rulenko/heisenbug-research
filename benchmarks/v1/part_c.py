@@ -4,10 +4,10 @@ from __future__ import annotations
 import json
 import os
 import time
-from benchmark_runner import call_cerebras, ScenarioResult
+from runner import call_cerebras, ScenarioResult
 
 _script_dir = os.path.dirname(os.path.abspath(__file__))
-_data_dir = os.path.join(os.path.dirname(_script_dir), "data")
+_data_dir = os.path.join(os.path.dirname(_script_dir), "shared", "data")
 _decision_path = os.path.join(_data_dir, "decision_context.json")
 if not os.path.exists(_decision_path):
     _decision_path = "decision_context.json"

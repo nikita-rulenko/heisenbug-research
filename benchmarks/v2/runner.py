@@ -371,13 +371,13 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: python benchmark_runner_v2.py <approach> [context_file] [num_runs]")
+        print("Usage: python runner.py <approach> [context_file] [num_runs]")
         print("Approaches: md_files, github_issues, mem0, graphiti, helixir")
         print(f"Default: {NUM_RUNS} runs, GLM 4.7 evaluator")
         sys.exit(1)
 
     approach = sys.argv[1]
-    context_file = sys.argv[2] if len(sys.argv) > 2 else "../data/test_context.json"
+    context_file = sys.argv[2] if len(sys.argv) > 2 else "../shared/data/test_context.json"
     num_runs = int(sys.argv[3]) if len(sys.argv) > 3 else NUM_RUNS
 
     # Resolve context file path
@@ -385,7 +385,7 @@ def main():
     if not ctx_path.exists():
         ctx_path = Path(__file__).parent / context_file
     if not ctx_path.exists():
-        ctx_path = Path(__file__).parent.parent / "data" / "test_context.json"
+        ctx_path = Path(__file__).parent.parent / "shared" / "data" / "test_context.json"
 
     with open(ctx_path) as f:
         episodes = json.load(f)

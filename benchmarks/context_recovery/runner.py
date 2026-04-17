@@ -654,7 +654,7 @@ def main():
         sys.exit(1)
 
     approach = sys.argv[1]
-    context_file = sys.argv[2] if len(sys.argv) > 2 else str(Path(__file__).parent.parent / "data" / "test_context.json")
+    context_file = sys.argv[2] if len(sys.argv) > 2 else str(Path(__file__).parent.parent / "shared" / "data" / "test_context.json")
     num_runs = int(sys.argv[3]) if len(sys.argv) > 3 else NUM_RUNS
 
     if approach == "all":
