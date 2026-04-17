@@ -93,19 +93,8 @@ echo ""
 echo -e "📊 Benchmark v2: ${GREEN}125/192 (65.1%) — 1-е место${NC} | σ=10.97"
 pause
 
-# ─── 4. Graphiti (raw fallback) ───
-echo -e "${GREEN}═══ Подход 4: Graphiti — temporal knowledge graph ═══${NC}"
-echo "⚠️  Graphiti заблокирован vendor lock на OpenAI Responses API"
-echo "SDK использует client.responses.parse() — несовместим с Cerebras/Ollama"
-echo ""
-echo "Бенчмарк прогнан с raw context fallback (тот же текст, что и MD)"
-echo ""
-echo -e "📊 Benchmark v2: ${YELLOW}107/192 (55.7%) — 5-е место${NC} | σ=16.17"
-echo "   Без графа знаний — худший результат, подтверждает vendor lock problem"
-pause
-
-# ─── 5. Helixir (graph + FastThink) ───
-echo -e "${GREEN}═══ Подход 5: Helixir — графовая память с reasoning ═══${NC}"
+# ─── 4. Helixir (graph + FastThink) ───
+echo -e "${GREEN}═══ Подход 4: Helixir — графовая память с reasoning ═══${NC}"
 echo "HelixDB + graph relations (IMPLIES/BECAUSE/CONTRADICTS):"
 echo ""
 echo "Контейнер: $(docker ps --filter name=helix --format '{{.Names}} {{.Status}}')"
@@ -123,8 +112,7 @@ printf "%-20s %8s %15s %6s\n" "Mem0 (self-hosted)" "125/192" "121.33 ± 10.97" "
 printf "%-20s %8s %15s %6s\n" "MD-файлы" "123/192" "123.67 ± 2.08"  "64.1%"
 printf "%-20s %8s %15s %6s\n" "GitHub Issues" "122/192" "119.67 ± 12.66" "63.5%"
 printf "%-20s %8s %15s %6s\n" "Helixir" "121/192" "118.00 ± 16.70" "63.0%"
-printf "%-20s %8s %15s %6s\n" "Graphiti (raw)" "107/192" "109.67 ± 16.17" "55.7%"
 echo ""
 echo -e "${BLUE}Ключевой вывод:${NC} MD-файлы — самый стабильный baseline (σ=2.08)."
 echo "Mem0 лидирует на задачах со сложным retrieval (S4, S8, S11)."
-echo "Все подходы в диапазоне 55-65% — различия меньше LLM-дисперсии."
+echo "Все подходы в узком диапазоне 63-65% — различия меньше LLM-дисперсии."

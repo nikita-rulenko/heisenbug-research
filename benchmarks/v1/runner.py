@@ -191,7 +191,7 @@ if __name__ == "__main__":
     import sys
     if len(sys.argv) < 2:
         print("Usage: python runner.py <approach> [context_file]")
-        print("Approaches: md_files, github_issues, mem0, graphiti, helixir")
+        print("Approaches: md_files, github_issues, mem0, helixir")
         sys.exit(1)
 
     approach = sys.argv[1]

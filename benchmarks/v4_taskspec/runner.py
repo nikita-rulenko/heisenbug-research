@@ -56,7 +56,7 @@ MODEL_PROVIDER = {
     SPOT_CHECKER_MODEL: "deepseek",
 }
 
-APPROACHES = ["md_files", "github_issues", "mem0", "graphiti", "helixir"]
+APPROACHES = ["md_files", "github_issues", "mem0", "helixir"]
 
 SCRIPT_DIR = Path(__file__).parent
 PROMPTS_DIR = SCRIPT_DIR / "prompts"
@@ -135,9 +135,9 @@ def load_approach_context(approach: str) -> str:
     """Load approach-specific context.
 
     For v4 this is the realistic per-approach retrieval channel. In this
-    first drop we provide a thin shim: md_files/github_issues/graphiti
-    read their own on-disk snapshot; mem0/helixir call their live MCP
-    retrievers (to be wired in a follow-up commit).
+    first drop we provide a thin shim: md_files/github_issues read their
+    own on-disk snapshot; mem0/helixir call their live MCP retrievers
+    (to be wired in a follow-up commit).
 
     For the benchmark to be honest, each approach must produce context
     through its OWN pipeline. Everything below is the boundary between
@@ -153,10 +153,6 @@ def load_approach_context(approach: str) -> str:
 
     if approach == "github_issues":
         # TODO: wire real gh API retrieval per task topic
-        return "\n\n".join(f"### {e['name']}\n{e['content']}" for e in episodes)
-
-    if approach == "graphiti":
-        # TODO: wire real Graphiti Query via FalkorDB
         return "\n\n".join(f"### {e['name']}\n{e['content']}" for e in episodes)
 
     if approach == "mem0":

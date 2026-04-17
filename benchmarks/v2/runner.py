@@ -372,7 +372,7 @@ def main():
 
     if len(sys.argv) < 2:
         print("Usage: python runner.py <approach> [context_file] [num_runs]")
-        print("Approaches: md_files, github_issues, mem0, graphiti, helixir")
+        print("Approaches: md_files, github_issues, mem0, helixir")
         print(f"Default: {NUM_RUNS} runs, GLM 4.7 evaluator")
         sys.exit(1)
 

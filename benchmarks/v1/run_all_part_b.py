@@ -108,21 +108,10 @@ Trace connections precisely. Answer based ONLY on the memories above."""
     return data
 
 
-def bench_graphiti():
-    """Graphiti: raw context fallback (same as Part A, confirmed vendor lock-in)."""
-    print("\n" + "=" * 60)
-    print("4/5  GRAPHITI (raw context, vendor lock-in confirmed)")
-    print("=" * 60)
-    with open(os.path.join(INFRA, "test_context.json")) as f:
-        eps = json.load(f)
-    ctx = "\n\n".join(f"### {e['name']}\n{e['content']}" for e in eps)
-    return run_part_b("graphiti", ctx)
-
-
 def bench_helixir():
     """Helixir local: search via MCP for each scenario."""
     print("\n" + "=" * 60)
-    print("5/5  HELIXIR LOCAL (semantic search per scenario)")
+    print("4/4  HELIXIR LOCAL (semantic search per scenario)")
     print("=" * 60)
 
     HELIXIR_MCP = "/Users/nikitarulenko/Documents/PROJ/helixir-rs/helixir/target/release/helixir-mcp"
@@ -231,8 +220,6 @@ if __name__ == "__main__":
             print("   Mem0 not available, skipping")
     except Exception:
         print("   Mem0 not available, skipping")
-
-    all_results["graphiti"] = bench_graphiti()
 
     if os.path.exists("/Users/nikitarulenko/Documents/PROJ/helixir-rs/helixir/target/release/helixir-mcp"):
         try:

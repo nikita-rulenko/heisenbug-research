@@ -412,31 +412,11 @@ def onboard_helixir_mcp():
     }
 
 
-def onboard_graphiti(context_file):
-    """Graphiti fallback: same as MD but with graph-like framing."""
-    t0 = time.time()
-    with open(context_file) as f:
-        episodes = json.load(f)
-    # Simulate graph extraction: entities + relationships
-    parts = []
-    for ep in episodes:
-        parts.append(f"[Node: {ep['name']}]\n{ep['content']}")
-    context = "\n\n".join(parts)
-    elapsed = int((time.time() - t0) * 1000)
-    return context, {
-        "tool_calls": 1,
-        "retrieval_time_ms": elapsed,
-        "context_chars": len(context),
-        "context_tokens_est": estimate_tokens(context),
-    }
-
-
 APPROACHES = {
     "md_files": onboard_md_files,
     "github_issues": onboard_github_issues,
     "mem0": onboard_mem0,
     "helixir_mcp": onboard_helixir_mcp,
-    "graphiti": onboard_graphiti,
 }
 
 
@@ -520,7 +500,7 @@ def run_approach(approach, context_file, num_runs=NUM_RUNS):
     # Phase 1: Onboarding
     print(f"\n  Phase 1: Onboarding...")
     onboard_fn = APPROACHES[approach]
-    if approach in ("md_files", "github_issues", "graphiti"):
+    if approach in ("md_files", "github_issues"):
         context, onboard_metrics = onboard_fn(context_file)
     else:
         context, onboard_metrics = onboard_fn()
