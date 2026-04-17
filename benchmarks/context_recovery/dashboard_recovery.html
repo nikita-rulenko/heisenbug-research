@@ -127,18 +127,25 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
   }
-  .card.done.best { border-color: var(--green); }
-  .card.done.best::after {
-    content: 'BEST';
+  .badges {
     position: absolute;
     top: 12px;
     right: 12px;
-    background: var(--green);
-    color: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+  .badge {
+    background: rgba(63, 185, 80, 0.15);
+    border: 1px solid var(--green);
+    color: var(--green);
     font-size: 10px;
     font-weight: bold;
-    padding: 2px 8px;
+    padding: 2px 6px;
     border-radius: 4px;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
   }
   .card h2 {
     font-size: 16px;
@@ -450,15 +457,44 @@ function setActive(key, on) {
   }
 }
 
+// Per-category awards — each card may earn 0+ badges. Ties get all winners.
+const CATEGORIES = [
+  { key: 'accuracy_pct',           label: 'Accuracy',  best: 'max' },
+  { key: 'total_time_ms',          label: 'Fastest',   best: 'min' },
+  { key: 'cost_estimate_usd',      label: 'Cheapest',  best: 'min' },
+  { key: 'cost_performance_ratio', label: 'Best CPR',  best: 'max' },
+];
+
 function markBest() {
   const withData = ORDER.filter(k => final[k]);
   if (withData.length === 0) return;
-  const maxAcc = Math.max(...withData.map(k => final[k].accuracy_pct));
+
+  const winners = {};  // key -> [approach, ...]
+  for (const cat of CATEGORIES) {
+    const vals = withData.map(k => final[k][cat.key]);
+    const target = cat.best === 'max' ? Math.max(...vals) : Math.min(...vals);
+    winners[cat.key] = withData.filter(k => final[k][cat.key] === target);
+  }
+
   for (const k of ORDER) {
     const c = document.getElementById('card-' + k);
     if (!c) continue;
     c.classList.add('done');
-    c.classList.toggle('best', !!final[k] && final[k].accuracy_pct === maxAcc);
+    let badges = c.querySelector('.badges');
+    if (!badges) {
+      badges = document.createElement('div');
+      badges.className = 'badges';
+      c.appendChild(badges);
+    }
+    badges.innerHTML = '';
+    for (const cat of CATEGORIES) {
+      if ((winners[cat.key] || []).includes(k)) {
+        const b = document.createElement('span');
+        b.className = 'badge';
+        b.textContent = cat.label;
+        badges.appendChild(b);
+      }
+    }
   }
 }
 
@@ -557,9 +593,10 @@ function startReplay() {
     const m = approaches[key];
     if (!m) continue;
 
-    // Compress real wall-clock into a stage-friendly window (2–6s per approach).
-    const wallMs = Math.max(2000, Math.min(6000, (m.total_time_ms || 3000) / 4));
-    const steps = 24;
+    // Play each approach for its real wall-clock from the recorded run.
+    const wallMs = m.total_time_ms || 3000;
+    // 12 steps per second keeps counters tickign smoothly without flooding.
+    const steps = Math.max(8, Math.round(wallMs / 80));
     const stepDt = wallMs / steps;
 
     scheduleEvent(cursor, { type: 'approach_start', approach: key, tool_calls: m.tool_calls || 0 });

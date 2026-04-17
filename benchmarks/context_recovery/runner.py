@@ -433,8 +433,14 @@ APPROACHES = {
 
 # ─── Verification Phase ──────────────────────────────────────────────
 
-def run_verification(context_text, run_id):
-    """Ask 5 questions with retrieved context, evaluate answers."""
+def run_verification(context_text, run_id, approach=None, progress_base=None):
+    """Ask 5 questions with retrieved context, evaluate answers.
+
+    `approach` and `progress_base` are only used for live-mode SSE events:
+    each completed question emits an `approach_progress` so the dashboard
+    counters tick on every LLM call instead of waiting for a whole verify
+    run (5 questions × ~3s) to finish.
+    """
     system_msg = (
         "You are an AI assistant. You have just recovered the context of the Bean & Brew "
         "Go coffee shop project from the following source:\n\n"
@@ -447,6 +453,8 @@ def run_verification(context_text, run_id):
     total_input_tokens = estimate_tokens(system_msg)
     total_output_tokens = 0
     total_time = 0
+
+    base = progress_base or {"tokens": 0, "time_ms": 0, "tool_calls": 0}
 
     for q in VERIFICATION_QUESTIONS:
         print(f"    R{run_id} [{q['id']}]...", end="", flush=True)
@@ -482,6 +490,16 @@ def run_verification(context_text, run_id):
             "output_tokens": out_tok,
         })
         print(f" {total}/16 ({latency}ms)")
+
+        if approach:
+            emit_event({
+                "type": "approach_progress",
+                "approach": approach,
+                "tokens": int(base["tokens"] + total_input_tokens + total_output_tokens),
+                "time_ms": int(base["time_ms"] + total_time),
+                "tool_calls_done": int(base["tool_calls"]),
+                "activity": f"R{run_id} {q['id']} → {total}/16",
+            })
 
     return results, {
         "total_input_tokens": total_input_tokens,
@@ -535,7 +553,15 @@ def run_approach(approach, context_file, num_runs=NUM_RUNS):
     cumulative_time = onboard_metrics["retrieval_time_ms"]
     for run_id in range(1, num_runs + 1):
         print(f"\n  Phase 2: Verification run {run_id}/{num_runs}")
-        results, run_metrics = run_verification(context, run_id)
+        results, run_metrics = run_verification(
+            context, run_id,
+            approach=approach,
+            progress_base={
+                "tokens": cumulative_tokens,
+                "time_ms": cumulative_time,
+                "tool_calls": onboard_metrics["tool_calls"],
+            },
+        )
         run_total = sum(r["total"] for r in results)
         all_runs.append({
             "run_id": run_id,
@@ -546,13 +572,6 @@ def run_approach(approach, context_file, num_runs=NUM_RUNS):
         print(f"    Run {run_id} total: {run_total}/80")
         cumulative_tokens += run_metrics["total_input_tokens"] + run_metrics["total_output_tokens"]
         cumulative_time += run_metrics["total_time_ms"]
-        emit_event({
-            "type": "approach_progress",
-            "approach": approach,
-            "tokens": int(cumulative_tokens),
-            "time_ms": int(cumulative_time),
-            "tool_calls_done": int(onboard_metrics["tool_calls"]),
-        })
 
     # Statistics
     totals = [r["total_score"] for r in all_runs]
