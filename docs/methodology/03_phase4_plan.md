@@ -38,7 +38,7 @@ Phase 4 — это:
 
 ### 1.1. Один и тот же контекст для всех «подходов»
 
-Файл: `benchmark/scripts/benchmark_runner_v2.py:255-259`
+Файл: `benchmarks/v2/runner.py:255-259`
 
 ```python
 def run_single(approach: str, context_text: str, run_id: int) -> RunResult:
@@ -87,7 +87,7 @@ for i in range(num_runs):
 
 ### 1.3. Gold standards систематически наказывают фильтрующие подходы
 
-Файлы: `benchmark/data/test_context.json`, `benchmark/data/decision_context.json`.
+Файлы: `benchmarks/shared/data/test_context.json`, `benchmarks/shared/data/decision_context.json`.
 
 Часть gold-ответов перечисляют все 28 тестов или 70+ файлов (S2, S4). Подход,
 который выдал семантически корректный, но сжатый список («все handler-тесты
@@ -293,13 +293,13 @@ Delta = «штраф подхода за устаревание». Это чис
 
 ## Ссылки
 
-- `benchmark/scripts/benchmark_runner_v2.py` — runner v2/v3
-- `benchmark/scripts/benchmark_context_recovery.py` — единственный честный
+- `benchmarks/v2/runner.py` — runner v2/v3
+- `benchmarks/context_recovery/runner.py` — единственный честный
   per-approach замер
-- `benchmark/data/test_context.json`, `decision_context.json` — gold-ы
-- `docs/benchmark/12_benchmark_design.md` — первоначальный design (содержит
+- `benchmarks/shared/data/test_context.json`, `decision_context.json` — gold-ы
+- `docs/methodology/01_design.md` — первоначальный design (содержит
   предупреждение о N=3)
-- `docs/benchmark/20_benchmark_v3_results.md` — текущие headline
+- `docs/results/v3_results.md` — текущие headline
 - `docs/experiments/21_practical_verification.md` — практическое
   подтверждение dedup wall
 - `prompts/adv_onboarding_*.md` (coffee-portal) — материал для Phase 4.1

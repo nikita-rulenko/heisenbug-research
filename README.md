@@ -21,7 +21,7 @@
 | **Part C** | Decision reasoning | «Почему выбрали SQLite, а не PostgreSQL?» | 5 | 80 |
 | | | **Итого** | **22** | **352** |
 
-Каждый ответ оценивает **отдельная LLM-модель** (не та, что отвечала) по 4 критериям: accuracy, completeness, context utilization, actionability. Шкала 1-4 на критерий, **max 16 баллов за задачу**. Три прогона, берём медиану. Процент = доля от максимума 352. [**Как и почему мы сделали бенчмарк именно таким** →](docs/benchmark/12_benchmark_design.md) (эволюция v0→v2, все 22 сценария с обоснованиями, ограничения)
+Каждый ответ оценивает **отдельная LLM-модель** (не та, что отвечала) по 4 критериям: accuracy, completeness, context utilization, actionability. Шкала 1-4 на критерий, **max 16 баллов за задачу**. Три прогона, берём медиану. Процент = доля от максимума 352. [**Как и почему мы сделали бенчмарк именно таким** →](docs/methodology/01_design.md) (эволюция v0→v2, все 22 сценария с обоснованиями, ограничения). [**Как устроена оценка в деталях (все 22 вопроса + eval-промт)** →](docs/methodology/02_how_it_works.md)
 
 ---
 
@@ -101,7 +101,7 @@
 | **200-500KB** | Не влезает | Mem0 / Helixir (если обновлены!) |
 | **>500KB** | Enterprise | Graphiti / Helixir (каузальный граф) |
 
-[Подробный анализ v3](docs/benchmark/20_benchmark_v3_results.md)
+[Подробный анализ v3](docs/results/v3_results.md)
 
 <details>
 <summary>Benchmark v2 — базовая таблица (175 тестов)</summary>
@@ -120,7 +120,7 @@
 
 ### Context Recovery Benchmark (демо для конференции)
 
-Бенчмарк онбординга — [дизайн и методология](docs/benchmark/19_context_recovery_benchmark.md). Для live-демо на конференции: split-screen с token-счётчиками.
+Бенчмарк онбординга — [дизайн и методология](docs/results/context_recovery.md). Для live-демо на конференции: split-screen с token-счётчиками.
 
 ## Структура репозитория
 
@@ -240,9 +240,9 @@ Temporal knowledge graph поверх FalkorDB.
 на onboarding через каждый источник. Двухфазный: Phase 1 (retrieval) → Phase 2 (5 вопросов).
 Для live-демо на конференции: split-screen с token-счётчиками.
 
-- [Дизайн и методология](docs/benchmark/19_context_recovery_benchmark.md)
-- Скрипт: [`benchmark/scripts/benchmark_context_recovery.py`](benchmark/scripts/benchmark_context_recovery.py)
-- Дашборд: [`scripts/dashboard_recovery.html`](scripts/dashboard_recovery.html)
+- [Дизайн и методология](docs/results/context_recovery.md)
+- Скрипт: [`benchmarks/context_recovery/runner.py`](benchmarks/context_recovery/runner.py)
+- Дашборд: [`benchmarks/context_recovery/dashboard_recovery.html`](benchmarks/context_recovery/dashboard_recovery.html)
 
 ### Общий стек
 
@@ -251,8 +251,11 @@ Temporal knowledge graph поверх FalkorDB.
 - **Embeddings**: Ollama `nomic-embed-text`
 
 > **Почему Cerebras?** Cerebras — самый быстрый inference-провайдер на рынке (~2000 tok/s output). Для бенчмарка это критично: мы измеряем **скорость извлечения фактов из памяти**, а не латентность модели. Быстрый inference убирает bottleneck LLM и позволяет изолировать влияние именно подхода к контексту. Бонус: низкая цена ($0.60/1M) позволяет делать 3 прогона × 5 подходов × 3 части = 45 запусков без ощутимых расходов.
-- [Дизайн бенчмарка](docs/benchmark/12_benchmark_design.md)
-- [Полные результаты](docs/benchmark/16_benchmark_results.md)
+- [Дизайн бенчмарка](docs/methodology/01_design.md)
+- [Как устроена оценка (все 22 вопроса + eval-промт)](docs/methodology/02_how_it_works.md)
+- [Полные результаты v2](docs/results/v2_results.md)
+- [Полные результаты v3](docs/results/v3_results.md)
+- [Phase 4 plan — честность бенчмарка и v4](docs/methodology/03_phase4_plan.md)
 
 ### Методология расчёта стоимости
 
@@ -284,7 +287,7 @@ CPR = median_quality_score / cost_usd
 
 Чем выше CPR — тем больше качества за доллар. Mem0 лидирует по CPR (2,643) за счёт минимальных токенов (29K), но **только при актуальных данных**.
 
-> ⚠️ Стоимость обновления памяти (Mem0: ~30 API calls к embedding, Helixir: rebuild графа) **не включена** в расчёт, т.к. зависит от частоты изменений проекта. Это скрытый OPEX, описанный в [анализе v3](docs/benchmark/20_benchmark_v3_results.md#3-стоимость-обновления-памяти--скрытый-расход).
+> ⚠️ Стоимость обновления памяти (Mem0: ~30 API calls к embedding, Helixir: rebuild графа) **не включена** в расчёт, т.к. зависит от частоты изменений проекта. Это скрытый OPEX, описанный в [анализе v3](docs/results/v3_results.md#3-стоимость-обновления-памяти--скрытый-расход).
 
 ## Phase 2: Практическая верификация и стоимость обслуживания (2026-04-14)
 
@@ -374,19 +377,19 @@ pip install httpx
 export CEREBRAS_API_KEY=your-key-here
 
 # 3. Бенчмарк Part A (12 сценариев × 3 прогона)
-cd benchmark/scripts
-python3 benchmark_runner_v2.py md_files ../data/test_context.json 3
+cd benchmarks/v2
+python3 runner.py md_files ../shared/data/test_context.json 3
 
 # 4. Part B (связность фактов)
-python3 benchmark_part_b_v2.py md_files ../data/test_context.json 3
+python3 part_b.py md_files ../shared/data/test_context.json 3
 
 # 5. Part C (decision reasoning)
-python3 benchmark_part_c_v2.py md_files ../data/test_context.json 3
+python3 part_c.py md_files ../shared/data/test_context.json 3
 
 # 6. Helixir MCP (требует запущенный HelixDB + Ollama)
-python3 benchmark_helixir_mcp.py A 3
-python3 benchmark_helixir_mcp.py B 3
-python3 benchmark_helixir_mcp.py C 3
+python3 helixir_mcp.py A 3
+python3 helixir_mcp.py B 3
+python3 helixir_mcp.py C 3
 
 # 7. Context Recovery (все подходы)
 python3 benchmark_context_recovery.py all

@@ -29,9 +29,20 @@
 | 17 | [Graphiti](experiments/17_experiment_graphiti.md) | FalkorDB + getzep SDK | Vendor lock на OpenAI Responses API |
 | 18 | [Helixir Roadmap](experiments/18_helixir_issues_and_roadmap.md) | HelixDB + FastThink | Graph reasoning работает, extraction нестабилен |
 
-### Бенчмарк (`benchmark/`)
+### Методология бенчмарка (`methodology/`)
 
 | # | Документ | Описание |
 |---|----------|----------|
-| 12 | [Дизайн бенчмарка](benchmark/12_benchmark_design.md) | Сценарии, метрики, протокол оценки |
-| 16 | [Результаты](benchmark/16_benchmark_results.md) | Полные результаты по всем частям (A+B+C) |
+| 01 | [Дизайн бенчмарка](methodology/01_design.md) | Сценарии, метрики, протокол оценки, эволюция v0→v2 |
+| 02 | [Как устроена оценка](methodology/02_how_it_works.md) | Все 22 вопроса + полный eval-промт verbatim |
+| 03 | [Phase 4 plan](methodology/03_phase4_plan.md) | Честность бенчмарка: что видим как слабое в v2/v3, как закрываем в v4 |
+| 04 | [v4 task-spec design](methodology/04_v4_taskspec_design.md) | Почему v4 — task-spec + critic, а не ещё одни вопросы |
+
+### Результаты бенчмарков (`results/`)
+
+| Документ | Описание |
+|----------|----------|
+| [v2 results](results/v2_results.md) | 175-тестовый прогон: 5 подходов × Part A+B+C, headline |
+| [v3 results](results/v3_results.md) | 637-тестовый прогон: что изменилось, stale memory эффект |
+| [Context recovery](results/context_recovery.md) | Онбординг-бенчмарк: accuracy + стоимость токенов по подходам |
+| [v4 task-spec results](results/v4_taskspec_results.md) | Planner+critic прогон (после запуска) |

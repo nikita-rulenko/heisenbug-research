@@ -199,16 +199,17 @@ Q2 и Q3 особенно интересны: каузальный граф (Hel
 
 ### Скрипт бенчмарка
 
-`benchmark/scripts/benchmark_context_recovery.py`:
+`benchmarks/context_recovery/runner.py`:
 
 ```
-python3 benchmark_context_recovery.py <approach|all> [context_file] [num_runs]
+cd benchmarks/context_recovery
+python3 runner.py <approach|all> [context_file] [num_runs]
 
 # Один подход:
-CEREBRAS_API_KEY=... python3 benchmark_context_recovery.py helixir_mcp
+CEREBRAS_API_KEY=... python3 runner.py helixir_mcp
 
 # Все подходы:
-CEREBRAS_API_KEY=... python3 benchmark_context_recovery.py all
+CEREBRAS_API_KEY=... python3 runner.py all
 ```
 
 Для Mem0 и Helixir MCP требуются запущенные серверы:
@@ -218,17 +219,17 @@ CEREBRAS_API_KEY=... python3 benchmark_context_recovery.py all
 
 ### Визуализация
 
-`scripts/dashboard_recovery.html` — веб-дашборд для конференции:
+`benchmarks/context_recovery/dashboard_recovery.html` — веб-дашборд для конференции:
 - Split-screen карточки с token-счётчиками для каждого подхода
 - Accuracy-бары с цветовой индикацией (green ≥85%, yellow ≥70%, red <70%)
 - Сравнительная таблица всех метрик
-- Загружает реальные результаты из `benchmark/results/recovery_comparison.json`
+- Загружает реальные результаты из `benchmarks/context_recovery/results/recovery_comparison.json`
 - Fallback на sample data для preview
 
 ### Выходные файлы
 
 ```
-benchmark/results/
+benchmarks/context_recovery/results/
   recovery_md_files.json       # Детальные результаты по подходу
   recovery_github_issues.json
   recovery_mem0.json
