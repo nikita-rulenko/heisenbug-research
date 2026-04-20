@@ -176,9 +176,9 @@ Q2 и Q3 особенно интересны: каузальный граф (Hel
 ### Оценка: LLM-as-Judge
 
 - Evaluator: `zai-glm-4.7` (reasoning model, Cerebras)
-- Generator ≠ Evaluator (устраняет circular bias, см. [основной бенчмарк](12_benchmark_design.md))
+- Generator ≠ Evaluator (устраняет circular bias, см. [дизайн бенчмарка](../methodology/01_design.md))
 - 4 критерия: Accuracy, Completeness, Context Utilization, Specificity
-- Шкала 1-4 (лучше дискриминирует чем 1-5, см. исследования в 12_benchmark_design.md)
+- Шкала 1-4 (лучше дискриминирует чем 1-5, см. [дизайн бенчмарка](../methodology/01_design.md))
 - Для каждого подхода: 3 прогона → медиана (робастность)
 
 ### Ограничения
