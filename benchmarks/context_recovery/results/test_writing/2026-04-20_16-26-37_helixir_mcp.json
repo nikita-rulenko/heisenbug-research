@@ -1,0 +1,83 @@
+{
+  "approach": "helixir_mcp",
+  "fixed": {
+    "topic_id": "fixed_order_total",
+    "target": "Order.CalculateTotal",
+    "test_name": "TestUnitBenchA25A927E",
+    "test_path": "internal/entity/zz_bench_fixed_order_total_a25a927e_test.go",
+    "plan_latency_ms": 1973,
+    "plan_tokens_in": 3731,
+    "plan_tokens_out": 1398,
+    "test_source": "package entity_test\n\nimport (\n\t\"testing\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBenchA25A927E(t *testing.T) {\n\ttests := []struct {\n\t\tname  string\n\t\titems []entity.OrderItem\n\t\twant  float64\n\t}{\n\t\t{\n\t\t\tname:  \"empty items\",\n\t\t\titems: nil,\n\t\t\twant:  0,\n\t\t},\n\t\t{\n\t\t\tname: \"zero quantity\",\n\t\t\titems: []entity.OrderItem{\n\t\t\t\t{Quantity: 0, Price: 10.0},\n\t\t\t},\n\t\t\twant: 0,\n\t\t},\n\t\t{\n\t\t\tname: \"negative price\",\n\t\t\titems: []entity.OrderItem{\n\t\t\t\t{Quantity: 2, Price: -5.0},\n\t\t\t},\n\t\t\twant: -10.0,\n\t\t},\n\t\t{\n\t\t\tname: \"large quantity\",\n\t\t\titems: []entity.OrderItem{\n\t\t\t\t{Quantity: 1_000_000, Price: 1.23},\n\t\t\t},\n\t\t\twant: 1_000_000 * 1.23,\n\t\t},\n\t\t{\n\t\t\tname: \"mixed positive and zero\",\n\t\t\titems: []entity.OrderItem{\n\t\t\t\t{Quantity: 2, Price: 5.0},\n\t\t\t\t{Quantity: 0, Price: 100.0},\n\t\t\t\t{Quantity: 3, Price: 0.0},\n\t\t\t},\n\t\t\twant: 2*5.0 + 3*0.0,\n\t\t},\n\t}\n\n\tconst epsilon = 1e-9\n\n\tfor _, tt := range tests {\n\t\tt.Run(tt.name, func(t *testing.T) {\n\t\t\torder := entity.Order{\n\t\t\t\tItems: tt.items,\n\t\t\t}\n\t\t\torder.CalculateTotal()\n\t\t\tif diff := order.Total - tt.want; diff > epsilon || diff < -epsilon {\n\t\t\t\tt.Fatalf(\"expected total %v, got %v\", tt.want, order.Total)\n\t\t\t}\n\t\t})\n\t}\n}",
+    "go_exit_code": 0,
+    "go_duration_ms": 2982,
+    "go_stdout": "?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\n=== RUN   TestUnitBenchA25A927E\n=== RUN   TestUnitBenchA25A927E/empty_items\n=== RUN   TestUnitBenchA25A927E/zero_quantity\n=== RUN   TestUnitBenchA25A927E/negative_price\n=== RUN   TestUnitBenchA25A927E/large_quantity\n=== RUN   TestUnitBenchA25A927E/mixed_positive_and_zero\n--- PASS: TestUnitBenchA25A927E (0.00s)\n    --- PASS: TestUnitBenchA25A927E/empty_items (0.00s)\n    --- PASS: TestUnitBenchA25A927E/zero_quantity (0.00s)\n    --- PASS: TestUnitBenchA25A927E/negative_price (0.00s)\n    --- PASS: TestUnitBenchA25A927E/large_quantity (0.00s)\n    --- PASS: TestUnitBenchA25A927E/mixed_positive_and_zero (0.00s)\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity\t0.541s\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t0.377s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t0.684s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t0.996s [no tests to run]\n",
+    "go_stderr": "",
+    "judge_latency_ms": 8524,
+    "judge_raw": "```json\n{\n  \"fact_grounding\": 4,\n  \"convention_match\": 3,\n  \"coverage_depth\": 4,\n  \"runs_clean\": 4,\n  \"divergence\": 0,\n  \"notes\": \"Тест хорошо покрывает edge-cases (пустые items, нулевые количества, отрицательные цены, большие числа) и использует только реальные сущности. Однако имя теста TestUnitBenchA25A927E не соответствует Go convention - должно быть TestOrder_CalculateTotal, и отсутствует проверка возвращаемого значения метода CalculateTotal() напрямую.\"\n}\n```",
+    "scores": {
+      "fact_grounding": 4,
+      "convention_match": 3,
+      "coverage_depth": 4,
+      "runs_clean": 4,
+      "divergence": 0,
+      "notes": "Тест хорошо покрывает edge-cases (пустые items, нулевые количества, отрицательные цены, большие числа) и использует только реальные сущности. Однако имя теста TestUnitBenchA25A927E не соответствует Go convention - должно быть TestOrder_CalculateTotal, и отсутствует проверка возвращаемого значения метода CalculateTotal() напрямую.",
+      "total": 15,
+      "max_total": 16
+    }
+  },
+  "wide": {
+    "topic_id": "wide_news_summary_emoji",
+    "target": "NewsItem.Summary",
+    "test_name": "TestUnitBench9CB747AB",
+    "test_path": "internal/entity/zz_bench_wide_news_summary_emoji_9cb747ab_test.go",
+    "plan_latency_ms": 3585,
+    "plan_tokens_in": 3737,
+    "plan_tokens_out": 3000,
+    "test_source": "package entity_test\n\nimport (\n\t\"reflect\"\n\t\"strings\"\n\t\"testing\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBench9CB747AB(t *testing.T) {\n\tconst maxRunes = 200 // assumed max runes limit in NewsItem.Summary implementation\n\n\t// helper to repeat a pattern n times\n\trepeat := func(s string, n int) string {\n\t\treturn strings.Repeat(s, n)\n\t}\n\n\t// pattern consisting of two runes: an emoji (4‑byte) and a CJK character (3‑byte)\n\tpattern := \"😀漢\"\n\n\t// build test strings\n\texact := repeat(pattern, maxRunes/2) // 200 runes exactly\n\tover := exact + \"🚀\"                 // one extra rune (emoji)\n\n\ttests := []struct {\n\t\tname           string\n\t\tinput          string\n\t\texpectTruncate bool\n\t}{\n\t\t{\n\t\t\tname:           \"exact max runes\",\n\t\t\tinput:          exact,\n\t\t\texpectTruncate: false,\n\t\t},\n\t\t{\n\t\t\tname:           \"over max runes by one rune\",\n\t\t\tinput:          over,\n\t\t\texpectTruncate: true,\n\t\t},\n\t\t{\n\t\t\tname:           \"mixed ascii and multibyte at boundary\",\n\t\t\tinput:          strings.Repeat(\"a\", 50) + strings.Repeat(\"😀\", 75) + strings.Repeat(\"漢\", 75),\n\t\t\texpectTruncate: false,\n\t\t},\n\t\t{\n\t\t\tname:           \"mixed ascii and multibyte over boundary\",\n\t\t\tinput:          strings.Repeat(\"a\", 50) + strings.Repeat(\"😀\", 75) + strings.Repeat(\"漢\", 75) + \"🚀\",\n\t\t\texpectTruncate: true,\n\t\t},\n\t}\n\n\tfor _, tc := range tests {\n\t\ttc := tc // capture range variable\n\t\tt.Run(tc.name, func(t *testing.T) {\n\t\t\t// create a NewsItem and set all its string fields to the test input\n\t\t\tvar news entity.NewsItem\n\t\t\trv := reflect.ValueOf(&news).Elem()\n\t\t\tfor i := 0; i < rv.NumField(); i++ {\n\t\t\t\tf := rv.Field(i)\n\t\t\t\tif f.Kind() == reflect.String && f.CanSet() {\n\t\t\t\t\tf.SetString(tc",
+    "go_exit_code": 1,
+    "go_duration_ms": 2451,
+    "go_stdout": "FAIL\tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity [setup failed]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t0.445s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t1.105s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t0.794s [no tests to run]\nFAIL\n",
+    "go_stderr": "# github.com/nikita-rulenko/heisenbug-portal/internal/entity\ninternal/entity/zz_bench_wide_news_summary_emoji_9cb747ab_test.go:62:20: missing ',' before newline in argument list\n",
+    "judge_latency_ms": 8219,
+    "judge_raw": "```json\n{\n  \"fact_grounding\": 2,\n  \"convention_match\": 3,\n  \"coverage_depth\": 3,\n  \"runs_clean\": 1,\n  \"divergence\": 2,\n  \"notes\": \"Тест пытается проверить edge-cases с emoji и CJK символами, что хорошо, но содержит синтаксическую ошибку (незавершенный вызов SetString) и выдуманные сущности (ErrEmptyName, ErrEmptyContent). Также странно, что тест пытается установить все строковые поля NewsItem вместо проверки только метода Summary.\"\n}\n```",
+    "scores": {
+      "fact_grounding": 2,
+      "convention_match": 3,
+      "coverage_depth": 3,
+      "runs_clean": 1,
+      "divergence": 2,
+      "notes": "Тест пытается проверить edge-cases с emoji и CJK символами, что хорошо, но содержит синтаксическую ошибку (незавершенный вызов SetString) и выдуманные сущности (ErrEmptyName, ErrEmptyContent). Также странно, что тест пытается установить все строковые поля NewsItem вместо проверки только метода Summary.",
+      "total": 9,
+      "max_total": 16
+    }
+  },
+  "free": {
+    "topic_id": "free_agent_choice",
+    "target": "<agent-chosen>",
+    "test_name": "TestUnitBench52BB7795",
+    "test_path": "internal/entity/zz_bench_free_agent_choice_52bb7795_test.go",
+    "plan_latency_ms": 2369,
+    "plan_tokens_in": 3812,
+    "plan_tokens_out": 1712,
+    "test_source": "package entity_test\n\n// CHOICE: Product.ApplyDiscount — edge cases for discount clamping not covered\nimport (\n\t\"math\"\n\t\"testing\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBench52BB7795(t *testing.T) {\n\tconst eps = 1e-9\n\n\ttests := []struct {\n\t\tname          string\n\t\tinitialPrice  float64\n\t\tdiscount      float64\n\t\texpectedPrice float64\n\t}{\n\t\t{\n\t\t\tname:          \"no discount leaves price unchanged\",\n\t\t\tinitialPrice:  100.0,\n\t\t\tdiscount:      0.0,\n\t\t\texpectedPrice: 100.0,\n\t\t},\n\t\t{\n\t\t\tname:          \"normal percent discount\",\n\t\t\tinitialPrice:  200.0,\n\t\t\tdiscount:      25.0,\n\t\t\texpectedPrice: 150.0,\n\t\t},\n\t\t{\n\t\t\tname:          \"negative discount is treated as zero\",\n\t\t\tinitialPrice:  80.0,\n\t\t\tdiscount:      -10.0,\n\t\t\texpectedPrice: 80.0,\n\t\t},\n\t\t{\n\t\t\tname:          \"discount greater than 100% is clamped to 100%\",\n\t\t\tinitialPrice:  50.0,\n\t\t\tdiscount:      150.0,\n\t\t\texpectedPrice: 0.0,\n\t\t},\n\t\t{\n\t\t\tname:          \"discount exactly 100% results in zero price\",\n\t\t\tinitialPrice:  123.45,\n\t\t\tdiscount:      100.0,\n\t\t\texpectedPrice: 0.0,\n\t\t},\n\t}\n\n\tfor _, tc := range tests {\n\t\ttc := tc // capture range variable\n\t\tt.Run(tc.name, func(t *testing.T) {\n\t\t\tt.Parallel()\n\t\t\tp := &entity.Product{\n\t\t\t\tPrice: tc.initialPrice,\n\t\t\t}\n\t\t\tp.ApplyDiscount(tc.discount)\n\n\t\t\tif math.Abs(p.Price-tc.expectedPrice) > eps {\n\t\t\t\tt.Errorf(\"ApplyDiscount(%v) on price %v: expected %v, got %v\",\n\t\t\t\t\ttc.discount, tc.initialPrice, tc.expectedPrice, p.Price)\n\t\t\t}\n\t\t})\n\t}\n}",
+    "go_exit_code": 1,
+    "go_duration_ms": 2478,
+    "go_stdout": "?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\n=== RUN   TestUnitBench52BB7795\n=== RUN   TestUnitBench52BB7795/no_discount_leaves_price_unchanged\n=== PAUSE TestUnitBench52BB7795/no_discount_leaves_price_unchanged\n=== RUN   TestUnitBench52BB7795/normal_percent_discount\n=== PAUSE TestUnitBench52BB7795/normal_percent_discount\n=== RUN   TestUnitBench52BB7795/negative_discount_is_treated_as_zero\n=== PAUSE TestUnitBench52BB7795/negative_discount_is_treated_as_zero\n=== RUN   TestUnitBench52BB7795/discount_greater_than_100%_is_clamped_to_100%\n=== PAUSE TestUnitBench52BB7795/discount_greater_than_100%_is_clamped_to_100%\n=== RUN   TestUnitBench52BB7795/discount_exactly_100%_results_in_zero_price\n=== PAUSE TestUnitBench52BB7795/discount_exactly_100%_results_in_zero_price\n=== CONT  TestUnitBench52BB7795/no_discount_leaves_price_unchanged\n=== CONT  TestUnitBench52BB7795/negative_discount_is_treated_as_zero\n=== CONT  TestUnitBench52BB7795/normal_percent_discount\n    zz_bench_free_agent_choice_52bb7795_test.go:62: ApplyDiscount(25) on price 200: expected 150, got 200\n=== CONT  TestUnitBench52BB7795/discount_exactly_100%_results_in_zero_price\n=== CONT  TestUnitBench52BB7795/discount_greater_than_100%_is_clamped_to_100%\n=== NAME  TestUnitBench52BB7795/discount_exactly_100%_results_in_zero_price\n    zz_bench_free_agent_choice_52bb7795_test.go:62: ApplyDiscount(100) on price 123.45: expected 0, got 123.45\n=== NAME  TestUnitBench52BB7795/discount_greater_than_100%_is_clamped_to_100%\n    zz_bench_free_agent_choice_52bb7795_test.go:62: ApplyDiscount(150) on price 50: expected 0, got 50\n--- FAIL: TestUnitBench52BB7795 (0.00s)\n    --- PASS: TestUnitBench52BB7795/no_discount_leaves_price_unchanged (0.00s)\n    --- PASS: TestUnitBench52BB7795/negative_discount_is_treated_as_zero (0.00s)\n    --- FAIL: TestUnitBench52BB7795/normal_percent_discount (0.00s)\n    --- FAIL: TestUnitBench52BB7795/discount_exactly_100%_results_in_zero_price (0.00s)\n    --- FAIL: TestUnitBench52BB7795/discount_greater_than_100%_is_clamped_to_100% (0.00s)\nFAIL\nFAIL\tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity\t0.431s\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t0.362s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t0.687s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t0.989s [no tests to run]\nFAIL\n",
+    "go_stderr": "",
+    "judge_latency_ms": 11390,
+    "judge_raw": "```json\n{\n  \"chosen_target\": \"Product.ApplyDiscount\",\n  \"fact_grounding\": 4,\n  \"convention_match\": 4,\n  \"coverage_depth\": 4,\n  \"runs_clean\": 2,\n  \"target_choice\": 3,\n  \"divergence\": 0,\n  \"notes\": \"Выбор метода Product.ApplyDiscount разумен — это метод с бизнес-логикой (clamping), где действительно могут быть edge-cases, хотя и довольно очевидные. Тест хорошо спроектирован: table-driven, покрывает граничные значения (отрицательный, >100%, ровно 100%), но содержит критическую ошибку — тест проверяет поле Price, хотя ApplyDiscount возвращает новую цену, не изменяя структуру, что приводит к падению теста.\"\n}\n```",
+    "scores": {
+      "fact_grounding": 4,
+      "convention_match": 4,
+      "coverage_depth": 4,
+      "runs_clean": 2,
+      "target_choice": 3,
+      "divergence": 0,
+      "notes": "Выбор метода Product.ApplyDiscount разумен — это метод с бизнес-логикой (clamping), где действительно могут быть edge-cases, хотя и довольно очевидные. Тест хорошо спроектирован: table-driven, покрывает граничные значения (отрицательный, >100%, ровно 100%), но содержит критическую ошибку — тест проверяет поле Price, хотя ApplyDiscount возвращает новую цену, не изменяя структуру, что приводит к падению теста.",
+      "chosen_target": "Product.ApplyDiscount",
+      "total": 17,
+      "max_total": 20
+    }
+  }
+}

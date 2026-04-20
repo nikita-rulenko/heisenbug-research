@@ -1,0 +1,83 @@
+{
+  "approach": "github_issues",
+  "fixed": {
+    "topic_id": "fixed_order_total",
+    "target": "Order.CalculateTotal",
+    "test_name": "TestUnitBench89C1CE8C",
+    "test_path": "internal/entity/zz_bench_fixed_order_total_89c1ce8c_test.go",
+    "plan_latency_ms": 33695,
+    "plan_tokens_in": 3258,
+    "plan_tokens_out": 952,
+    "test_source": "package entity_test\n\nimport (\n\t\"testing\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBench89C1CE8C(t *testing.T) {\n\ttests := []struct {\n\t\tname     string\n\t\titems    []entity.OrderItem\n\t\texpected float64\n\t}{\n\t\t{\n\t\t\tname:     \"empty items slice\",\n\t\t\titems:    []entity.OrderItem{},\n\t\t\texpected: 0,\n\t\t},\n\t\t{\n\t\t\tname: \"nil items slice\",\n\t\t\titems: nil,\n\t\t\texpected: 0,\n\t\t},\n\t\t{\n\t\t\tname: \"item with zero quantity\",\n\t\t\titems: []entity.OrderItem{\n\t\t\t\t{Quantity: 0, Price: 10.0},\n\t\t\t},\n\t\t\texpected: 0,\n\t\t},\n\t\t{\n\t\t\tname: \"item with negative price\",\n\t\t\titems: []entity.OrderItem{\n\t\t\t\t{Quantity: 5, Price: -10.0},\n\t\t\t},\n\t\t\texpected: -50.0,\n\t\t},\n\t\t{\n\t\t\tname: \"very large quantity\",\n\t\t\titems: []entity.OrderItem{\n\t\t\t\t{Quantity: 1_000_000, Price: 0.01},\n\t\t\t},\n\t\t\texpected: 10000.0,\n\t\t},\n\t\t{\n\t\t\tname: \"mixed positive, zero, and negative values\",\n\t\t\titems: []entity.OrderItem{\n\t\t\t\t{Quantity: 2, Price: 10.0},   // 20\n\t\t\t\t{Quantity: 0, Price: 100.0},  // 0\n\t\t\t\t{Quantity: 3, Price: -5.0},   // -15\n\t\t\t},\n\t\t\texpected: 5.0,\n\t\t},\n\t}\n\n\tfor _, tt := range tests {\n\t\ttt := tt // capture range variable\n\t\tt.Run(tt.name, func(t *testing.T) {\n\t\t\torder := entity.Order{\n\t\t\t\tItems: tt.items,\n\t\t\t}\n\t\t\torder.CalculateTotal()\n\t\t\tif order.Total != tt.expected {\n\t\t\t\tt.Fatalf(\"expected total %.2f, got %.2f\", tt.expected, order.Total)\n\t\t\t}\n\t\t})\n\t}\n}",
+    "go_exit_code": 0,
+    "go_duration_ms": 3456,
+    "go_stdout": "?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\n=== RUN   TestUnitBench89C1CE8C\n=== RUN   TestUnitBench89C1CE8C/empty_items_slice\n=== RUN   TestUnitBench89C1CE8C/nil_items_slice\n=== RUN   TestUnitBench89C1CE8C/item_with_zero_quantity\n=== RUN   TestUnitBench89C1CE8C/item_with_negative_price\n=== RUN   TestUnitBench89C1CE8C/very_large_quantity\n=== RUN   TestUnitBench89C1CE8C/mixed_positive,_zero,_and_negative_values\n--- PASS: TestUnitBench89C1CE8C (0.00s)\n    --- PASS: TestUnitBench89C1CE8C/empty_items_slice (0.00s)\n    --- PASS: TestUnitBench89C1CE8C/nil_items_slice (0.00s)\n    --- PASS: TestUnitBench89C1CE8C/item_with_zero_quantity (0.00s)\n    --- PASS: TestUnitBench89C1CE8C/item_with_negative_price (0.00s)\n    --- PASS: TestUnitBench89C1CE8C/very_large_quantity (0.00s)\n    --- PASS: TestUnitBench89C1CE8C/mixed_positive,_zero,_and_negative_values (0.00s)\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity\t0.898s\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t1.085s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t0.658s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t0.346s [no tests to run]\n",
+    "go_stderr": "",
+    "judge_latency_ms": 8561,
+    "judge_raw": "```json\n{\n  \"fact_grounding\": 4,\n  \"convention_match\": 4,\n  \"coverage_depth\": 4,\n  \"runs_clean\": 4,\n  \"divergence\": 0,\n  \"notes\": \"Тест отлично соответствует реальному коду: все сущности существуют, используется table-driven подход с t.Run(). Хорошо покрыты запрошенные edge-cases: пустой и nil слайс, нулевое количество, отрицательная цена, большие числа и смешанные значения. Все тесты проходят успешно.\"\n}\n```",
+    "scores": {
+      "fact_grounding": 4,
+      "convention_match": 4,
+      "coverage_depth": 4,
+      "runs_clean": 4,
+      "divergence": 0,
+      "notes": "Тест отлично соответствует реальному коду: все сущности существуют, используется table-driven подход с t.Run(). Хорошо покрыты запрошенные edge-cases: пустой и nil слайс, нулевое количество, отрицательная цена, большие числа и смешанные значения. Все тесты проходят успешно.",
+      "total": 16,
+      "max_total": 16
+    }
+  },
+  "wide": {
+    "topic_id": "wide_order_can_cancel_matrix",
+    "target": "Order.CanCancel",
+    "test_name": "TestUnitBench3C9C1438",
+    "test_path": "internal/entity/zz_bench_wide_order_can_cancel_matrix_3c9c1438_test.go",
+    "plan_latency_ms": 1967,
+    "plan_tokens_in": 3250,
+    "plan_tokens_out": 1030,
+    "test_source": "package entity_test\n\nimport (\n\t\"testing\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBench3C9C1438(t *testing.T) {\n\ttests := []struct {\n\t\tname   string\n\t\tstatus entity.OrderStatus\n\t\twant   bool\n\t}{\n\t\t{name: \"new\", status: entity.OrderStatusNew, want: true},\n\t\t{name: \"processing\", status: entity.OrderStatusProcessing, want: true},\n\t\t{name: \"completed\", status: entity.OrderStatusCompleted, want: false},\n\t\t{name: \"cancelled\", status: entity.OrderStatusCancelled, want: false},\n\t\t{name: \"empty\", status: entity.OrderStatus(\"\"), want: false},\n\t\t{name: \"unknown\", status: entity.OrderStatus(\"unknown\"), want: false},\n\t}\n\n\tfor _, tt := range tests {\n\t\ttt := tt\n\t\tt.Run(tt.name, func(t *testing.T) {\n\t\t\tt.Parallel()\n\t\t\to := entity.Order{Status: tt.status}\n\t\t\tif got := o.CanCancel(); got != tt.want {\n\t\t\t\tt.Fatalf(\"Order.CanCancel() = %v, want %v (status=%v)\", got, tt.want, tt.status)\n\t\t\t}\n\t\t})\n\t}\n}",
+    "go_exit_code": 0,
+    "go_duration_ms": 2350,
+    "go_stdout": "?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\n=== RUN   TestUnitBench3C9C1438\n=== RUN   TestUnitBench3C9C1438/new\n=== PAUSE TestUnitBench3C9C1438/new\n=== RUN   TestUnitBench3C9C1438/processing\n=== PAUSE TestUnitBench3C9C1438/processing\n=== RUN   TestUnitBench3C9C1438/completed\n=== PAUSE TestUnitBench3C9C1438/completed\n=== RUN   TestUnitBench3C9C1438/cancelled\n=== PAUSE TestUnitBench3C9C1438/cancelled\n=== RUN   TestUnitBench3C9C1438/empty\n=== PAUSE TestUnitBench3C9C1438/empty\n=== RUN   TestUnitBench3C9C1438/unknown\n=== PAUSE TestUnitBench3C9C1438/unknown\n=== CONT  TestUnitBench3C9C1438/new\n=== CONT  TestUnitBench3C9C1438/unknown\n=== CONT  TestUnitBench3C9C1438/empty\n=== CONT  TestUnitBench3C9C1438/cancelled\n=== CONT  TestUnitBench3C9C1438/completed\n=== CONT  TestUnitBench3C9C1438/processing\n--- PASS: TestUnitBench3C9C1438 (0.00s)\n    --- PASS: TestUnitBench3C9C1438/new (0.00s)\n    --- PASS: TestUnitBench3C9C1438/unknown (0.00s)\n    --- PASS: TestUnitBench3C9C1438/empty (0.00s)\n    --- PASS: TestUnitBench3C9C1438/cancelled (0.00s)\n    --- PASS: TestUnitBench3C9C1438/completed (0.00s)\n    --- PASS: TestUnitBench3C9C1438/processing (0.00s)\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity\t0.491s\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t0.701s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t0.357s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t1.013s [no tests to run]\n",
+    "go_stderr": "",
+    "judge_latency_ms": 9116,
+    "judge_raw": "```json\n{\n  \"fact_grounding\": 4,\n  \"convention_match\": 4,\n  \"coverage_depth\": 4,\n  \"runs_clean\": 4,\n  \"divergence\": 0,\n  \"notes\": \"Тест отлично соответствует требованиям: использует только реальные сущности, полностью соблюдает Go-конвенции (table-driven с t.Run, параллельные подтесты), покрывает все статусы из кода плюс edge-cases (пустой и неизвестный статус). Все тесты проходят без ошибок, выдуманных методов/полей нет.\"\n}\n```",
+    "scores": {
+      "fact_grounding": 4,
+      "convention_match": 4,
+      "coverage_depth": 4,
+      "runs_clean": 4,
+      "divergence": 0,
+      "notes": "Тест отлично соответствует требованиям: использует только реальные сущности, полностью соблюдает Go-конвенции (table-driven с t.Run, параллельные подтесты), покрывает все статусы из кода плюс edge-cases (пустой и неизвестный статус). Все тесты проходят без ошибок, выдуманных методов/полей нет.",
+      "total": 16,
+      "max_total": 16
+    }
+  },
+  "free": {
+    "topic_id": "free_agent_choice",
+    "target": "<agent-chosen>",
+    "test_name": "TestUnitBench42523BE0",
+    "test_path": "internal/entity/zz_bench_free_agent_choice_42523be0_test.go",
+    "plan_latency_ms": 2099,
+    "plan_tokens_in": 3338,
+    "plan_tokens_out": 2076,
+    "test_source": "package entity_test\n\n// CHOICE: Order.Validate — testing whitespace CustomerID edge case not covered\nimport (\n\t\"testing\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBench42523BE0(t *testing.T) {\n\ttests := []struct {\n\t\tname        string\n\t\torder       entity.Order\n\t\twantErr     error\n\t}{\n\t\t{\n\t\t\tname: \"valid order\",\n\t\t\torder: entity.Order{\n\t\t\t\tCustomerID: \"alice\",\n\t\t\t\tItems: []entity.OrderItem{\n\t\t\t\t\t{ProductID: 1, Quantity: 2, Price: 5.0},\n\t\t\t\t},\n\t\t\t},\n\t\t\twantErr: nil,\n\t\t},\n\t\t{\n\t\t\tname: \"whitespace CustomerID should be accepted\",\n\t\t\torder: entity.Order{\n\t\t\t\tCustomerID: \"   \",\n\t\t\t\tItems: []entity.OrderItem{\n\t\t\t\t\t{ProductID: 2, Quantity: 1, Price: 3.5},\n\t\t\t\t},\n\t\t\t},\n\t\t\twantErr: nil,\n\t\t},\n\t\t{\n\t\t\tname: \"empty CustomerID returns ErrEmptyCustomerID\",\n\t\t\torder: entity.Order{\n\t\t\t\tCustomerID: \"\",\n\t\t\t\tItems: []entity.OrderItem{\n\t\t\t\t\t{ProductID: 3, Quantity: 1, Price: 2.0},\n\t\t\t\t},\n\t\t\t},\n\t\t\twantErr: entity.ErrEmptyCustomerID,\n\t\t},\n\t\t{\n\t\t\tname: \"empty CustomerID with invalid item still returns ErrEmptyCustomerID (priority)\",\n\t\t\torder: entity.Order{\n\t\t\t\tCustomerID: \"\",\n\t\t\t\tItems: []entity.OrderItem{\n\t\t\t\t\t{ProductID: 0, Quantity: 0, Price: 0},\n\t\t\t\t},\n\t\t\t},\n\t\t\twantErr: entity.ErrEmptyCustomerID,\n\t\t},\n\t}\n\n\tfor _, tt := range tests {\n\t\ttt := tt // capture range variable\n\t\tt.Run(tt.name, func(t *testing.T) {\n\t\t\terr := tt.order.Validate()\n\t\t\tif tt.wantErr != nil {\n\t\t\t\tif err == nil {\n\t\t\t\t\tt.Fatalf(\"expected error %v, got nil\", tt.wantErr)\n\t\t\t\t}\n\t\t\t\tif err != tt.wantErr {\n\t\t\t\t\tt.Fatalf(\"expected error %v, got %v\", tt.wantErr, err)\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\tif err != nil {\n\t\t\t\t\tt.Fatalf(\"expected no error, got %v\", err)\n\t\t\t\t}\n\t\t\t}\n\t\t})\n\t}\n}",
+    "go_exit_code": 0,
+    "go_duration_ms": 2431,
+    "go_stdout": "?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\n=== RUN   TestUnitBench42523BE0\n=== RUN   TestUnitBench42523BE0/valid_order\n=== RUN   TestUnitBench42523BE0/whitespace_CustomerID_should_be_accepted\n=== RUN   TestUnitBench42523BE0/empty_CustomerID_returns_ErrEmptyCustomerID\n=== RUN   TestUnitBench42523BE0/empty_CustomerID_with_invalid_item_still_returns_ErrEmptyCustomerID_(priority)\n--- PASS: TestUnitBench42523BE0 (0.00s)\n    --- PASS: TestUnitBench42523BE0/valid_order (0.00s)\n    --- PASS: TestUnitBench42523BE0/whitespace_CustomerID_should_be_accepted (0.00s)\n    --- PASS: TestUnitBench42523BE0/empty_CustomerID_returns_ErrEmptyCustomerID (0.00s)\n    --- PASS: TestUnitBench42523BE0/empty_CustomerID_with_invalid_item_still_returns_ErrEmptyCustomerID_(priority) (0.00s)\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity\t0.437s\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t0.450s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t0.815s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t1.124s [no tests to run]\n",
+    "go_stderr": "",
+    "judge_latency_ms": 9882,
+    "judge_raw": "```json\n{\n  \"chosen_target\": \"Order.Validate\",\n  \"fact_grounding\": 4,\n  \"convention_match\": 4,\n  \"coverage_depth\": 3,\n  \"runs_clean\": 4,\n  \"target_choice\": 2,\n  \"divergence\": 0,\n  \"notes\": \"Выбор метода слабый — Validate() очевидный кандидат для тестирования, и его edge-cases (пустые строки, нулевые значения) обычно покрываются первыми. Тест выполнен технически безупречно: компилируется, проходит, соответствует конвенциям, но проверяет тривиальный кейс с пробелами, который не является реальным gap в покрытии.\"\n}\n```",
+    "scores": {
+      "fact_grounding": 4,
+      "convention_match": 4,
+      "coverage_depth": 3,
+      "runs_clean": 4,
+      "target_choice": 2,
+      "divergence": 0,
+      "notes": "Выбор метода слабый — Validate() очевидный кандидат для тестирования, и его edge-cases (пустые строки, нулевые значения) обычно покрываются первыми. Тест выполнен технически безупречно: компилируется, проходит, соответствует конвенциям, но проверяет тривиальный кейс с пробелами, который не является реальным gap в покрытии.",
+      "chosen_target": "Order.Validate",
+      "total": 17,
+      "max_total": 20
+    }
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "approach": "mem0",
+  "fixed": {
+    "topic_id": "fixed_order_total",
+    "target": "Order.CalculateTotal",
+    "test_name": "TestUnitBenchBFA050A9",
+    "test_path": "internal/entity/zz_bench_fixed_order_total_bfa050a9_test.go",
+    "plan_latency_ms": 3169,
+    "plan_tokens_in": 3559,
+    "plan_tokens_out": 1442,
+    "test_source": "package entity_test\n\nimport (\n\t\"math\"\n\t\"testing\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBenchBFA050A9(t *testing.T) {\n\ttests := []struct {\n\t\tname  string\n\t\torder entity.Order\n\t\twant  float64\n\t}{\n\t\t{\n\t\t\tname:  \"empty items\",\n\t\t\torder: entity.Order{},\n\t\t\twant:  0,\n\t\t},\n\t\t{\n\t\t\tname: \"zero quantity\",\n\t\t\torder: entity.Order{\n\t\t\t\tItems: []entity.OrderItem{\n\t\t\t\t\t{Quantity: 0, Price: 10.0},\n\t\t\t\t},\n\t\t\t},\n\t\t\twant: 0,\n\t\t},\n\t\t{\n\t\t\tname: \"negative price\",\n\t\t\torder: entity.Order{\n\t\t\t\tItems: []entity.OrderItem{\n\t\t\t\t\t{Quantity: 2, Price: -5.0},\n\t\t\t\t},\n\t\t\t},\n\t\t\twant: -10.0,\n\t\t},\n\t\t{\n\t\t\tname: \"large quantity\",\n\t\t\torder: entity.Order{\n\t\t\t\tItems: []entity.OrderItem{\n\t\t\t\t\t{Quantity: 1_000_000, Price: 9.99},\n\t\t\t\t},\n\t\t\t},\n\t\t\twant: 9_990_000.0,\n\t\t},\n\t\t{\n\t\t\tname: \"mixed items\",\n\t\t\torder: entity.Order{\n\t\t\t\tItems: []entity.OrderItem{\n\t\t\t\t\t{Quantity: 2, Price: 3.5},\n\t\t\t\t\t{Quantity: 0, Price: 100.0},\n\t\t\t\t\t{Quantity: 1, Price: -2.0},\n\t\t\t\t},\n\t\t\t},\n\t\t\twant: 5.0,\n\t\t},\n\t}\n\n\tconst epsilon = 1e-9\n\n\tfor _, tc := range tests {\n\t\tt.Run(tc.name, func(t *testing.T) {\n\t\t\tgot := tc.order.CalculateTotal()\n\t\t\tif math.Abs(got-tc.want) > epsilon {\n\t\t\t\tt.Errorf(\"CalculateTotal() = %v, want %v\", got, tc.want)\n\t\t\t}\n\t\t})\n\t}\n}",
+    "go_exit_code": 0,
+    "go_duration_ms": 2597,
+    "go_stdout": "?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\n=== RUN   TestUnitBenchBFA050A9\n=== RUN   TestUnitBenchBFA050A9/empty_items\n=== RUN   TestUnitBenchBFA050A9/zero_quantity\n=== RUN   TestUnitBenchBFA050A9/negative_price\n=== RUN   TestUnitBenchBFA050A9/large_quantity\n=== RUN   TestUnitBenchBFA050A9/mixed_items\n--- PASS: TestUnitBenchBFA050A9 (0.00s)\n    --- PASS: TestUnitBenchBFA050A9/empty_items (0.00s)\n    --- PASS: TestUnitBenchBFA050A9/zero_quantity (0.00s)\n    --- PASS: TestUnitBenchBFA050A9/negative_price (0.00s)\n    --- PASS: TestUnitBenchBFA050A9/large_quantity (0.00s)\n    --- PASS: TestUnitBenchBFA050A9/mixed_items (0.00s)\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity\t0.521s\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t0.458s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t0.771s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t1.090s [no tests to run]\n",
+    "go_stderr": "",
+    "judge_latency_ms": 9231,
+    "judge_raw": "```json\n{\n  \"fact_grounding\": 4,\n  \"convention_match\": 3,\n  \"coverage_depth\": 4,\n  \"runs_clean\": 4,\n  \"divergence\": 0,\n  \"notes\": \"Тест отлично покрывает edge-cases (пустые items, нулевые quantity, отрицательные цены, большие числа, смешанные случаи) и полностью проходит. Однако имя теста TestUnitBenchBFA050A9 не соответствует Go convention - должно быть TestOrder_CalculateTotal или подобное. Выдуманных сущностей нет, все методы и поля реальные.\"\n}\n```",
+    "scores": {
+      "fact_grounding": 4,
+      "convention_match": 3,
+      "coverage_depth": 4,
+      "runs_clean": 4,
+      "divergence": 0,
+      "notes": "Тест отлично покрывает edge-cases (пустые items, нулевые quantity, отрицательные цены, большие числа, смешанные случаи) и полностью проходит. Однако имя теста TestUnitBenchBFA050A9 не соответствует Go convention - должно быть TestOrder_CalculateTotal или подобное. Выдуманных сущностей нет, все методы и поля реальные.",
+      "total": 15,
+      "max_total": 16
+    }
+  },
+  "wide": {
+    "topic_id": "wide_news_summary_emoji",
+    "target": "NewsItem.Summary",
+    "test_name": "TestUnitBenchE104B40A",
+    "test_path": "internal/entity/zz_bench_wide_news_summary_emoji_e104b40a_test.go",
+    "plan_latency_ms": 3646,
+    "plan_tokens_in": 3566,
+    "plan_tokens_out": 2240,
+    "test_source": "package entity_test\n\nimport (\n\t\"strings\"\n\t\"testing\"\n\t\"unicode/utf8\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBenchE104B40A(t *testing.T) {\n\t// Determine the max runes limit used by Summary.\n\tlong := strings.Repeat(\"a\", 1000)\n\tni := entity.NewsItem{Content: long}\n\tsummary := ni.Summary()\n\tlimit := len([]rune(summary))\n\thasEllipsis := false\n\tif limit > 0 && []rune(summary)[limit-1] == '…' {\n\t\thasEllipsis = true\n\t\tlimit--\n\t}\n\n\ttype testCase struct {\n\t\tname  string\n\t\tinput string\n\t\twant  string\n\t}\n\ttests := []testCase{\n\t\t{\n\t\t\tname:  \"exact limit with multibyte runes\",\n\t\t\tinput: strings.Repeat(\"😀\", limit), // each emoji is one rune (4‑byte UTF‑8)\n\t\t\t// expect no truncation, no ellipsis\n\t\t\twant: strings.Repeat(\"😀\", limit),\n\t\t},\n\t\t{\n\t\t\tname:  \"exceeds limit by one emoji\",\n\t\t\tinput: strings.Repeat(\"😀\", limit+1),\n\t\t\t// expect truncation to limit runes, possibly with ellipsis\n\t\t\twant: func() string {\n\t\t\t\tbase := strings.Repeat(\"😀\", limit)\n\t\t\t\tif hasEllipsis {\n\t\t\t\t\treturn base + \"…\"\n\t\t\t\t}\n\t\t\t\treturn base\n\t\t\t}(),\n\t\t},\n\t\t{\n\t\t\tname:  \"mixed CJK and emoji at boundary\",\n\t\t\tinput: func() string {\n\t\t\t\t// Build a string where the last rune inside the limit is a CJK character,\n\t\t\t\t// and the next rune (which should be cut off) is an emoji.\n\t\t\t\tvar sb strings.Builder\n\t\t\t\t// fill limit-1 runes with simple ASCII\n\t\t\t\tsb.WriteString(strings.Repeat(\"a\", limit-1))\n\t\t\t\t// add a CJK rune (one rune)\n\t\t\t\tsb.WriteString(\"你\") // Chinese character\n\t\t\t\t// add an extra emoji that exceeds the limit\n\t\t\t\tsb.WriteString(\"😀\")\n\t\t\t\treturn sb.String()\n\t\t\t}(),\n\t\t\twant: func() string {\n\t\t\t\tvar sb strings.Builder\n\t\t\t\tsb.WriteString(strings.Repeat(\"a\", limit-1))\n\t\t\t\tsb.WriteString(\"你\")\n\t\t\t\tif hasEllipsis {\n\t\t\t\t\treturn sb.String() + \"…\"\n\t\t\t\t}\n\t\t\t\treturn sb.String()\n\t\t\t}(),\n\t\t},\n\t}\n\n\tfor _, tc := range tests {\n\t\ttc := tc\n\t\tt.Run(tc.name, func(t *testing.T) {\n\t\t\tni := entity.NewsItem{Content: tc.input}\n\t\t\tgot := ni.Summary()\n\n\t\t\tif got != tc.want {\n\t\t\t\tt.Fatalf(\"unexpected summary.\\nwant: %q\\n got: %q\", tc.want, got)\n\t\t\t}\n\t\t\tif !utf8.ValidString(got) {\n\t\t\t\tt.Fatalf(\"resulting summary is not valid UTF-8: %q\", got)\n\t\t\t}\n\t\t\t// Ensure the result does not exceed the limit (excluding possible ellipsis)\n\t\t\trunes := []rune(got)\n\t\t\tif hasEllipsis && len(runes) > 0 && runes[len(runes)-1] == '…' {\n\t\t\t\trunes = runes[:len(runes)-1]\n\t\t\t}\n\t\t\tif len(runes) > limit {\n\t\t\t\tt.Fatalf(\"summary exceeds max runes: have %d, limit %d\", len(runes), limit)\n\t\t\t}\n\t\t})\n\t}\n}",
+    "go_exit_code": 1,
+    "go_duration_ms": 3303,
+    "go_stdout": "?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\nFAIL\tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity [build failed]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t0.821s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t0.413s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t1.129s [no tests to run]\nFAIL\n",
+    "go_stderr": "# github.com/nikita-rulenko/heisenbug-portal/internal/entity_test [github.com/nikita-rulenko/heisenbug-portal/internal/entity.test]\ninternal/entity/zz_bench_wide_news_summary_emoji_e104b40a_test.go:15:13: not enough arguments in call to ni.Summary\n\thave ()\n\twant (int)\ninternal/entity/zz_bench_wide_news_summary_emoji_e104b40a_test.go:77:11: not enough arguments in call to ni.Summary\n\thave ()\n\twant (int)\n",
+    "judge_latency_ms": 10038,
+    "judge_raw": "```json\n{\n  \"fact_grounding\": 1,\n  \"convention_match\": 3,\n  \"coverage_depth\": 4,\n  \"runs_clean\": 1,\n  \"divergence\": 4,\n  \"notes\": \"Тест имеет хорошую структуру table-driven с t.Run() и проверяет важные edge-case с emoji и CJK символами, но содержит критическую выдумку: метод Summary() без параметров не существует (реальный метод требует maxRunes int). Также используется неверный символ эллипсиса '…' вместо реального '...'. Тест не компилируется из-за этих выдумок.\"\n}\n```",
+    "scores": {
+      "fact_grounding": 1,
+      "convention_match": 3,
+      "coverage_depth": 4,
+      "runs_clean": 1,
+      "divergence": 4,
+      "notes": "Тест имеет хорошую структуру table-driven с t.Run() и проверяет важные edge-case с emoji и CJK символами, но содержит критическую выдумку: метод Summary() без параметров не существует (реальный метод требует maxRunes int). Также используется неверный символ эллипсиса '…' вместо реального '...'. Тест не компилируется из-за этих выдумок.",
+      "total": 9,
+      "max_total": 16
+    }
+  },
+  "free": {
+    "topic_id": "free_agent_choice",
+    "target": "<agent-chosen>",
+    "test_name": "TestUnitBenchC0B8A596",
+    "test_path": "internal/entity/zz_bench_free_agent_choice_c0b8a596_test.go",
+    "plan_latency_ms": 9973,
+    "plan_tokens_in": 3642,
+    "plan_tokens_out": 1749,
+    "test_source": "package entity_test\n\n// CHOICE: Product.ApplyDiscount — edge cases for discount validation not covered\nimport (\n\t\"math\"\n\t\"testing\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBenchC0B8A596(t *testing.T) {\n\tconst eps = 0.1\n\n\ttests := []struct {\n\t\tname       string\n\t\tprice      float64\n\t\tdiscount   float64\n\t\twantPrice  float64\n\t\twantErr    bool\n\t}{\n\t\t{\n\t\t\tname:      \"no discount\",\n\t\t\tprice:     100,\n\t\t\tdiscount:  0,\n\t\t\twantPrice: 100,\n\t\t\twantErr:   false,\n\t\t},\n\t\t{\n\t\t\tname:      \"half discount\",\n\t\t\tprice:     200,\n\t\t\tdiscount:  50,\n\t\t\twantPrice: 100,\n\t\t\twantErr:   false,\n\t\t},\n\t\t{\n\t\t\tname:      \"full discount\",\n\t\t\tprice:     150,\n\t\t\tdiscount:  100,\n\t\t\twantPrice: 0,\n\t\t\twantErr:   false,\n\t\t},\n\t\t{\n\t\t\tname:      \"negative discount\",\n\t\t\tprice:     100,\n\t\t\tdiscount:  -10,\n\t\t\twantPrice: 0,\n\t\t\twantErr:   true,\n\t\t},\n\t\t{\n\t\t\tname:      \"over discount\",\n\t\t\tprice:     100,\n\t\t\tdiscount:  150,\n\t\t\twantPrice: 0,\n\t\t\twantErr:   true,\n\t\t},\n\t}\n\n\tfor _, tt := range tests {\n\t\tt.Run(tt.name, func(t *testing.T) {\n\t\t\tp := entity.Product{Price: tt.price}\n\t\t\terr := p.ApplyDiscount(tt.discount)\n\n\t\t\tif (err != nil) != tt.wantErr {\n\t\t\t\tt.Fatalf(\"expected error %v, got %v\", tt.wantErr, err)\n\t\t\t}\n\t\t\tif !tt.wantErr {\n\t\t\t\tif math.Abs(p.Price-tt.wantPrice) > eps {\n\t\t\t\t\tt.Fatalf(\"price after discount = %v, want %v (tolerance %v)\", p.Price, tt.wantPrice, eps)\n\t\t\t\t}\n\t\t\t}\n\t\t})\n\t}\n}",
+    "go_exit_code": 1,
+    "go_duration_ms": 3041,
+    "go_stdout": "?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\nFAIL\tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity [build failed]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t0.937s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t0.458s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t1.369s [no tests to run]\nFAIL\n",
+    "go_stderr": "# github.com/nikita-rulenko/heisenbug-portal/internal/entity_test [github.com/nikita-rulenko/heisenbug-portal/internal/entity.test]\ninternal/entity/zz_bench_free_agent_choice_c0b8a596_test.go:63:15: invalid operation: err != nil (mismatched types float64 and untyped nil)\n",
+    "judge_latency_ms": 10714,
+    "judge_raw": "```json\n{\n  \"chosen_target\": \"Product.ApplyDiscount\",\n  \"fact_grounding\": 3,\n  \"convention_match\": 3,\n  \"coverage_depth\": 3,\n  \"runs_clean\": 1,\n  \"target_choice\": 2,\n  \"divergence\": 1,\n  \"notes\": \"Выбор метода ApplyDiscount слабый — это простой метод с явной логикой, который уже наверняка покрыт базовыми тестами. В исполнении есть критическая ошибка: тест ожидает возврат ошибки от метода, который в реальности возвращает только float64, что приводит к ошибке компиляции. Edge-cases подобраны разумно, но реализация нерабочая.\"\n}\n```",
+    "scores": {
+      "fact_grounding": 3,
+      "convention_match": 3,
+      "coverage_depth": 3,
+      "runs_clean": 1,
+      "target_choice": 2,
+      "divergence": 1,
+      "notes": "Выбор метода ApplyDiscount слабый — это простой метод с явной логикой, который уже наверняка покрыт базовыми тестами. В исполнении есть критическая ошибка: тест ожидает возврат ошибки от метода, который в реальности возвращает только float64, что приводит к ошибке компиляции. Edge-cases подобраны разумно, но реализация нерабочая.",
+      "chosen_target": "Product.ApplyDiscount",
+      "total": 12,
+      "max_total": 20
+    }
+  }
+}

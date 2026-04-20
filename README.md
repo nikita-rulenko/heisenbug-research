@@ -416,6 +416,33 @@ python3 benchmark_context_recovery.py all
 - **LoCoMo Benchmark**: Long Context Models evaluation — [arxiv.org/abs/2401.17919](https://arxiv.org/abs/2401.17919)
 - **RAG Survey**: Retrieval-Augmented Generation — [arxiv.org/abs/2312.10997](https://arxiv.org/abs/2312.10997)
 
+## Bonus: Test-Writing Stage (для тех, кто заглянул после доклада)
+
+В докладе со сцены этого нет — там нет времени гонять `go test` в реальном времени. Но если вам интересно, **может ли агент применить онбординг для написания РЕАЛЬНОГО рабочего теста**, в репозитории есть отдельная стадия:
+
+После онбординга и Q&A, агент получает один топик («напиши новый unit-тест для `Order.CalculateTotal` с edge-cases»), пишет Go-файл прямо в `coffee-portal`, мы запускаем `go test`, а независимый судья (DeepSeek) оценивает результат по 4 критериям + отдельной метрике divergence (сколько НЕсуществующих сущностей упомянуто).
+
+Запускается до **3 топиков** на подход:
+- **fixed** — один и тот же метод для всех 4 подходов → прямое сравнение качества онбординга
+- **wide** — рандом из курированного пула, seed=`hash(approach)` → воспроизводимо, без cherry-pick
+- **free** — агент САМ выбирает метод из контекста, который, по его мнению, реально стоит покрыть. Самый интересный режим: показывает не «помнит ли», а «адекватен ли в принятии решений после онбординга». Здесь у судьи есть отдельный критерий `target_choice` (1-4) — насколько неочевиден и осмыслен был выбор.
+
+После каждого топика — полный `git reset --hard HEAD && git clean -fd` в портале.
+
+Не для дашборда — Makefile-only:
+
+```bash
+cd benchmarks/context_recovery
+make bench-tw                              # все 4 подхода × TOPIC (default: both = fixed+wide)
+make bench-tw-approach APPROACH=helixir_mcp TOPIC=free
+make bench-tw TOPIC=all                    # все 4 подхода × все 3 топика
+make bench-full TOPIC=all                  # бенч + test-writing все 3 топика
+```
+
+**[Полный дизайн и обоснования →](docs/methodology/05_test_writing_design.md)**
+
+---
+
 ## Лицензия
 
 Материалы исследования предоставляются для образовательных и научных целей.

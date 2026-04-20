@@ -33,6 +33,10 @@ benchmarks/context_recovery/results/runs/*
 # Runtime state (server pid/log)
 benchmarks/context_recovery/.server.log
 benchmarks/context_recovery/.server.pid
+benchmarks/context_recovery/.bench-*.log
+
+# Cached onboarding contexts (regenerable; large; per-machine)
+benchmarks/context_recovery/results/contexts/
 
 # Conference slides (kept local)
 presentation/

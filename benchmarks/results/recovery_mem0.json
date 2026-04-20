@@ -2,7 +2,7 @@
   "approach": "mem0",
   "onboarding_metrics": {
     "tool_calls": 6,
-    "retrieval_time_ms": 831,
+    "retrieval_time_ms": 941,
     "context_chars": 19863,
     "context_tokens_est": 4965
   },
@@ -13,7 +13,7 @@
         {
           "question_id": "Q1",
           "question": "Какая архитектура проекта Bean & Brew? Перечисли все слои и их роли.",
-          "answer": "**Bean & Brew – Clean Architecture**\n\nThe project is built on a classic *Clean Architecture* (also called “hexagonal” or “onion”) layout.  \nFour logical layers are defined; each one has a single, well‑defined responsibility and depends only on the layers that are *inner* to it.\n\n| Layer (package) | Primary purpose / responsibilities | Typical contents (files, symbols) |\n|-----------------|--------------------------------------|-----------------------------------|\n| **entity** | Core business dom",
+          "answer": "**Архитектура проекта Bean & Brew – Clean Architecture**\n\n| Слой | Что находится в слое | Основные обязанности (роль) |\n|------|----------------------|-----------------------------|\n| **entity** | • Доменные модели (Product, Order, Category, NewsItem и т.п.)  <br>• Методы бизнес‑логики (например, `Product.ApplyDiscount`) | • Инкапсулирует чистую бизнес‑логику, не зависящую от внешних технологий. <br>• Содержит валидацию и правила предметной области. <br>• Тестируется полностью (coverage = 100 %,",
           "scores": {
             "accuracy": 4,
             "completeness": 4,
@@ -23,145 +23,31 @@
             "total": 20
           },
           "total": 20,
-          "latency_ms": 987,
+          "latency_ms": 1962,
           "input_tokens": 5264,
-          "output_tokens": 826
+          "output_tokens": 898
         },
         {
           "question_id": "Q2",
           "question": "Если API-запрос POST /orders приходит с пустым customer_id и пустым списком items — какую ошибку и какой HTTP-статус вернёт сервер? Опиши всю цепочку проверок: на каком слое что проверяется и как ошибка превращается в HTTP-код.",
-          "answer": "**Что вернёт клиенту сервер**\n\n| Параметр запроса | Ошибка | HTTP‑статус |\n|------------------|--------|-------------|\n| `customer_id` — пустой **и** `items` — пустой массив | `order: validation error – missing customer_id or empty items` | **400 Bad Request** |\n\n---\n\n## Полный путь от HTTP‑запроса до ответа\n\n### 1. Handler (слой *handler*)\n\n*Файл:* `internal/handler/order_handler.go`  \n*Функция:* `CreateOrderHandler(w http.ResponseWriter, r *http.Request)`\n\n1. **Парсинг тела** – `json.NewDecode",
+          "answer": "**Что вернёт сервер?**  \nПри POST `/orders` с пустым `customer_id` **и** пустым массивом `items` запрос будет отклонён на уровне бизнес‑логики и клиент получит **HTTP 400 Bad Request**. В теле ответа будет JSON‑сообщение‑ошибка, в котором указаны оба нарушения (например — `\"customer_id is required\"` и `\"order must contain at least one item\"`).  \n\n---\n\n## Полный путь проверки и трансформации ошибки\n\n| Шаг | Слой | Что происходит | Где находится код | Как ошибка поднимается |\n|-----|------|-------",
           "scores": {
             "accuracy": 2,
-            "completeness": 3,
-            "context_utilization": 2,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 15
-          },
-          "total": 15,
-          "latency_ms": 2754,
-          "input_tokens": 5305,
-          "output_tokens": 1780
-        },
-        {
-          "question_id": "Q3",
-          "question": "Почему TestIntegrationProductSearch назвали flaky и не удалили? Какой альтернативный фикс рассматривался и почему его отвергли? Объясни trade-off.",
-          "answer": "**Почему тест `TestIntegrationProductSearch` считается *flaky* и почему его не удалили**\n\n| Причина | Что происходит | Почему это делает тест «flaky» |\n|--------|----------------|--------------------------------|\n| **Unicode‑LIKE** | В запросах репозитория используется `LIKE`‑оператор SQLite. Для ASCII‑символов он нечувствителен к регистру, но для Unicode (в частности для кириллических символов) **не**. | На разных версиях SQLite (и даже на разных сборках без ICU) результат `LIKE '%кофе%'` может",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 4,
-            "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 20
-          },
-          "total": 20,
-          "latency_ms": 2627,
-          "input_tokens": 5279,
-          "output_tokens": 1406
-        },
-        {
-          "question_id": "Q4",
-          "question": "Сколько всего test runs в проекте и как они распределены по 4 слоям? Назови точное число на каждом слое и общую сумму.",
-          "answer": "**Общее количество запусков тестов**\n\n- В сообщениях о проекте указано, что за всё время **≈ 637 прогонов** (`~637 прогонов в go test -v (функции + sub‑tests через t.Run)`). Это и есть суммарное количество запусков тестов во всём проекте.\n\n**Распределение по слоям**\n\n| Слой (Clean Architecture) | Кол‑во test‑run’ов, указанных в контексте |\n|----------------------------|--------------------------------------------|\n| **entity**                 | **237** тест‑ранов (строго указано: *“Entity layer ",
-          "scores": {
-            "accuracy": 1,
-            "completeness": 1,
-            "context_utilization": 2,
-            "specificity": 2,
-            "causal_depth": 1,
-            "total": 7
-          },
-          "total": 7,
-          "latency_ms": 1596,
-          "input_tokens": 5277,
-          "output_tokens": 1364
-        },
-        {
-          "question_id": "Q5",
-          "question": "Если разработчик меняет схему миграций в migrations.go — какие тесты продолжат работать БЕЗ модификаций? Назови конкретный слой, точное число тестов и объясни почему именно они не пострадают.",
-          "answer": "**Слой, который останется полностью неизменным:** **entity**  \n\n**Точное количество тестов, которые продолжат проходить без каких‑либо правок:** **237 тестов** (это всё тестовое покрытие слоя *entity* — 100 % coverage, 237 запусков).\n\n**Почему именно эти тесты не пострадают, когда меняется `migrations.go`:**\n\n| Причина | Как это отражается в тестах |\n|--------|----------------------------|\n| **Тесты слоя *entity* работают только с чистыми доменными объектами** (структуры, методы, валидации) и не",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 3,
-            "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 19
-          },
-          "total": 19,
-          "latency_ms": 995,
-          "input_tokens": 5294,
-          "output_tokens": 803
-        },
-        {
-          "question_id": "Q6",
-          "question": "Ревьюер предлагает: 'перенесём Product.ApplyDiscount из entity-слоя в usecase-слой для консистентности с другими бизнес-операциями'. Это хорошая идея с точки зрения архитектуры проекта? Обоснуй через конкретные свойства кода и тестов.",
-          "answer": "**Кратко:** Нет — переносить `Product.ApplyDiscount` из слоя **entity** в слой **usecase** не улучшит архитектуру проекта, а наоборот нарушит её принципы и ухудшит покрытие тестами.\n\n---\n\n## Почему `ApplyDiscount` логично оставлять в слое **entity**\n\n| Свойство проекта | Что это значит для `ApplyDiscount` |\n|------------------|-------------------------------------|\n| **Clean Architecture** (entity → usecase → repository → handler) | Слой *entity* хранит **доменные правила** – всё, что относится ",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 4,
-            "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 20
-          },
-          "total": 20,
-          "latency_ms": 1668,
-          "input_tokens": 5306,
-          "output_tokens": 1679
-        }
-      ],
-      "metrics": {
-        "total_input_tokens": 36754,
-        "total_output_tokens": 7858,
-        "total_time_ms": 10627,
-        "messages": 6
-      },
-      "total_score": 101
-    },
-    {
-      "run_id": 2,
-      "results": [
-        {
-          "question_id": "Q1",
-          "question": "Какая архитектура проекта Bean & Brew? Перечисли все слои и их роли.",
-          "answer": "**Архитектура проекта Bean & Brew — Clean Architecture**  \n\n| Слой | Пакет (примерный путь) | Что находится в слое | Основная роль |\n|------|------------------------|----------------------|----------------|\n| **Entity** | `internal/domain/entity` (или `entity`) | Доменные модели и чистый бизнес‑логика: структуры `Product`, `Order`, `Category` и методы над ними (например, `Product.ApplyDiscount`). | Содержит **самую фундаментальную бизнес‑логику**, не зависящую от внешних технологий. Всё, что отн",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 3,
+            "completeness": 2,
             "context_utilization": 4,
             "specificity": 4,
             "causal_depth": 3,
-            "total": 18
+            "total": 15
           },
-          "total": 18,
-          "latency_ms": 1486,
-          "input_tokens": 5264,
-          "output_tokens": 769
-        },
-        {
-          "question_id": "Q2",
-          "question": "Если API-запрос POST /orders приходит с пустым customer_id и пустым списком items — какую ошибку и какой HTTP-статус вернёт сервер? Опиши всю цепочку проверок: на каком слое что проверяется и как ошибка превращается в HTTP-код.",
-          "answer": "**Кратко:**  \nPOST `/orders` с `customer_id = \"\"` и `items = []` приведёт к **HTTP 400 Bad Request**.  \nОшибка формируется в слое **entity**, пробрасывается через **use‑case**, а в слое **handler** маппится на статус 400.\n\n---\n\n## 1. Слой **entity** – проверка бизнес‑правил\n\n**Файл:** `internal/domain/entity/order.go` (или аналогичный в `entity`‑пакете)  \n\n```go\ntype Order struct {\n    ID         string\n    CustomerID string\n    Items      []OrderItem\n    // …\n}\n\n// Validate проверяет, что заказ",
-          "scores": {
-            "accuracy": 3,
-            "completeness": 3,
-            "context_utilization": 4,
-            "specificity": 3,
-            "causal_depth": 4,
-            "total": 17
-          },
-          "total": 17,
-          "latency_ms": 1374,
+          "total": 15,
+          "latency_ms": 1711,
           "input_tokens": 5305,
-          "output_tokens": 1730
+          "output_tokens": 1512
         },
         {
           "question_id": "Q3",
           "question": "Почему TestIntegrationProductSearch назвали flaky и не удалили? Какой альтернативный фикс рассматривался и почему его отвергли? Объясни trade-off.",
-          "answer": "**Почему `TestIntegrationProductSearch` считается *flaky* и почему её не удалили**\n\n| Причина | Что происходит | Почему это делает тест «flaky» |\n|--------|----------------|--------------------------------|\n| **Unicode‑LIKE** | Тест ищет товары через `LIKE`‑запросы, где в шаблоне используется кириллический текст (например `'%кофе%'`). В SQLite оператор `LIKE` **регистронезависим только для ASCII**; для Unicode‑символов (кириллица) регистр учитывается и поведение зависит от того, какая версия SQL",
+          "answer": "**Почему `TestIntegrationProductSearch` считается *flaky* и почему её не удалили**\n\n| Причина | Что происходит | Почему тест «падает» иногда |\n|--------|----------------|-----------------------------|\n| **SQLite LIKE не Unicode‑friendly** | В запросах репозитория используется `LIKE` для поиска продуктов. Для ASCII‑символов SQLite делает сравнение без учёта регистра, но для Unicode‑символов (в частности — кириллицы) сравнение **чувствительно к регистру** и зависит от версии SQLite. | При разных в",
           "scores": {
             "accuracy": 4,
             "completeness": 4,
@@ -171,128 +57,14 @@
             "total": 20
           },
           "total": 20,
-          "latency_ms": 1903,
+          "latency_ms": 1570,
           "input_tokens": 5279,
-          "output_tokens": 1472
+          "output_tokens": 1290
         },
         {
           "question_id": "Q4",
           "question": "Сколько всего test runs в проекте и как они распределены по 4 слоям? Назови точное число на каждом слое и общую сумму.",
-          "answer": "**Всего в проекте — ≈ 637 запусков тестов** (это число, которое фиксируется в журнале `go test -v` и упоминается в контексте «~637 прогонов в go test -v (функции + sub‑tests через t.Run)»).\n\nРаспределение по четырём слоям Clean Architecture выглядит так:\n\n| Слой                     | Кол‑во test‑run’ов |\n|--------------------------|-------------------|\n| **entity**               | **237** |\n| **usecase**              | **150** |\n| **repository / sqlite** | **150** |\n| **handler**              | ",
-          "scores": {
-            "accuracy": 1,
-            "completeness": 1,
-            "context_utilization": 2,
-            "specificity": 2,
-            "causal_depth": 1,
-            "total": 7
-          },
-          "total": 7,
-          "latency_ms": 1044,
-          "input_tokens": 5277,
-          "output_tokens": 1222
-        },
-        {
-          "question_id": "Q5",
-          "question": "Если разработчик меняет схему миграций в migrations.go — какие тесты продолжат работать БЕЗ модификаций? Назови конкретный слой, точное число тестов и объясни почему именно они не пострадают.",
-          "answer": "**Те слой — entity**  \n**Количество тестов — 237** (это все запуски тестов в entity‑слое, см. отчёт «Entity layer in Bean & Brew has 237 test runs»).\n\n**Почему они не пострадают**\n\n| Причина | Как это проявляется в коде |\n|--------|----------------------------|\n| **Тесты работают только с чистыми доменными объектами** | В entity‑слое находятся типы `Product`, `Order`, `Category` и их методы (например, `Product.ApplyDiscount`). Тесты проверяют бизнес‑логику (валидацию, расчёты, преобразования) бе",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 3,
-            "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 19
-          },
-          "total": 19,
-          "latency_ms": 883,
-          "input_tokens": 5294,
-          "output_tokens": 752
-        },
-        {
-          "question_id": "Q6",
-          "question": "Ревьюер предлагает: 'перенесём Product.ApplyDiscount из entity-слоя в usecase-слой для консистентности с другими бизнес-операциями'. Это хорошая идея с точки зрения архитектуры проекта? Обоснуй через конкретные свойства кода и тестов.",
-          "answer": "**Краткий ответ:**  \nНет – перенос `Product.ApplyDiscount` из слоя **entity** в слой **usecase** ухудшит чистую архитектуру проекта и приведёт к реальному ухудшению качества кода (потеря покрытий, дублирование тестов, нарушение границ ответственности).\n\n---\n\n## Почему метод должен оставаться в **entity‑слое**\n\n| Свойство проекта | Что это значит для `ApplyDiscount` |\n|------------------|-------------------------------------|\n| **Clean Architecture** – entity слой хранит *доменные модели и их биз",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 4,
-            "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 20
-          },
-          "total": 20,
-          "latency_ms": 1560,
-          "input_tokens": 5306,
-          "output_tokens": 1596
-        }
-      ],
-      "metrics": {
-        "total_input_tokens": 36754,
-        "total_output_tokens": 7541,
-        "total_time_ms": 8250,
-        "messages": 6
-      },
-      "total_score": 101
-    },
-    {
-      "run_id": 3,
-      "results": [
-        {
-          "question_id": "Q1",
-          "question": "Какая архитектура проекта Bean & Brew? Перечисли все слои и их роли.",
-          "answer": "**Архитектура проекта Bean & Brew – Clean Architecture**\n\n| Слой | Пакет (примерный путь) | Основная роль | Что находится в слое |\n|------|------------------------|---------------|----------------------|\n| **Entity** | `internal/domain/entity` (или `entity`) | Содержит чистые бизнес‑модели и бизнес‑правила. Здесь находятся структуры, которые описывают предметную область (Product, Order, Category, NewsItem и т.д.) и методы, реализующие бизнес‑логику без зависимости от внешних технологий. Пример: ",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 4,
-            "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 20
-          },
-          "total": 20,
-          "latency_ms": 1302,
-          "input_tokens": 5264,
-          "output_tokens": 854
-        },
-        {
-          "question_id": "Q2",
-          "question": "Если API-запрос POST /orders приходит с пустым customer_id и пустым списком items — какую ошибку и какой HTTP-статус вернёт сервер? Опиши всю цепочку проверок: на каком слое что проверяется и как ошибка превращается в HTTP-код.",
-          "answer": "**Что произойдёт, когда клиент посылает запрос**\n\n```\nPOST /orders\n{\n    \"customer_id\": \"\",          // пустая строка\n    \"items\": []                 // пустой массив\n}\n```\n\n1. **Handler (слой `handler`)**  \n   * Файл `internal/handler/order_handler.go` (или аналогичный) получает запрос, читает тело и **десериализует** JSON в структуру `entity.Order`.  \n   * После десериализации вызывается **use‑case** `CreateOrder` (файл `internal/usecase/order_usecase.go`).\n\n2. **Use‑case (слой `usecase`)**  \n",
-          "scores": {
-            "accuracy": 3,
-            "completeness": 3,
-            "context_utilization": 2,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 16
-          },
-          "total": 16,
-          "latency_ms": 1210,
-          "input_tokens": 5305,
-          "output_tokens": 1203
-        },
-        {
-          "question_id": "Q3",
-          "question": "Почему TestIntegrationProductSearch назвали flaky и не удалили? Какой альтернативный фикс рассматривался и почему его отвергли? Объясни trade-off.",
-          "answer": "**Почему `TestIntegrationProductSearch` считается *flaky* и почему его не удалили**\n\n| Причина | Что происходит | Почему тест «падает» иногда |\n|--------|----------------|------------------------------|\n| **SQLite LIKE не Unicode‑friendly** | В запросах репозитория используется `LIKE`‑оператор для поиска товаров. Для ASCII‑символов он нечувствителен к регистру, но для Unicode‑символов (в частности — кириллицы) поведение зависит от версии SQLite и от того, включён ли ICU‑расширение. | На разных C",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 4,
-            "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 20
-          },
-          "total": 20,
-          "latency_ms": 1799,
-          "input_tokens": 5279,
-          "output_tokens": 1435
-        },
-        {
-          "question_id": "Q4",
-          "question": "Сколько всего test runs в проекте и как они распределены по 4 слоям? Назови точное число на каждом слое и общую сумму.",
-          "answer": "**Тест‑раны, известные из текущего контекста**\n\n| Слой (Clean Architecture) | Кол‑во известных `test runs` |\n|---------------------------|------------------------------|\n| **entity**                | **237** тест‑ранов* |\n| usecase                   | — (число в контексте не указано) |\n| repository / sqlite       | — (число в контексте не указано) |\n| handler                   | — (число в контексте не указано) |\n| **Итого**                 | **≥ 237** тест‑ранов* |\n\n\\* Эта цифра явно указана в ",
+          "answer": "**Общее количество запусков тестов** – **637** (это число, которое появляется в журнале `go test -v` и считается суммой всех запусков тестов и под‑тестов в проекте).\n\n**Распределение по слоям**\n\n| Слой                | Кол‑во test‑runs |\n|---------------------|------------------|\n| **entity**          | **237** тест‑ранов |\n| **usecase**         | (точное число в контексте не указано) |\n| **repository/sqlite**| (точное число в контексте не указано) |\n| **handler**         | (точное число в конте",
           "scores": {
             "accuracy": 1,
             "completeness": 1,
@@ -302,60 +74,31 @@
             "total": 5
           },
           "total": 5,
-          "latency_ms": 952,
+          "latency_ms": 1574,
           "input_tokens": 5277,
-          "output_tokens": 811
+          "output_tokens": 1271
         },
         {
           "question_id": "Q5",
           "question": "Если разработчик меняет схему миграций в migrations.go — какие тесты продолжат работать БЕЗ модификаций? Назови конкретный слой, точное число тестов и объясни почему именно они не пострадают.",
-          "answer": "**Слой, который останется полностью неизменным — ** **`entity`**.  \n\n**Точное количество тестов, которые продолжат проходить без каких‑либо правок — ** **237** тестов** (это всё, что покрывает слой `entity`).  \n\n### Почему именно они не пострадают\n\n| Причина | Как она проявляется в проекте |\n|--------|------------------------------|\n| **Тесты работают только с бизнес‑моделью** | В слое `entity` находятся типы `Product`, `Order`, `Category` и т.п., а также их методы (например, `Product.ApplyDisco",
+          "answer": "**Тесты, которые останутся рабочими без каких‑либо правок – это тесты **слоя `entity`**.  \n\n- **Точное количество:** **237 тестов** (в контексте указано «Entity layer in Bean & Brew has 237 test runs»).  \n- **Почему они не пострадают:**  \n  1. **Чисто бизнес‑логика.** Код в слое `entity` (модели `Product`, `Order`, `Category` и т.п.) не взаимодействует с базой данных – он не использует миграции, схемы таблиц или драйвер SQLite.  \n  2. **Отсутствие зависимости от `migrations.go`.** Все функции и ",
           "scores": {
             "accuracy": 4,
-            "completeness": 3,
+            "completeness": 2,
             "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 19
+            "specificity": 3,
+            "causal_depth": 3,
+            "total": 16
           },
-          "total": 19,
-          "latency_ms": 1048,
+          "total": 16,
+          "latency_ms": 1266,
           "input_tokens": 5294,
-          "output_tokens": 709
+          "output_tokens": 669
         },
         {
           "question_id": "Q6",
           "question": "Ревьюер предлагает: 'перенесём Product.ApplyDiscount из entity-слоя в usecase-слой для консистентности с другими бизнес-операциями'. Это хорошая идея с точки зрения архитектуры проекта? Обоснуй через конкретные свойства кода и тестов.",
-          "answer": "**Краткий ответ:**  \nНет — перенос `Product.ApplyDiscount` из слоя **entity** в слой **usecase** ухудшит соответствие проекту Clean Architecture и приведёт к реальным проблемам в тестовой базе (потеря покрытий, дублирование тестов, нарушение единой модели домена).\n\n---\n\n## Почему в текущем проекте метод должен оставаться в слое **entity**\n\n| Свойство проекта | Как оно относится к `Product.ApplyDiscount` |\n|------------------|--------------------------------------------|\n| **Clean Architecture** ",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 3,
-            "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 19
-          },
-          "total": 19,
-          "latency_ms": 1533,
-          "input_tokens": 5306,
-          "output_tokens": 1498
-        }
-      ],
-      "metrics": {
-        "total_input_tokens": 36754,
-        "total_output_tokens": 6510,
-        "total_time_ms": 7844,
-        "messages": 6
-      },
-      "total_score": 99
-    },
-    {
-      "run_id": 4,
-      "results": [
-        {
-          "question_id": "Q1",
-          "question": "Какая архитектура проекта Bean & Brew? Перечисли все слои и их роли.",
-          "answer": "**Архитектура проекта — Clean Architecture (чистая архитектура)**  \n\nПроект разбит на четыре основных слоя, каждый из которых имеет чётко определённую ответственность и не зависит от слоёв ниже него.\n\n| Слой | Пакет (пример) | Основная роль | Что находится в слое |\n|------|----------------|---------------|----------------------|\n| **Entity** | `entity` | Доменный уровень – бизнес‑модель и бизнес‑логика. Здесь описаны сущности (Product, Order, Category и т.д.) и их методы (например, `Product.Appl",
+          "answer": "**Кратко:** Нет, переносить `Product.ApplyDiscount` из слоя *entity* в слой *usecase* не является хорошей идеей для этого проекта.\n\n**Почему (с опорой на конкретные свойства кода и тестов)**  \n\n| Что мы знаем из контекста | Как это влияет на решение |\n|----------------------------|---------------------------|\n| **Clean‑Architecture**: проект построен по классической схеме *entity → usecase → repository → handler*.  | В слое **entity** находятся «чистые» бизнес‑правила – структуры и методы, котор",
           "scores": {
             "accuracy": 4,
             "completeness": 4,
@@ -365,31 +108,174 @@
             "total": 20
           },
           "total": 20,
-          "latency_ms": 1271,
+          "latency_ms": 2161,
+          "input_tokens": 5306,
+          "output_tokens": 1640
+        }
+      ],
+      "metrics": {
+        "total_input_tokens": 36754,
+        "total_output_tokens": 7280,
+        "total_time_ms": 10244,
+        "messages": 6
+      },
+      "total_score": 96
+    },
+    {
+      "run_id": 2,
+      "results": [
+        {
+          "question_id": "Q1",
+          "question": "Какая архитектура проекта Bean & Brew? Перечисли все слои и их роли.",
+          "answer": "**Архитектура проекта Bean & Brew – Clean Architecture**\n\nПроект построен по принципу **Clean Architecture** (чистая архитектура).  \nОн разбит на четыре основных слоя, каждый из которых имеет чётко определённую ответственность и не зависит от слоёв, расположенных ниже него.\n\n| Слой | Пакет (пример) | Что находится в слое | Основные роли |\n|------|----------------|----------------------|---------------|\n| **Entity** | `entity` | Доменные модели и бизнес‑логика. <br>‑ структуры `Product`, `Order`,",
+          "scores": {
+            "accuracy": 4,
+            "completeness": 4,
+            "context_utilization": 4,
+            "specificity": 4,
+            "causal_depth": 4,
+            "total": 20
+          },
+          "total": 20,
+          "latency_ms": 1661,
           "input_tokens": 5264,
-          "output_tokens": 931
+          "output_tokens": 1035
         },
         {
           "question_id": "Q2",
           "question": "Если API-запрос POST /orders приходит с пустым customer_id и пустым списком items — какую ошибку и какой HTTP-статус вернёт сервер? Опиши всю цепочку проверок: на каком слое что проверяется и как ошибка превращается в HTTP-код.",
-          "answer": "**Что произойдёт, если клиент отправит запрос**\n\n```\nPOST /orders\n{\n    \"customer_id\": \"\",          // пустая строка\n    \"items\": []                 // пустой массив\n}\n```\n\n**Ответ сервера** – **HTTP 400 Bad Request** с телом, в котором будет описана ошибка валидации (обычно JSON‑сообщение `\"customer_id is required\"` или `\"order must contain at least one item\"`).  \n\nНиже – полная цепочка, где и как происходит проверка и как ошибка превращается в HTTP‑код.\n\n---\n\n## 1. HTTP‑слой (handler)\n\n* **Фай",
+          "answer": "**Что произойдёт, когда клиент посылает запрос**\n\n```\nPOST /orders\n{\n    \"customer_id\": \"\",          // пустая строка\n    \"items\": []                 // пустой массив\n}\n```\n\n**Ответ сервера** – `400 Bad Request` с телом, содержащим сообщение о валидационной ошибке (например, `\"customer_id must not be empty\"` или `\"order must contain at least one item\"`).\n\n---\n\n## Полная цепочка проверок\n\n| Слой | Что проверяется | Где находится код | Как ошибка поднимается |\n|------|----------------|------------",
           "scores": {
-            "accuracy": 3,
+            "accuracy": 4,
             "completeness": 3,
-            "context_utilization": 2,
-            "specificity": 3,
+            "context_utilization": 4,
+            "specificity": 4,
+            "causal_depth": 4,
+            "total": 19
+          },
+          "total": 19,
+          "latency_ms": 2088,
+          "input_tokens": 5305,
+          "output_tokens": 1483
+        },
+        {
+          "question_id": "Q3",
+          "question": "Почему TestIntegrationProductSearch назвали flaky и не удалили? Какой альтернативный фикс рассматривался и почему его отвергли? Объясни trade-off.",
+          "answer": "**Почему `TestIntegrationProductSearch` получил метку *flaky* и почему его не удалили**\n\n| Причина | Что именно происходит |\n|--------|-----------------------|\n| **SQLite LIKE не работает одинаково для Unicode** | В SQLite оператор `LIKE` регистронезависим только для ASCII‑символов. Для кириллического текста (Unicode) он **чувствителен к регистру** и в разных версиях SQLite может возвращать разные наборы строк. Тест ищет товары по части названия, написанной кириллицей, и поэтому иногда получает ",
+          "scores": {
+            "accuracy": 4,
+            "completeness": 4,
+            "context_utilization": 4,
+            "specificity": 4,
+            "causal_depth": 4,
+            "total": 20
+          },
+          "total": 20,
+          "latency_ms": 5096,
+          "input_tokens": 5279,
+          "output_tokens": 1409
+        },
+        {
+          "question_id": "Q4",
+          "question": "Сколько всего test runs в проекте и как они распределены по 4 слоям? Назови точное число на каждом слое и общую сумму.",
+          "answer": "**Ответ (исходя только из предоставленного контекста)**  \n\n| Слой проекта | Кол‑во test‑runs* |\n|--------------|-------------------|\n| **entity**   | **237** |\n| **usecase**  | — (точное число в контексте не указано) |\n| **repository / sqlite** | — (точное число в контексте не указано) |\n| **handler**  | — (точное число в контексте не указано) |\n| **Итого**    | **≈ 637** (общее количество прогонов `go test -v`, включая функции + sub‑tests) |\n\n\\* `test‑runs` – это количество запусков тестов (вкл",
+          "scores": {
+            "accuracy": 2,
+            "completeness": 1,
+            "context_utilization": 1,
+            "specificity": 1,
+            "causal_depth": 1,
+            "total": 6
+          },
+          "total": 6,
+          "latency_ms": 1481,
+          "input_tokens": 5277,
+          "output_tokens": 1520
+        },
+        {
+          "question_id": "Q5",
+          "question": "Если разработчик меняет схему миграций в migrations.go — какие тесты продолжат работать БЕЗ модификаций? Назови конкретный слой, точное число тестов и объясни почему именно они не пострадают.",
+          "answer": "**Слой, который останется полностью «непотрёпанным» — слой **`entity`**.**  \n\n- **Точное количество тестов:** **237** (это — все тест‑запуски, которые относятся к слою `entity`; в отчёте покрытие указано как `entity=100.0%` и `Entity layer in Bean & Brew has 237 test runs`).  \n\n- **Почему они не пострадают:**  \n  1. **Тесты слоя `entity` проверяют только чистую бизнес‑логику** (структуры `Product`, `Order`, `NewsItem` и их методы `ApplyDiscount`, `Validate` и т.п.).  \n  2. Они **не используют ре",
+          "scores": {
+            "accuracy": 4,
+            "completeness": 3,
+            "context_utilization": 4,
+            "specificity": 4,
+            "causal_depth": 4,
+            "total": 19
+          },
+          "total": 19,
+          "latency_ms": 896,
+          "input_tokens": 5294,
+          "output_tokens": 745
+        },
+        {
+          "question_id": "Q6",
+          "question": "Ревьюер предлагает: 'перенесём Product.ApplyDiscount из entity-слоя в usecase-слой для консистентности с другими бизнес-операциями'. Это хорошая идея с точки зрения архитектуры проекта? Обоснуй через конкретные свойства кода и тестов.",
+          "answer": "**Кратко:** Нет – переносить `Product.ApplyDiscount` из слоя **entity** в слой **usecase** не является хорошей идеей.  \n\n**Почему (подкреплено конкретными фактами из проекта):**\n\n| Что мы знаем о проекте | Как это относится к `ApplyDiscount` |\n|------------------------|--------------------------------------|\n| **Clean Architecture** – слой *entity* содержит «чистые» бизнес‑правила (модели и их методы), а слой *usecase* – координацию нескольких сущностей и взаимодействие с внешними зависимостями.",
+          "scores": {
+            "accuracy": 4,
+            "completeness": 4,
+            "context_utilization": 4,
+            "specificity": 4,
+            "causal_depth": 4,
+            "total": 20
+          },
+          "total": 20,
+          "latency_ms": 2832,
+          "input_tokens": 5306,
+          "output_tokens": 1550
+        }
+      ],
+      "metrics": {
+        "total_input_tokens": 36754,
+        "total_output_tokens": 7742,
+        "total_time_ms": 14054,
+        "messages": 6
+      },
+      "total_score": 104
+    },
+    {
+      "run_id": 3,
+      "results": [
+        {
+          "question_id": "Q1",
+          "question": "Какая архитектура проекта Bean & Brew? Перечисли все слои и их роли.",
+          "answer": "**Архитектура проекта Bean & Brew – Clean Architecture**\n\n| Слой | Пакет (примерный путь) | Что делает / какую роль выполняет |\n|------|------------------------|-----------------------------------|\n| **Entity** | `internal/domain/entity` (или аналогичный) | Содержит чистые бизнес‑модели и их методы. Здесь находятся структуры `Product`, `Order`, `Category` и т.п., а также бизнес‑логика, например метод **`Product.ApplyDiscount`**. Слой не зависит ни от каких внешних библиотек, ни от инфраструктуры",
+          "scores": {
+            "accuracy": 4,
+            "completeness": 4,
+            "context_utilization": 4,
+            "specificity": 4,
+            "causal_depth": 3,
+            "total": 19
+          },
+          "total": 19,
+          "latency_ms": 1058,
+          "input_tokens": 5264,
+          "output_tokens": 793
+        },
+        {
+          "question_id": "Q2",
+          "question": "Если API-запрос POST /orders приходит с пустым customer_id и пустым списком items — какую ошибку и какой HTTP-статус вернёт сервер? Опиши всю цепочку проверок: на каком слое что проверяется и как ошибка превращается в HTTP-код.",
+          "answer": "**Ответ:**  \nПри POST `/orders` с пустым `customer_id` **и** пустым массивом `items` сервер вернёт **HTTP 400 Bad Request**. Ошибка будет описана в теле ответа (обычно JSON‑поле `error`), например:\n\n```json\n{\n  \"error\": \"customer_id is required; items must contain at least one element\"\n}\n```\n\n### Полная цепочка проверок\n\n| Шаг | Слой | Что происходит | Где находится (примерный путь) | Как ошибка превращается в HTTP‑код |\n|-----|------|----------------|--------------------------------|-----------",
+          "scores": {
+            "accuracy": 2,
+            "completeness": 2,
+            "context_utilization": 3,
+            "specificity": 4,
             "causal_depth": 3,
             "total": 14
           },
           "total": 14,
-          "latency_ms": 1533,
+          "latency_ms": 1575,
           "input_tokens": 5305,
-          "output_tokens": 1749
+          "output_tokens": 1683
         },
         {
           "question_id": "Q3",
           "question": "Почему TestIntegrationProductSearch назвали flaky и не удалили? Какой альтернативный фикс рассматривался и почему его отвергли? Объясни trade-off.",
-          "answer": "**Почему `TestIntegrationProductSearch` считается *flaky* и почему её не удалили**\n\n| Причина | Что происходит | Почему это делает тест «flaky» |\n|--------|----------------|--------------------------------|\n| **Unicode‑LIKE в SQLite** | SQLite реализует оператор `LIKE` без учёта регистра только для ASCII‑символов. Для кириллических символов (`LIKE` «Кофе», «кофе» и т.п.) регистронезависимость **не гарантируется** и зависит от версии SQLite, от того, собран ли движок с ICU‑расширением и от параме",
+          "answer": "**Почему `TestIntegrationProductSearch` считают *flaky* и почему её не удалили**\n\n| Причина | Что происходит | Почему это делает тест «flaky» |\n|--------|----------------|--------------------------------|\n| **Unicode‑LIKE в SQLite** | SQLite реализует оператор `LIKE` без учёта регистра только для ASCII‑символов. Для кириллических символов (`LIKE` «Кофе», «кофе», …) регистр учитывается, а в разных версиях SQLite (и в разных сборках) поведение может отличаться. | Тест ищет товары по кириллическому",
           "scores": {
             "accuracy": 4,
             "completeness": 4,
@@ -399,31 +285,31 @@
             "total": 20
           },
           "total": 20,
-          "latency_ms": 3317,
+          "latency_ms": 3127,
           "input_tokens": 5279,
-          "output_tokens": 1458
+          "output_tokens": 1344
         },
         {
           "question_id": "Q4",
           "question": "Сколько всего test runs в проекте и как они распределены по 4 слоям? Назови точное число на каждом слое и общую сумму.",
-          "answer": "**Общее количество прогонов тестов**\n\n- В репозитории `heisenbug-coffee-portal` фиксируется **≈ 637 прогонов** (`~637 прогонов в go test -v (функции + sub‑tests через t.Run)`). Это и есть суммарное количество `test runs` во всём проекте.\n\n**Распределение по слоям (из того, что явно указано в контексте)**  \n\n| Слой (Clean Architecture) | Кол‑во `test runs` |\n|----------------------------|--------------------|\n| **entity**                 | **237** прогонов |\n| usecase                    | — (точн",
+          "answer": "**Общее количество запусков тестов**\n\n- По всему проекту — около **637 запусков** (`~637 прогонов в go test -v (функции + sub‑tests через t.Run)`).\n\n**Распределение по слоям**\n\n| Слой                     | Кол‑во запусков (test runs) |\n|--------------------------|-----------------------------|\n| **entity**               | **237** — указано явно в контексте (`Entity layer in Bean & Brew has 237 test runs`). |\n| **usecase**              | — не указано в предоставленном контексте. |\n| **repository/",
           "scores": {
             "accuracy": 2,
             "completeness": 1,
-            "context_utilization": 2,
+            "context_utilization": 1,
             "specificity": 2,
             "causal_depth": 1,
-            "total": 8
+            "total": 7
           },
-          "total": 8,
-          "latency_ms": 1098,
+          "total": 7,
+          "latency_ms": 2954,
           "input_tokens": 5277,
-          "output_tokens": 1255
+          "output_tokens": 1030
         },
         {
           "question_id": "Q5",
           "question": "Если разработчик меняет схему миграций в migrations.go — какие тесты продолжат работать БЕЗ модификаций? Назови конкретный слой, точное число тестов и объясни почему именно они не пострадают.",
-          "answer": "**Слой, который останется полностью неизменным:** **entity**  \n\n**Точное количество тестов, которые продолжат проходить без каких‑либо правок:** **237 тестов** (это 100 % покрытие слоя entity, указано в отчёте о покрытии).\n\n**Почему именно эти тесты не пострадают, когда меняется `migrations.go`:**\n\n| Причина | Подробности |\n|--------|--------------|\n| **Тесты слоя entity работают только с чистыми доменными объектами** | В слое entity находятся структуры `Product`, `Order`, `Category` и т.п., а т",
+          "answer": "**Слой, который останется полностью «непотрёпанным» — слой **`entity`**.**  \n\n- **Точное количество тестов:** **237** (это — все тесты, которые находятся в пакете `entity`; в отчёте о покрытии они отмечены как `entity=100.0%`).  \n- **Почему они не пострадают:**  \n\n  1. **Тесты уровня сущностей работают только с бизнес‑логикой** – они проверяют методы и функции, объявленные в файлах `entity/*.go` (например, `Product.ApplyDiscount`, `Order.Validate` и т.п.).  \n  2. **Никакой обращения к базе данны",
           "scores": {
             "accuracy": 4,
             "completeness": 3,
@@ -433,14 +319,14 @@
             "total": 19
           },
           "total": 19,
-          "latency_ms": 1015,
+          "latency_ms": 939,
           "input_tokens": 5294,
-          "output_tokens": 897
+          "output_tokens": 700
         },
         {
           "question_id": "Q6",
           "question": "Ревьюер предлагает: 'перенесём Product.ApplyDiscount из entity-слоя в usecase-слой для консистентности с другими бизнес-операциями'. Это хорошая идея с точки зрения архитектуры проекта? Обоснуй через конкретные свойства кода и тестов.",
-          "answer": "**Кратко:** Нет, переносить `Product.ApplyDiscount` из слоя **entity** в слой **usecase** не является хорошей идеей.  \n\n**Почему (с опорой на конкретные свойства кода и тестов):**\n\n| Что мы знаем из контекста | Как это влияет на решение |\n|----------------------------|---------------------------|\n| **`Product.ApplyDiscount` объявлен в слое entity** и уже покрыт тестами. В слое entity выполнено **237 тест‑запусков** и **100 % покрытие**. | Переместив метод, мы разрушим уже существующий набор unit",
+          "answer": "**Кратко:** Нет — перенос `Product.ApplyDiscount` из слоя **entity** в слой **usecase** нарушит чистую архитектуру проекта и ухудшит уже существующее покрытие тестами.  \n\n---\n\n## Почему метод остаётся в слое *entity*\n\n| Свойство проекта | Что это значит для `ApplyDiscount` |\n|------------------|-------------------------------------|\n| **Clean Architecture** (entity ↔ usecase ↔ repository ↔ handler) | Слой *entity* хранит **доменные модели и чистую бизнес‑логику**, не зависящую от инфраструктуры.",
           "scores": {
             "accuracy": 4,
             "completeness": 3,
@@ -450,159 +336,41 @@
             "total": 19
           },
           "total": 19,
-          "latency_ms": 4392,
+          "latency_ms": 5111,
           "input_tokens": 5306,
-          "output_tokens": 1663
+          "output_tokens": 1463
         }
       ],
       "metrics": {
         "total_input_tokens": 36754,
-        "total_output_tokens": 7953,
-        "total_time_ms": 12626,
+        "total_output_tokens": 7013,
+        "total_time_ms": 14764,
         "messages": 6
       },
-      "total_score": 100
-    },
-    {
-      "run_id": 5,
-      "results": [
-        {
-          "question_id": "Q1",
-          "question": "Какая архитектура проекта Bean & Brew? Перечисли все слои и их роли.",
-          "answer": "**Архитектура проекта Bean & Brew – Clean Architecture**\n\n| Слой | Пакет (пример) | Основная роль в системе | Ключевые элементы / примеры |\n|------|----------------|------------------------|----------------------------|\n| **Entity** | `entity` | Содержит чистые доменные модели и бизнес‑логику, не зависящую от инфраструктуры. Здесь находятся типы `Product`, `Order`, `Category` и методы, которые реализуют правила предметной области (например, `Product.ApplyDiscount`). | 237 тест‑запусков, покрытие",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 4,
-            "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 20
-          },
-          "total": 20,
-          "latency_ms": 1504,
-          "input_tokens": 5264,
-          "output_tokens": 787
-        },
-        {
-          "question_id": "Q2",
-          "question": "Если API-запрос POST /orders приходит с пустым customer_id и пустым списком items — какую ошибку и какой HTTP-статус вернёт сервер? Опиши всю цепочку проверок: на каком слое что проверяется и как ошибка превращается в HTTP-код.",
-          "answer": "**Кратко:**  \nЕсли клиент посылает запрос  \n\n```\nPOST /orders\n{\n    \"customer_id\": \"\",          // пустой\n    \"items\": []                 // пустой массив\n}\n```\n\nсервер вернёт **HTTP 400 Bad Request** с телом‑ошибкой, описывающей, что заказ некорректен (отсутствует `customer_id` и/или список товаров пуст).\n\n---\n\n## Полный путь от HTTP‑запроса до ответа\n\n| Шаг | Слой | Что происходит | Где (примерный путь в репозитории) | Как ошибка превращается в HTTP‑код |\n|-----|------|----------------|-------",
-          "scores": {
-            "accuracy": 3,
-            "completeness": 3,
-            "context_utilization": 4,
-            "specificity": 3,
-            "causal_depth": 4,
-            "total": 17
-          },
-          "total": 17,
-          "latency_ms": 1338,
-          "input_tokens": 5305,
-          "output_tokens": 1516
-        },
-        {
-          "question_id": "Q3",
-          "question": "Почему TestIntegrationProductSearch назвали flaky и не удалили? Какой альтернативный фикс рассматривался и почему его отвергли? Объясни trade-off.",
-          "answer": "**Почему `TestIntegrationProductSearch` считается *flaky* и почему её не удалили**\n\n| Причина | Что происходит в тесте | Почему это делает тест «flaky» |\n|--------|------------------------|--------------------------------|\n| **Unicode‑LIKE** | Тест ищет товары по кириллической подстроке (`LIKE '%кофе%'`). В SQLite оператор `LIKE` **регистронезависим только для ASCII**. Для Unicode (кириллица) сравнение зависит от версии SQLite и от того, включён ли ICU‑расширение. | На разных CI‑машинах (macOS D",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 4,
-            "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 20
-          },
-          "total": 20,
-          "latency_ms": 1470,
-          "input_tokens": 5279,
-          "output_tokens": 1328
-        },
-        {
-          "question_id": "Q4",
-          "question": "Сколько всего test runs в проекте и как они распределены по 4 слоям? Назови точное число на каждом слое и общую сумму.",
-          "answer": "**Общее количество запусков тестов в проекте** – **≈ 637** (это число упоминается в журнале `go test -v` как «~637 прогонов», где учитываются и вложенные sub‑tests, запущенные через `t.Run`).\n\n**Распределение по слоям Clean Architecture**\n\n| Слой                | Кол‑во test‑runs |\n|---------------------|-----------------|\n| **entity**          | **237** |\n| **usecase**         | **150** |\n| **repository (sqlite)** | **120** |\n| **handler**         | **130** |\n| **Итого**           | **637** |\n\n",
-          "scores": {
-            "accuracy": 2,
-            "completeness": 2,
-            "context_utilization": 2,
-            "specificity": 3,
-            "causal_depth": 2,
-            "total": 11
-          },
-          "total": 11,
-          "latency_ms": 1277,
-          "input_tokens": 5277,
-          "output_tokens": 1234
-        },
-        {
-          "question_id": "Q5",
-          "question": "Если разработчик меняет схему миграций в migrations.go — какие тесты продолжат работать БЕЗ модификаций? Назови конкретный слой, точное число тестов и объясни почему именно они не пострадают.",
-          "answer": "**Слой, который останется полностью неизменным — слой `entity`.**  \n\n- **Точное количество тестов:** **237** тестов (это — весь набор тестов, который сейчас выполнен в слое `entity`).  \n- **Почему они не пострадают:**  \n\n  1. **Тесты слоя `entity` проверяют только бизнес‑логику** (например, методы `Product.ApplyDiscount`, валидацию структур, расчёты цен, работу с типами `float64` и т.п.).  \n  2. **Никакой код из этих тестов не открывает базу данных** – они работают исключительно с чистыми Go‑стр",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 3,
-            "context_utilization": 4,
-            "specificity": 3,
-            "causal_depth": 4,
-            "total": 18
-          },
-          "total": 18,
-          "latency_ms": 983,
-          "input_tokens": 5294,
-          "output_tokens": 645
-        },
-        {
-          "question_id": "Q6",
-          "question": "Ревьюер предлагает: 'перенесём Product.ApplyDiscount из entity-слоя в usecase-слой для консистентности с другими бизнес-операциями'. Это хорошая идея с точки зрения архитектуры проекта? Обоснуй через конкретные свойства кода и тестов.",
-          "answer": "**Кратко:**  \nПеренос `Product.ApplyDiscount` из **entity‑слоя** в **usecase‑слой** — неправильный шаг для этой кодовой базы.  \n\n**Почему (с конкретными цифрами и ссылками на тесты):**\n\n| Что делает `ApplyDiscount` | Где он сейчас находится | Как покрыт тестами |\n|----------------------------|------------------------|--------------------|\n| Чистая бизнес‑логика над сущностью `Product` (вычисление цены после скидки, проверка границ, …​) | `entity`‑пакет (`entity/product.go`) | 237 запусков тестов",
-          "scores": {
-            "accuracy": 4,
-            "completeness": 4,
-            "context_utilization": 4,
-            "specificity": 4,
-            "causal_depth": 4,
-            "total": 20
-          },
-          "total": 20,
-          "latency_ms": 1562,
-          "input_tokens": 5306,
-          "output_tokens": 1466
-        }
-      ],
-      "metrics": {
-        "total_input_tokens": 36754,
-        "total_output_tokens": 6976,
-        "total_time_ms": 8134,
-        "messages": 6
-      },
-      "total_score": 106
+      "total_score": 98
     }
   ],
   "verification_stats": {
-    "total_median": 101,
-    "total_mean": 101.4,
-    "total_stddev": 2.7,
+    "total_median": 98,
+    "total_mean": 99.33,
+    "total_stddev": 4.16,
     "per_question": {
       "Q1": {
         "median": 20,
-        "mean": 19.6,
+        "mean": 19.67,
         "scores": [
           20,
-          18,
           20,
-          20,
-          20
+          19
         ]
       },
       "Q2": {
-        "median": 16,
-        "mean": 15.8,
+        "median": 15,
+        "mean": 16,
         "scores": [
           15,
-          17,
-          16,
-          14,
-          17
+          19,
+          14
         ]
       },
       "Q3": {
@@ -611,42 +379,34 @@
         "scores": [
           20,
           20,
-          20,
-          20,
           20
         ]
       },
       "Q4": {
-        "median": 7,
-        "mean": 7.6,
+        "median": 6,
+        "mean": 6,
         "scores": [
-          7,
-          7,
           5,
-          8,
-          11
+          6,
+          7
         ]
       },
       "Q5": {
         "median": 19,
-        "mean": 18.8,
+        "mean": 18,
         "scores": [
+          16,
           19,
-          19,
-          19,
-          19,
-          18
+          19
         ]
       },
       "Q6": {
         "median": 20,
-        "mean": 19.6,
+        "mean": 19.67,
         "scores": [
           20,
           20,
-          19,
-          19,
-          20
+          19
         ]
       }
     }
@@ -654,16 +414,16 @@
   "aggregate": {
     "context_tokens": 4965,
     "verification_input_tokens": 36754,
-    "verification_output_tokens": 7858,
-    "total_tokens": 49577,
-    "retrieval_time_ms": 831,
-    "verification_time_ms": 10627,
-    "total_time_ms": 176410,
-    "tool_time_ms": 11458,
+    "verification_output_tokens": 7013,
+    "total_tokens": 48732,
+    "retrieval_time_ms": 941,
+    "verification_time_ms": 14764,
+    "total_time_ms": 118997,
+    "tool_time_ms": 15705,
     "tool_calls": 6,
     "messages": 6,
-    "accuracy_pct": 84.2,
-    "part_a_pct": 71.7,
+    "accuracy_pct": 81.7,
+    "part_a_pct": 68.3,
     "part_b_pct": 100.0,
     "part_c_pct": 95.0,
     "retrieval_quality_pct": 58.3,
@@ -673,7 +433,90 @@
       "structure": 2,
       "total": 7
     },
-    "cost_estimate_usd": 0.029746,
-    "cost_performance_ratio": 3395.4
+    "cost_estimate_usd": 0.029239,
+    "cost_performance_ratio": 3351.7
+  },
+  "test_writing": {
+    "approach": "mem0",
+    "fixed": {
+      "topic_id": "fixed_order_total",
+      "target": "Order.CalculateTotal",
+      "test_name": "TestUnitBench6E2DC8A9",
+      "test_path": "internal/entity/zz_bench_fixed_order_total_6e2dc8a9_test.go",
+      "plan_latency_ms": 1592,
+      "plan_tokens_in": 3561,
+      "plan_tokens_out": 1417,
+      "test_source": "package entity_test\n\nimport (\n\t\"testing\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBench6E2DC8A9(t *testing.T) {\n\ttests := []struct {\n\t\tname  string\n\t\torder entity.Order\n\t\twant  float64\n\t}{\n\t\t{\n\t\t\tname:  \"empty items\",\n\t\t\torder: entity.Order{Items: []entity.OrderItem{}},\n\t\t\twant:  0,\n\t\t},\n\t\t{\n\t\t\tname:  \"zero quantity\",\n\t\t\torder: entity.Order{Items: []entity.OrderItem{{Quantity: 0, Price: 10.0}}},\n\t\t\twant:  0,\n\t\t},\n\t\t{\n\t\t\tname:  \"negative price\",\n\t\t\torder: entity.Order{Items: []entity.OrderItem{{Quantity: 2, Price: -5.0}}},\n\t\t\twant:  -10.0,\n\t\t},\n\t\t{\n\t\t\tname:  \"large quantity\",\n\t\t\torder: entity.Order{Items: []entity.OrderItem{{Quantity: 1_000_000, Price: 1.5}}},\n\t\t\twant:  1_500_000.0,\n\t\t},\n\t\t{\n\t\t\tname: \"mixed positive, zero and negative\",\n\t\t\torder: entity.Order{Items: []entity.OrderItem{\n\t\t\t\t{Quantity: 2, Price: 3.0},\n\t\t\t\t{Quantity: 0, Price: 100.0},\n\t\t\t\t{Quantity: 5, Price: -1.0},\n\t\t\t}},\n\t\t\twant: 2*3.0 + 5*(-1.0),\n\t\t},\n\t}\n\n\tfor _, tt := range tests {\n\t\tt.Run(tt.name, func(t *testing.T) {\n\t\t\tgot := tt.order.CalculateTotal()\n\t\t\tif diff := got - tt.want; diff > 0.1 || diff < -0.1 {\n\t\t\t\tt.Errorf(\"CalculateTotal() = %v, want %v\", got, tt.want)\n\t\t\t}\n\t\t})\n\t}\n}",
+      "go_exit_code": 0,
+      "go_duration_ms": 3541,
+      "go_stdout": "?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\n=== RUN   TestUnitBench6E2DC8A9\n=== RUN   TestUnitBench6E2DC8A9/empty_items\n=== RUN   TestUnitBench6E2DC8A9/zero_quantity\n=== RUN   TestUnitBench6E2DC8A9/negative_price\n=== RUN   TestUnitBench6E2DC8A9/large_quantity\n=== RUN   TestUnitBench6E2DC8A9/mixed_positive,_zero_and_negative\n--- PASS: TestUnitBench6E2DC8A9 (0.00s)\n    --- PASS: TestUnitBench6E2DC8A9/empty_items (0.00s)\n    --- PASS: TestUnitBench6E2DC8A9/zero_quantity (0.00s)\n    --- PASS: TestUnitBench6E2DC8A9/negative_price (0.00s)\n    --- PASS: TestUnitBench6E2DC8A9/large_quantity (0.00s)\n    --- PASS: TestUnitBench6E2DC8A9/mixed_positive,_zero_and_negative (0.00s)\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity\t1.031s\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t0.489s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t0.931s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t1.406s [no tests to run]\n",
+      "go_stderr": "",
+      "judge_latency_ms": 7094,
+      "judge_raw": "```json\n{\n  \"fact_grounding\": 4,\n  \"convention_match\": 4,\n  \"coverage_depth\": 4,\n  \"runs_clean\": 4,\n  \"divergence\": 0,\n  \"notes\": \"Тест отлично соответствует реальному коду: все сущности существуют, используется table-driven подход с t.Run(). Покрывает все запрошенные edge-cases: пустые Items, Quantity=0, отрицательные цены, большие количества и смешанные случаи. Тест успешно компилируется и проходит без ошибок.\"\n}\n```",
+      "scores": {
+        "fact_grounding": 4,
+        "convention_match": 4,
+        "coverage_depth": 4,
+        "runs_clean": 4,
+        "divergence": 0,
+        "notes": "Тест отлично соответствует реальному коду: все сущности существуют, используется table-driven подход с t.Run(). Покрывает все запрошенные edge-cases: пустые Items, Quantity=0, отрицательные цены, большие количества и смешанные случаи. Тест успешно компилируется и проходит без ошибок.",
+        "total": 16,
+        "max_total": 16
+      }
+    },
+    "wide": {
+      "topic_id": "wide_news_validate_combos",
+      "target": "NewsItem.Validate",
+      "test_name": "TestUnitBenchCD323029",
+      "test_path": "internal/entity/zz_bench_wide_news_validate_combos_cd323029_test.go",
+      "plan_latency_ms": 1997,
+      "plan_tokens_in": 3565,
+      "plan_tokens_out": 852,
+      "test_source": "package entity_test\n\nimport (\n\t\"strings\"\n\t\"testing\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBenchCD323029(t *testing.T) {\n\ttests := []struct {\n\t\tname      string\n\t\titem      entity.NewsItem\n\t\twantError bool\n\t}{\n\t\t{\n\t\t\tname: \"empty title\",\n\t\t\titem: entity.NewsItem{\n\t\t\t\tTitle:   \"\",\n\t\t\t\tContent: \"Valid content\",\n\t\t\t},\n\t\t\twantError: true,\n\t\t},\n\t\t{\n\t\t\tname: \"empty content\",\n\t\t\titem: entity.NewsItem{\n\t\t\t\tTitle:   \"Valid title\",\n\t\t\t\tContent: \"\",\n\t\t\t},\n\t\t\twantError: true,\n\t\t},\n\t\t{\n\t\t\tname: \"both empty\",\n\t\t\titem: entity.NewsItem{\n\t\t\t\tTitle:   \"\",\n\t\t\t\tContent: \"\",\n\t\t\t},\n\t\t\twantError: true,\n\t\t},\n\t\t{\n\t\t\tname: \"very long content\",\n\t\t\titem: entity.NewsItem{\n\t\t\t\tTitle:   \"Valid title\",\n\t\t\t\tContent: strings.Repeat(\"a\", 10001), // >10k characters\n\t\t\t},\n\t\t\twantError: true,\n\t\t},\n\t\t{\n\t\t\tname: \"unicode title with emoji\",\n\t\t\titem: entity.NewsItem{\n\t\t\t\tTitle:   \"Привет 🌟\",\n\t\t\t\tContent: \"Valid content\",\n\t\t\t},\n\t\t\twantError: false,\n\t\t},\n\t\t{\n\t\t\tname: \"title only spaces\",\n\t\t\titem: entity.NewsItem{\n\t\t\t\tTitle:   \"   \",\n\t\t\t\tContent: \"Valid content\",\n\t\t\t},\n\t\t\twantError: true,\n\t\t},\n\t}\n\n\tfor _, tt := range tests {\n\t\ttt := tt // capture range variable\n\t\tt.Run(tt.name, func(t *testing.T) {\n\t\t\tt.Parallel()\n\t\t\terr := tt.item.Validate()\n\t\t\tif (err != nil) != tt.wantError {\n\t\t\t\tt.Fatalf(\"Validate() error = %v, wantError %v\", err, tt.wantError)\n\t\t\t}\n\t\t})\n\t}\n}",
+      "go_exit_code": 1,
+      "go_duration_ms": 2431,
+      "go_stdout": "?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\n=== RUN   TestUnitBenchCD323029\n=== RUN   TestUnitBenchCD323029/empty_title\n=== PAUSE TestUnitBenchCD323029/empty_title\n=== RUN   TestUnitBenchCD323029/empty_content\n=== PAUSE TestUnitBenchCD323029/empty_content\n=== RUN   TestUnitBenchCD323029/both_empty\n=== PAUSE TestUnitBenchCD323029/both_empty\n=== RUN   TestUnitBenchCD323029/very_long_content\n=== PAUSE TestUnitBenchCD323029/very_long_content\n=== RUN   TestUnitBenchCD323029/unicode_title_with_emoji\n=== PAUSE TestUnitBenchCD323029/unicode_title_with_emoji\n=== RUN   TestUnitBenchCD323029/title_only_spaces\n=== PAUSE TestUnitBenchCD323029/title_only_spaces\n=== CONT  TestUnitBenchCD323029/empty_title\n=== CONT  TestUnitBenchCD323029/both_empty\n=== CONT  TestUnitBenchCD323029/empty_content\n=== CONT  TestUnitBenchCD323029/title_only_spaces\n=== CONT  TestUnitBenchCD323029/very_long_content\n    zz_bench_wide_news_validate_combos_cd323029_test.go:72: Validate() error = <nil>, wantError true\n=== NAME  TestUnitBenchCD323029/title_only_spaces\n    zz_bench_wide_news_validate_combos_cd323029_test.go:72: Validate() error = <nil>, wantError true\n=== CONT  TestUnitBenchCD323029/unicode_title_with_emoji\n--- FAIL: TestUnitBenchCD323029 (0.00s)\n    --- PASS: TestUnitBenchCD323029/empty_title (0.00s)\n    --- PASS: TestUnitBenchCD323029/both_empty (0.00s)\n    --- PASS: TestUnitBenchCD323029/empty_content (0.00s)\n    --- FAIL: TestUnitBenchCD323029/very_long_content (0.00s)\n    --- FAIL: TestUnitBenchCD323029/title_only_spaces (0.00s)\n    --- PASS: TestUnitBenchCD323029/unicode_title_with_emoji (0.00s)\nFAIL\nFAIL\tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity\t0.431s\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t0.698s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t1.073s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t0.352s [no tests to run]\nFAIL\n",
+      "go_stderr": "",
+      "judge_latency_ms": 7213,
+      "judge_raw": "```json\n{\n  \"fact_grounding\": 4,\n  \"convention_match\": 4,\n  \"coverage_depth\": 3,\n  \"runs_clean\": 2,\n  \"divergence\": 0,\n  \"notes\": \"Тест хорошо структурирован, использует реальные сущности и table-driven подход с t.Run(). Однако он не учитывает реальную логику Validate(), которая проверяет только пустоту строк, а не пробелы или длину контента, что приводит к двум падающим тестам. Выдуманных сущностей нет.\"\n}\n```",
+      "scores": {
+        "fact_grounding": 4,
+        "convention_match": 4,
+        "coverage_depth": 3,
+        "runs_clean": 2,
+        "divergence": 0,
+        "notes": "Тест хорошо структурирован, использует реальные сущности и table-driven подход с t.Run(). Однако он не учитывает реальную логику Validate(), которая проверяет только пустоту строк, а не пробелы или длину контента, что приводит к двум падающим тестам. Выдуманных сущностей нет.",
+        "total": 13,
+        "max_total": 16
+      }
+    },
+    "free": {
+      "topic_id": "free_agent_choice",
+      "target": "<agent-chosen>",
+      "test_name": "TestUnitBenchC548CC64",
+      "test_path": "internal/entity/zz_bench_free_agent_choice_c548cc64_test.go",
+      "plan_latency_ms": 1498,
+      "plan_tokens_in": 3640,
+      "plan_tokens_out": 1265,
+      "test_source": "package entity_test\n\n// CHOICE: Product.ApplyDiscount — edge cases for discount bounds and floating‑point precision\n\nimport (\n\t\"math\"\n\t\"testing\"\n\n\t\"github.com/nikita-rulenko/heisenbug-portal/internal/entity\"\n)\n\nfunc TestUnitBenchC548CC64(t *testing.T) {\n\tconst tolerance = 0.1\n\n\ttests := []struct {\n\t\tname       string\n\t\tstartPrice float64\n\t\tdiscount   float64\n\t\twantPrice  float64\n\t\twantErr    bool\n\t}{\n\t\t{\n\t\t\tname:       \"normal discount 10%\",\n\t\t\tstartPrice: 100.0,\n\t\t\tdiscount:   10.0,\n\t\t\twantPrice:  90.0,\n\t\t\twantErr:    false,\n\t\t},\n\t\t{\n\t\t\tname:       \"zero discount\",\n\t\t\tstartPrice: 55.5,\n\t\t\tdiscount:   0.0,\n\t\t\twantPrice:  55.5,\n\t\t\twantErr:    false,\n\t\t},\n\t\t{\n\t\t\tname:       \"full discount 100%\",\n\t\t\tstartPrice: 42.0,\n\t\t\tdiscount:   100.0,\n\t\t\twantPrice:  0.0,\n\t\t\twantErr:    false,\n\t\t},\n\t\t{\n\t\t\tname:       \"negative discount (invalid)\",\n\t\t\tstartPrice: 30.0,\n\t\t\tdiscount:   -5.0,\n\t\t\twantPrice:  30.0, // price should remain unchanged\n\t\t\twantErr:    true,\n\t\t},\n\t\t{\n\t\t\tname:       \"over‑100% discount (invalid)\",\n\t\t\tstartPrice: 80.0,\n\t\t\tdiscount:   150.0,\n\t\t\twantPrice:  80.0, // price should remain unchanged\n\t\t\twantErr:    true,\n\t\t},\n\t}\n\n\tfor _, tt := range tests {\n\t\ttt := tt // capture range variable\n\t\tt.Run(tt.name, func(t *testing.T) {\n\t\t\t// Arrange\n\t\t\tp := &entity.Product{\n\t\t\t\tPrice: tt.startPrice,\n\t\t\t}\n\n\t\t\t// Act\n\t\t\terr := p.ApplyDiscount(tt.discount)\n\n\t\t\t// Assert error expectation\n\t\t\tif (err != nil) != tt.wantErr {\n\t\t\t\tt.Fatalf(\"ApplyDiscount() error = %v, wantErr %v\", err, tt.wantErr)\n\t\t\t}\n\n\t\t\t// If an error was expected, we don't check the price further\n\t\t\tif tt.wantErr {\n\t\t\t\tif math.Abs(p.Price-tt.wantPrice) > tolerance {\n\t\t\t\t\tt.Fatalf(\"price changed on error: got %v, want %v (tolerance %.2f)\", p.Price, tt.wantPrice, tolerance)\n\t\t\t\t}\n\t\t\t\treturn\n\t\t\t}\n\n\t\t\t// Verify resulting price within tolerance\n\t\t\tif math.Abs(p.Price-tt.wantPrice) > tolerance {\n\t\t\t\tt.Fatalf(\"ApplyDiscount() price = %v, want %v (tolerance %.2f)\", p.Price, tt.wantPrice, tolerance)\n\t\t\t}\n\t\t})\n\t}\n}",
+      "go_exit_code": 1,
+      "go_duration_ms": 3121,
+      "go_stdout": "?   \tgithub.com/nikita-rulenko/heisenbug-portal/cmd/server\t[no test files]\nFAIL\tgithub.com/nikita-rulenko/heisenbug-portal/internal/entity [build failed]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/handler\t0.390s [no tests to run]\n?   \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository\t[no test files]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/repository/sqlite\t0.680s [no tests to run]\ntesting: warning: no tests to run\nPASS\nok  \tgithub.com/nikita-rulenko/heisenbug-portal/internal/usecase\t1.100s [no tests to run]\nFAIL\n",
+      "go_stderr": "# github.com/nikita-rulenko/heisenbug-portal/internal/entity_test [github.com/nikita-rulenko/heisenbug-portal/internal/entity.test]\ninternal/entity/zz_bench_free_agent_choice_c548cc64_test.go:71:15: invalid operation: err != nil (mismatched types float64 and untyped nil)\n",
+      "judge_latency_ms": 37801,
+      "judge_raw": "```json\n{\n  \"chosen_target\": \"Product.ApplyDiscount\",\n  \"fact_grounding\": 2,\n  \"convention_match\": 3,\n  \"coverage_depth\": 3,\n  \"runs_clean\": 1,\n  \"target_choice\": 2,\n  \"divergence\": 1,\n  \"notes\": \"Выбор метода разумен (edge cases с границами скидки), но исполнение содержит критическую ошибку: ApplyDiscount возвращает float64, а не error, что приводит к compile error. Тест использует несуществующую сигнатуру метода, хотя остальные entity и поля реальны.\"\n}\n```",
+      "scores": {
+        "fact_grounding": 2,
+        "convention_match": 3,
+        "coverage_depth": 3,
+        "runs_clean": 1,
+        "target_choice": 2,
+        "divergence": 1,
+        "notes": "Выбор метода разумен (edge cases с границами скидки), но исполнение содержит критическую ошибку: ApplyDiscount возвращает float64, а не error, что приводит к compile error. Тест использует несуществующую сигнатуру метода, хотя остальные entity и поля реальны.",
+        "chosen_target": "Product.ApplyDiscount",
+        "total": 11,
+        "max_total": 20
+      }
+    }
   }
 }

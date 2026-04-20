@@ -766,10 +766,23 @@ class ApproachResult:
     verification_runs: list = field(default_factory=list)
     verification_stats: dict = field(default_factory=dict)
     aggregate: dict = field(default_factory=dict)
+    # Optional: filled when --with-test-writing is passed. Mirrors the
+    # asdict() of test_writing.ApproachResult, or {"error": "..."} on failure.
+    test_writing: dict | None = None
 
 
-def run_approach(approach, context_file, num_runs=NUM_RUNS):
-    """Run full benchmark for one approach."""
+def run_approach(approach, context_file, num_runs=NUM_RUNS,
+                 cache_context=True, test_writing=False, tw_topics="both"):
+    """Run full benchmark for one approach.
+
+    Args:
+        cache_context: if True, save the onboarding context to
+            results/contexts/<approach>_latest.txt for later reuse by the
+            test-writing stage (or for manual inspection).
+        test_writing: if True, run the test-writing stage AFTER verification.
+            Uses the in-memory context (no disk roundtrip needed).
+        tw_topics: 'fixed' / 'wide' / 'both' — which topics to run.
+    """
     print(f"\n{'='*60}")
     print(f"Approach: {approach}")
     print(f"{'='*60}")
@@ -783,6 +796,15 @@ def run_approach(approach, context_file, num_runs=NUM_RUNS):
         context, onboard_metrics = onboard_fn(context_file)
     else:
         context, onboard_metrics = onboard_fn()
+
+    # Cache context for the test-writing stage (and human inspection).
+    # Disabled with --no-cache when reproducibility against a stale snapshot
+    # is undesirable.
+    if cache_context:
+        ctx_dir = Path(__file__).resolve().parent / "results" / "contexts"
+        ctx_dir.mkdir(parents=True, exist_ok=True)
+        (ctx_dir / f"{approach}_latest.txt").write_text(context, encoding="utf-8")
+        print(f"    Cached context → results/contexts/{approach}_latest.txt")
 
     print(f"    Context: {onboard_metrics['context_chars']:,} chars "
           f"(~{onboard_metrics['context_tokens_est']:,} tokens)")
@@ -966,12 +988,37 @@ def run_approach(approach, context_file, num_runs=NUM_RUNS):
         "metrics": aggregate,
     })
 
+    # Phase 3: Test-writing (optional, OFF by default — heavy: extra LLM
+    # calls + go test runs). NOT emitted to the dashboard. Result saved to
+    # results/test_writing/ as a side-channel JSON.
+    tw_result = None
+    if test_writing:
+        try:
+            from test_writing import run_approach as tw_run
+            print(f"\n  Phase 3: Test-writing ({tw_topics})...")
+            tw_obj = tw_run(approach, context, topics=tw_topics)
+            from dataclasses import asdict as _asdict
+            tw_result = _asdict(tw_obj)
+            # Persist alongside other test-writing runs.
+            from datetime import datetime as _dt
+            _ts = _dt.now().strftime("%Y-%m-%d_%H-%M-%S")
+            _twdir = Path(__file__).resolve().parent / "results" / "test_writing"
+            _twdir.mkdir(parents=True, exist_ok=True)
+            _twpath = _twdir / f"{_ts}_{approach}.json"
+            _twpath.write_text(json.dumps(tw_result, ensure_ascii=False, indent=2),
+                               encoding="utf-8")
+            print(f"    Test-writing → {_twpath}")
+        except Exception as exc:
+            sys.stderr.write(f"[test_writing] failed for {approach}: {exc}\n")
+            tw_result = {"error": str(exc)}
+
     return ApproachResult(
         approach=approach,
         onboarding_metrics=onboard_metrics,
         verification_runs=all_runs,
         verification_stats=stats,
         aggregate=aggregate,
+        test_writing=tw_result,
     )
 
 
@@ -1019,23 +1066,40 @@ def save_results(results, output_dir="."):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python benchmark_context_recovery.py <approach|all> [context_file] [num_runs]")
-        print(f"Approaches: {', '.join(APPROACHES.keys())}, all")
-        sys.exit(1)
+    import argparse
+    ap = argparse.ArgumentParser(description="Context-recovery benchmark runner")
+    ap.add_argument("approach",
+                    help=f"Approach to run, or 'all'. Choices: {', '.join(APPROACHES.keys())}, all")
+    ap.add_argument("context_file", nargs="?",
+                    default=str(Path(__file__).resolve().parent.parent / "shared" / "data" / "test_context.json"),
+                    help="Path to context JSON (used by md_files / github_issues)")
+    ap.add_argument("--num-runs", type=int, default=NUM_RUNS,
+                    help="Number of verification runs per approach")
+    ap.add_argument("--no-cache", action="store_true",
+                    help="Do NOT cache onboarding context to disk "
+                         "(test_writing stage will refuse to use stale context)")
+    ap.add_argument("--with-test-writing", action="store_true",
+                    help="Run the test-writing stage after verification "
+                         "(adds ~2-3 min per approach, NOT shown on dashboard)")
+    ap.add_argument("--topics", default="both",
+                    choices=["fixed", "wide", "free", "both", "all"],
+                    help="Topics for test-writing: fixed/wide/free single, "
+                         "both=fixed+wide, all=fixed+wide+free")
+    args = ap.parse_args()
 
-    approach = sys.argv[1]
-    context_file = sys.argv[2] if len(sys.argv) > 2 else str(Path(__file__).parent.parent / "shared" / "data" / "test_context.json")
-    num_runs = int(sys.argv[3]) if len(sys.argv) > 3 else NUM_RUNS
-
-    if approach == "all":
+    if args.approach == "all":
         approaches = list(APPROACHES.keys())
     else:
-        approaches = [approach]
+        approaches = [args.approach]
 
     results = []
     for a in approaches:
-        result = run_approach(a, context_file, num_runs)
+        result = run_approach(
+            a, args.context_file, args.num_runs,
+            cache_context=not args.no_cache,
+            test_writing=args.with_test_writing,
+            tw_topics=args.topics,
+        )
         results.append(result)
 
     output_dir = str(Path(__file__).resolve().parent.parent / "results")
