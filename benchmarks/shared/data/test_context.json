@@ -1,7 +1,7 @@
 [
   {
     "name": "project_overview",
-    "content": "Bean & Brew is a Go web application for a coffee shop. Architecture: Clean Architecture with 4 layers (entity→repository→usecase→handler). Tech stack: Go 1.25, chi router, SQLite (in-memory for tests), html/template. The project has 637 test runs across 4 layers: entity unit tests (237 runs), handler API tests (179 runs), usecase tests (127 runs), repository integration tests (94 runs). Test naming convention: TestLevel_Entity_Method (e.g. TestUnitProductValidate, TestIntegrationProductCRUD, TestAPIOrderFlow). All tests use fresh in-memory SQLite databases via setupTestDB(t) or setupTestServer(t) helpers — no shared state between tests. Table-driven tests with t.Run() used extensively for parametric coverage."
+    "content": "Bean & Brew is a Go web application for a coffee shop. Architecture: Clean Architecture with 4 layers (entity→repository→usecase→handler). Tech stack: Go 1.25, chi router, SQLite (in-memory for tests), html/template. Test naming convention: TestLevel_Entity_Method (e.g. TestUnitProductValidate, TestIntegrationProductCRUD, TestAPIOrderFlow). All tests use fresh in-memory SQLite databases via setupTestDB(t) or setupTestServer(t) helpers — no shared state between tests. Table-driven tests with t.Run() used extensively for parametric coverage."
   },
   {
     "name": "entity_product",
@@ -112,8 +112,20 @@
     "content": "Test infrastructure pattern: setupTestDB(t) in testhelper_test.go opens :memory: SQLite, runs RunMigrations, registers db.Close() as t.Cleanup. seedCategory(t, repo) creates default 'Тестовая/test-cat' category. setupTestServer(t) creates full server stack: 4 repos + 4 usecases + 4 handlers + chi router → httptest.NewServer. setupUC(t) returns all 4 use cases with shared in-memory DB. seedCatAndProduct(t, productUC, categoryUC) creates default 'Кофе/coffee' category and 'Латте' product (price=350). setupOrderTestData(t, db) creates category+product and returns IDs for order tests. createTestOrder(t, repo, catID, prodID, customerID) convenience for order repo tests. All test functions start with fresh database — no test pollution."
   },
   {
-    "name": "test_patterns_and_coverage",
-    "content": "Coverage by layer: Entity layer — 237 test runs (Product: validate 14+15+12+5 subtests, discount 12+15+10+3, Order: validate 13+8 subtests, total 10+5, transitions 16, News: validate 10+9, summary 15+8+6, Category: validate 11+15+3). Repository layer — 94 test runs (Product: 14 original + 12 extended, Category: 10+8, News: 11+10, Order: 4+13). Usecase layer — 127 test runs (Product: 13+12, Order: 19+14, News: 10+14, Category: 9+13). API handler layer — 179 test runs (Product: 16+12 extended with 12+6+5 subtests, Category: 10+14 extended with 12+3 subtests, News: 12+15 extended with 12+6+3 subtests, Order: 19+17 extended with 10+4 subtests). Table-driven tests with t.Run() used extensively across all layers."
+    "name": "coverage_entity_layer",
+    "content": "Entity layer test coverage: 237 test runs total. Breakdown: Product validation 14+15+12+5 subtests, Product discount calculations 12+15+10+3, Order validation 13+8 subtests, Order total calculations 10+5, Order status transitions 16 (full 4×4 state machine matrix), News validation 10+9, News summary 15+8+6, Category validation 11+15+3. All entity tests are pure unit tests — they exercise struct methods (Validate, ApplyDiscount, CalculateTotal, CanCancel, CanComplete) without any database or HTTP layer. No setup helpers needed."
+  },
+  {
+    "name": "coverage_repository_layer",
+    "content": "Repository layer test coverage: 94 test runs total. Breakdown: Product 14 original + 12 extended, Category 10+8, News 11+10, Order 4+13. All repository tests are integration tests — they require a live SQLite database and call setupTestDB(t) to obtain an in-memory database with migrations applied."
+  },
+  {
+    "name": "coverage_usecase_layer",
+    "content": "Usecase layer test coverage: 127 test runs total. Breakdown: Product 13+12, Order 19+14, News 10+14, Category 9+13. Usecase tests use setupUC(t) helper which creates all 4 use cases sharing one in-memory database with migrations applied — meaning they depend on the migration schema."
+  },
+  {
+    "name": "coverage_api_layer",
+    "content": "API handler layer test coverage: 179 test runs total. Breakdown: Product 16+12 extended (with 12+6+5 subtests), Category 10+14 extended (with 12+3 subtests), News 12+15 extended (with 12+6+3 subtests), Order 19+17 extended (with 10+4 subtests). API tests use setupTestServer(t) helper which spins up the full chi router + 4 handlers + 4 usecases + 4 repositories on a single in-memory SQLite with migrations applied."
   },
   {
     "name": "known_issues_and_flaky_analysis",

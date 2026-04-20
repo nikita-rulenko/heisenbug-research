@@ -261,6 +261,66 @@
     font-size: 11px;
     margin-left: 8px;
   }
+
+  /* Recording picker */
+  .picker {
+    background: #0d1117;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    min-width: 200px;
+  }
+  .picker:focus { outline: 1px solid var(--accent); }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    width: 460px;
+    max-width: 92vw;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+  .modal h3 {
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-size: 16px;
+  }
+  .modal p { color: var(--muted); font-size: 13px; line-height: 1.5; margin-bottom: 14px; }
+  .modal a { color: var(--accent); }
+  .modal label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .modal input[type=text], .modal input[type=password] {
+    width: 100%;
+    background: #0d1117;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font: inherit;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .modal input:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .modal-msg { font-size: 12px; min-height: 18px; margin-bottom: 8px; }
+  .modal-msg.err { color: var(--red); }
+  .modal-msg.ok { color: var(--green); }
+  .btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -270,10 +330,13 @@
 
 <div class="controls">
   <button id="runBtn" class="btn">▶ Run Benchmark</button>
+  <select id="recordingPicker" class="picker" title="Choose a recorded run to replay">
+    <option value="">— loading recordings… —</option>
+  </select>
   <label class="checkbox-wrap" title="Запустить настоящий прогон через runner.py (требует Mem0+Helixir+Ollama+Cerebras key)">
     <input type="checkbox" id="liveChk">
     <span>refresh_bench</span>
-    <span class="hint">(live run — needs infra)</span>
+    <span class="hint">(live run — needs infra + Cerebras key)</span>
   </label>
   <div class="status idle" id="status">
     <span class="dot"></span>
@@ -292,6 +355,7 @@
         <th>Time</th>
         <th>Retrieval calls</th>
         <th>Accuracy</th>
+        <th>Retrieval</th>
         <th>Cost ($)</th>
         <th>Cost/Perf</th>
       </tr>
@@ -302,8 +366,28 @@
 
 <p class="footer">
   Generator: gpt-oss-120b · Evaluator: zai-glm-4.7 · 3 runs, median · 5 questions, 1–4 scale<br>
-  Replay data: <code>results/recovery_comparison.json</code> · Live mode needs <code>python3 server.py</code>
+  Recordings live in <code>results/runs/*.jsonl</code> · Live mode needs <code>python3 server.py</code> + Cerebras key
 </p>
+
+<!-- Cerebras key modal -->
+<div class="modal-backdrop" id="keyModal">
+  <div class="modal">
+    <h3>Cerebras API key required</h3>
+    <p>
+      The live benchmark calls <a href="https://cerebras.ai/inference" target="_blank" rel="noopener">Cerebras Inference</a>
+      for both the generator (<code>gpt-oss-120b</code>) and the evaluator (<code>zai-glm-4.7</code>).
+      Get a free key at <a href="https://cloud.cerebras.ai/?utm=heisenbug-2026" target="_blank" rel="noopener">cloud.cerebras.ai</a>
+      and paste it below — it will be saved to a local <code>.env</code> on this machine only.
+    </p>
+    <label for="keyInput">CEREBRAS_API_KEY</label>
+    <input type="password" id="keyInput" placeholder="csk-..." autocomplete="off">
+    <div id="keyMsg" class="modal-msg"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="keyCancel">Cancel</button>
+      <button class="btn" id="keySave">Test &amp; Save</button>
+    </div>
+  </div>
+</div>
 
 <script type="application/json" id="seedData">
 {
@@ -371,6 +455,14 @@ const tbodyEl  = document.getElementById('tableBody');
 const statusEl = document.getElementById('status');
 const runBtn   = document.getElementById('runBtn');
 const liveChk  = document.getElementById('liveChk');
+const picker   = document.getElementById('recordingPicker');
+const keyModal = document.getElementById('keyModal');
+const keyInput = document.getElementById('keyInput');
+const keyMsg   = document.getElementById('keyMsg');
+const keySave  = document.getElementById('keySave');
+const keyCancel= document.getElementById('keyCancel');
+
+const SERVED_FROM_HTTP = location.protocol === 'http:' || location.protocol === 'https:';
 
 function fmtInt(n) { return Math.round(n).toLocaleString('en-US'); }
 function fmtTime(ms) { return (ms / 1000).toFixed(1) + 's'; }
@@ -431,6 +523,7 @@ function refreshTable() {
       <td>${fmtTime(m.total_time_ms)}</td>
       <td>${m.tool_calls || 0}</td>
       <td style="color:${barColor(m.accuracy_pct)};font-weight:bold">${fmtPct(m.accuracy_pct)}</td>
+      <td style="color:${barColor(m.retrieval_quality_pct || 0)}">${fmtPct(m.retrieval_quality_pct || 0)}</td>
       <td>${fmtCost(m.cost_estimate_usd)}</td>
       <td>${Math.round(m.cost_performance_ratio).toLocaleString('en-US')}</td>
     `;
@@ -438,11 +531,48 @@ function refreshTable() {
   }
 }
 
+// Track the last displayed numeric value per field so we can animate the
+// card smoothly instead of snapping when events arrive 1–2s apart.
+// Each slot stores { value, rafId } — value is the live animated number,
+// rafId is the current requestAnimationFrame handle (for cancellation).
+const _displayed = {};
+
+function animateField(key, field, nextValue, format) {
+  const card = document.getElementById('card-' + key);
+  if (!card) return;
+  const el = card.querySelector('[data-field=' + field + ']');
+  if (!el) return;
+  const slot = key + ':' + field;
+
+  const prevCtrl = _displayed[slot];
+  if (prevCtrl && prevCtrl.rafId) cancelAnimationFrame(prevCtrl.rafId);
+
+  const from = prevCtrl ? prevCtrl.value : 0;
+  const to = nextValue;
+  if (from === to) { el.textContent = format(to); return; }
+
+  const start = performance.now();
+  const duration = 450;  // long enough to see the tick, short enough to feel live
+  const ctrl = { value: from, rafId: 0 };
+  _displayed[slot] = ctrl;
+
+  function step(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const e = 1 - Math.pow(1 - t, 3);  // easeOutCubic
+    ctrl.value = from + (to - from) * e;
+    el.textContent = format(ctrl.value);
+    if (t < 1) ctrl.rafId = requestAnimationFrame(step);
+    else ctrl.rafId = 0;
+  }
+  ctrl.rafId = requestAnimationFrame(step);
+}
+
 function applyCard(key, m) {
   const card = document.getElementById('card-' + key);
   if (!card) return;
-  card.querySelector('[data-field=tokens]').textContent = fmtInt(m.total_tokens);
-  card.querySelector('[data-field=time]').textContent   = fmtTime(m.total_time_ms);
+  animateField(key, 'tokens', m.total_tokens || 0, fmtInt);
+  animateField(key, 'time',   m.total_time_ms || 0, fmtTime);
+  // Tool-calls and cost are smaller numbers — snap is fine.
   card.querySelector('[data-field=calls]').textContent  = m.tool_calls || 0;
   card.querySelector('[data-field=cost]').textContent   = fmtCost(m.cost_estimate_usd || 0);
   card.querySelector('[data-field=cpr]').textContent    = Math.round(m.cost_performance_ratio || 0).toLocaleString('en-US');
@@ -450,6 +580,11 @@ function applyCard(key, m) {
   bar.style.width = (m.accuracy_pct || 0) + '%';
   bar.style.background = barColor(m.accuracy_pct || 0);
   bar.textContent = m.accuracy_pct ? fmtPct(m.accuracy_pct) : '';
+}
+
+// Reset per-card display state on every fresh run so animations start from 0.
+function resetDisplayedState() {
+  for (const k of Object.keys(_displayed)) delete _displayed[k];
 }
 
 function setActive(key, on) {
@@ -462,14 +597,17 @@ function setActive(key, on) {
 }
 
 // Per-category awards — each card may earn 0+ badges. Ties get all winners.
+// `tool_calls` is min-best because fewer retrieval calls = simpler pipeline.
 const CATEGORIES = [
   { key: 'accuracy_pct',           label: 'Accuracy',  best: 'max' },
   { key: 'total_time_ms',          label: 'Fastest',   best: 'min' },
   { key: 'cost_estimate_usd',      label: 'Cheapest',  best: 'min' },
   { key: 'cost_performance_ratio', label: 'Best CPR',  best: 'max' },
+  { key: 'tool_calls',             label: 'Simplest',  best: 'min' },
   { key: 'part_a_pct',             label: 'Facts',     best: 'max' },
   { key: 'part_b_pct',             label: 'Reasoning', best: 'max' },
   { key: 'part_c_pct',             label: 'Decisions', best: 'max' },
+  { key: 'retrieval_quality_pct',  label: 'Retrieval', best: 'max' },
 ];
 
 function markBest() {
@@ -478,7 +616,12 @@ function markBest() {
 
   const winners = {};  // key -> [approach, ...]
   for (const cat of CATEGORIES) {
-    const vals = withData.map(k => final[k][cat.key]);
+    // Skip a category entirely when no approach reports that metric —
+    // context_recovery live runs don't emit part_a/b/c_pct, for example.
+    const vals = withData
+      .map(k => final[k][cat.key])
+      .filter(v => typeof v === 'number' && !Number.isNaN(v) && v > 0);
+    if (vals.length === 0) continue;
     const target = cat.best === 'max' ? Math.max(...vals) : Math.min(...vals);
     winners[cat.key] = withData.filter(k => final[k][cat.key] === target);
   }
@@ -534,12 +677,19 @@ function handleEvent(evt) {
       applyCard(evt.approach, evt.metrics);
       setActive(evt.approach, false);
       refreshTable();
-      markBest();
+      // Badges are deferred to the final `complete` event so the category
+      // winners don't reshuffle while later approaches are still running.
       break;
     }
     case 'log': {
       // Don't spam status for every log line; keep stamp under cards via console.
       console.log('[runner]', evt.line);
+      break;
+    }
+    case 'need_keys': {
+      stopRun();
+      setStatus('idle', 'Cerebras key required — fill the form and try again');
+      showKeyModal();
       break;
     }
     case 'error': {
@@ -552,7 +702,11 @@ function handleEvent(evt) {
         ? `complete (live, exit=${evt.exit_code ?? 0})`
         : 'complete (replay)';
       setStatus('complete', tag);
+      markBest();  // badges appear in one shot after every approach is done
       stopRun();
+      // A live run just wrote a new JSONL + meta — refresh the picker so
+      // the curator can replay it without reloading the page.
+      if (evt.mode === 'live') loadRecordings();
       break;
     }
   }
@@ -566,6 +720,7 @@ function startRun() {
   liveChk.disabled = true;
 
   buildCards();
+  resetDisplayedState();
   for (const k of ORDER) final[k] = null;
 
   if (liveChk.checked) startLive();
@@ -577,68 +732,83 @@ function stopRun() {
   runBtn.textContent = '▶ Run Benchmark';
   runBtn.classList.remove('stop');
   liveChk.disabled = false;
+  // Ask the server to kill the runner subprocess — EventSource.close() alone
+  // just stops listening; the benchmark would keep going on the server.
+  if (evtSource && SERVED_FROM_HTTP) {
+    fetch('/stop').catch(() => {});
+  }
   if (evtSource) { evtSource.close(); evtSource = null; }
   for (const t of replayTimers) clearTimeout(t);
   replayTimers = [];
 }
 
-// ─── Replay mode: purely client-side animation over the embedded seed ───
+// ─── Replay mode ────────────────────────────────────────────────────────
+//
+// When served over HTTP (server.py running), we replay through SSE so the
+// timing matches a real recording. When opened directly from file://, we
+// fall back to a client-side animation over the embedded seed.
+
+function startReplay() {
+  if (SERVED_FROM_HTTP) {
+    const rid = picker.value || '';
+    const url = rid ? '/events?replay=' + encodeURIComponent(rid) : '/events';
+    setStatus('running', 'replay — streaming ' + (rid || 'baseline') + ' from server');
+    openSse(url);
+  } else {
+    startReplayEmbedded();
+  }
+}
 
 function scheduleEvent(delay, evt) {
   const h = setTimeout(() => { if (running) handleEvent(evt); }, delay);
   replayTimers.push(h);
 }
 
-function startReplay() {
-  setStatus('running', 'replay — playing snapshot from ' + (SEED._source || 'embedded seed'));
+function startReplayEmbedded() {
+  setStatus('running', 'replay — embedded snapshot (' + (SEED._source || 'seed') + ')');
   scheduleEvent(0, { type: 'start', mode: 'replay' });
 
   const approaches = SEED.approaches || {};
-  let cursor = 300;  // ms offset into the schedule
+  let cursor = 300;
 
   for (const key of ORDER) {
     const m = approaches[key];
     if (!m) continue;
-
-    // Play each approach for its real wall-clock from the recorded run.
     const wallMs = m.total_time_ms || 3000;
-    // 12 steps per second keeps counters tickign smoothly without flooding.
     const steps = Math.max(8, Math.round(wallMs / 80));
     const stepDt = wallMs / steps;
 
     scheduleEvent(cursor, { type: 'approach_start', approach: key, tool_calls: m.tool_calls || 0 });
-
     for (let i = 1; i <= steps; i++) {
       const frac = i / steps;
       scheduleEvent(cursor + i * stepDt, {
         type: 'approach_progress',
         approach: key,
-        tokens:           Math.round((m.total_tokens     || 0) * frac),
-        time_ms:          Math.round((m.total_time_ms    || 0) * frac),
-        tool_calls_done:  Math.round((m.tool_calls       || 0) * frac),
+        tokens:           Math.round((m.total_tokens  || 0) * frac),
+        time_ms:          Math.round((m.total_time_ms || 0) * frac),
+        tool_calls_done:  Math.round((m.tool_calls    || 0) * frac),
       });
     }
-
     cursor += wallMs;
     scheduleEvent(cursor, { type: 'approach_complete', approach: key, metrics: m });
-    cursor += 400;  // small gap between approaches
+    cursor += 50;
   }
-
   scheduleEvent(cursor, { type: 'complete', mode: 'replay' });
 }
 
-// ─── Live mode: SSE from server.py (requires `python3 server.py` running) ───
+// ─── Live mode: SSE from server.py ──────────────────────────────────────
 
 function startLive() {
-  // EventSource only works over http(s); file:// will fail instantly.
-  if (location.protocol === 'file:') {
+  if (!SERVED_FROM_HTTP) {
     setStatus('error', 'live mode requires server.py — open http://localhost:8765/ instead');
     stopRun();
     return;
   }
-
   setStatus('running', 'connecting to server.py…');
+  openSse('/events?live=1');
+}
 
+function openSse(url) {
   let gotAnyMessage = false;
   const connectTimeout = setTimeout(() => {
     if (!gotAnyMessage && running) {
@@ -648,7 +818,7 @@ function startLive() {
   }, 3000);
 
   try {
-    evtSource = new EventSource('/events?live=1');
+    evtSource = new EventSource(url);
   } catch (e) {
     clearTimeout(connectTimeout);
     setStatus('error', 'EventSource failed: ' + e.message);
@@ -663,15 +833,117 @@ function startLive() {
     catch (err) { console.error('bad event', e.data, err); }
   };
   evtSource.onerror = () => {
-    // EventSource fires onerror on normal stream close too. Only flag if we
-    // never saw any real message.
     if (!gotAnyMessage && running) {
       clearTimeout(connectTimeout);
-      setStatus('error', 'cannot reach /events — start python3 server.py first');
+      setStatus('error', 'cannot reach ' + url + ' — start python3 server.py first');
       stopRun();
     }
   };
 }
+
+// ─── Recording picker ───────────────────────────────────────────────────
+
+function fmtRecordingLabel(r) {
+  if (r.id === 'baseline') return 'Default run (v3 snapshot)';
+  // "2026-04-20_09-30-55" → "2026-04-20 09:30:55"
+  const src = r.timestamp || r.id;
+  return src.replace('T', ' ').replace(/_/g, ' ').replace(/-(\d\d)-(\d\d)$/, ':$1:$2');
+}
+
+async function loadRecordings() {
+  if (!SERVED_FROM_HTTP) {
+    picker.innerHTML = '<option value="">embedded seed (file:// mode)</option>';
+    picker.disabled = true;
+    return;
+  }
+  try {
+    const res = await fetch('/runs');
+    const data = await res.json();
+    const runs = data.runs || [];
+
+    // Always expose a "Default run" entry — when no baseline.jsonl exists,
+    // the server falls back to the legacy synthetic replay from the v3
+    // comparison JSON, so the picker is never empty on a fresh checkout.
+    const hasBaseline = runs.some(r => r.id === 'baseline');
+    picker.innerHTML = '';
+    if (!hasBaseline) {
+      const opt = document.createElement('option');
+      opt.value = 'baseline';
+      opt.textContent = fmtRecordingLabel({ id: 'baseline' });
+      picker.appendChild(opt);
+    }
+    for (const r of runs) {
+      const opt = document.createElement('option');
+      opt.value = r.id;
+      opt.textContent = fmtRecordingLabel(r);
+      picker.appendChild(opt);
+    }
+    // Default selection: baseline (pinned first).
+    picker.value = 'baseline';
+  } catch (e) {
+    picker.innerHTML = '<option value="baseline">Default run (v3 snapshot)</option>';
+    console.error('loadRecordings failed', e);
+  }
+}
+
+picker.addEventListener('change', () => {
+  if (running) return;
+  setStatus('idle', 'ready to replay ' + (picker.value || 'baseline'));
+});
+
+// ─── Key modal ──────────────────────────────────────────────────────────
+
+function showKeyModal() {
+  keyMsg.textContent = '';
+  keyMsg.className = 'modal-msg';
+  keyInput.value = '';
+  keyModal.classList.add('show');
+  setTimeout(() => keyInput.focus(), 50);
+}
+
+function hideKeyModal() {
+  keyModal.classList.remove('show');
+}
+
+keyCancel.addEventListener('click', hideKeyModal);
+keyModal.addEventListener('click', (e) => { if (e.target === keyModal) hideKeyModal(); });
+
+keySave.addEventListener('click', async () => {
+  const key = keyInput.value.trim();
+  if (!key) {
+    keyMsg.textContent = 'paste a key first';
+    keyMsg.className = 'modal-msg err';
+    return;
+  }
+  keySave.disabled = true;
+  keyMsg.textContent = 'testing key against Cerebras…';
+  keyMsg.className = 'modal-msg';
+  try {
+    const res = await fetch('/api/save-keys', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cerebras_api_key: key }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      keyMsg.textContent = 'saved — starting live run…';
+      keyMsg.className = 'modal-msg ok';
+      setTimeout(() => {
+        hideKeyModal();
+        liveChk.checked = true;
+        startRun();
+      }, 600);
+    } else {
+      keyMsg.textContent = 'rejected: ' + (data.error || 'unknown error');
+      keyMsg.className = 'modal-msg err';
+    }
+  } catch (e) {
+    keyMsg.textContent = 'request failed: ' + e.message;
+    keyMsg.className = 'modal-msg err';
+  } finally {
+    keySave.disabled = false;
+  }
+});
 
 runBtn.addEventListener('click', () => {
   if (running) {
@@ -682,8 +954,9 @@ runBtn.addEventListener('click', () => {
   }
 });
 
-// Initial paint: all-zero cards, idle status.
+// Initial paint: all-zero cards, idle status, populate picker.
 buildCards();
+loadRecordings();
 </script>
 
 </body>

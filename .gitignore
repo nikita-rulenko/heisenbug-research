@@ -24,3 +24,15 @@ infra/helixir-local/db/
 .cursor/
 .claude/
 .mcp.json
+
+# Local benchmark recordings — only baseline.jsonl is tracked
+benchmarks/context_recovery/results/runs/*
+!benchmarks/context_recovery/results/runs/baseline.jsonl
+!benchmarks/context_recovery/results/runs/baseline.meta.json
+
+# Runtime state (server pid/log)
+benchmarks/context_recovery/.server.log
+benchmarks/context_recovery/.server.pid
+
+# Conference slides (kept local)
+presentation/

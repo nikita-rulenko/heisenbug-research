@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Context Recovery — v2 · Heisenbug 2026</title>
+<style>
+  /* ── Design tokens ─────────────────────────────────────────── */
+  :root {
+    --bg-0: #08090c;
+    --bg-1: #0d1117;
+    --bg-2: #12161d;
+    --card: #161b22;
+    --card-hi: #1b2029;
+    --border: #242a33;
+    --border-hi: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --muted-dim: #6e7681;
+
+    --accent:  #6aa7ff;
+    --green:   #3fb950;
+    --yellow:  #e3b341;
+    --red:     #f85149;
+    --purple:  #bc8cff;
+    --cyan:    #39d0d8;
+
+    --md:   #6aa7ff;    /* MD-files */
+    --gh:   #e3b341;    /* GitHub Issues */
+    --mem0: #f778ba;    /* Mem0 */
+    --hlx:  #3fb950;    /* Helixir MCP */
+
+    --glow-md:   rgba(106,167,255,0.35);
+    --glow-gh:   rgba(227,179,65, 0.35);
+    --glow-mem0: rgba(247,120,186,0.35);
+    --glow-hlx:  rgba(63,185,80,  0.35);
+
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+
+    --t-fast: 180ms cubic-bezier(.4,.0,.2,1);
+    --t-med:  320ms cubic-bezier(.4,.0,.2,1);
+    --t-slow: 600ms cubic-bezier(.25,.1,.25,1);
+  }
+
+  /* ── Base ──────────────────────────────────────────────────── */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg-0); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', system-ui, sans-serif;
+    color: var(--text);
+    padding: 28px 32px 60px;
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 480px at 50% -100px, rgba(106,167,255,0.08), transparent 55%),
+      radial-gradient(900px 400px at 100% 200px, rgba(63,185,80,0.06), transparent 55%),
+      var(--bg-0);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  .mono, code, .num, .num *, [data-field], .table-v2 td.num {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Menlo', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Header ────────────────────────────────────────────────── */
+  .hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+  .hero-title {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .hero-title .eyebrow {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .hero-title h1 {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff 0%, #8fb8ff 60%, #6aa7ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero-title .sub {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 620px;
+    line-height: 1.55;
+  }
+  .hero-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn {
+    background: linear-gradient(135deg, #58a6ff 0%, #6aa7ff 100%);
+    color: #0a0f17;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 11px 22px;
+    font: inherit;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(106,167,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.08);
+    transition: transform var(--t-fast), box-shadow var(--t-fast), opacity var(--t-fast);
+  }
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(106,167,255,0.38), inset 0 0 0 1px rgba(255,255,255,0.12);
+  }
+  .btn:active:not(:disabled) { transform: translateY(0); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+  .btn.stop { background: linear-gradient(135deg, #f85149 0%, #e44a42 100%); color: #fff; box-shadow: 0 4px 18px rgba(248,81,73,0.28); }
+  .btn.ghost { background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1px var(--border-hi); }
+  .btn.ghost:hover:not(:disabled) { color: var(--text); box-shadow: inset 0 0 0 1px var(--border-hi), 0 0 0 3px rgba(255,255,255,0.03); }
+
+  .picker {
+    background: var(--bg-2);
+    color: var(--text);
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    min-width: 210px;
+    transition: border-color var(--t-fast);
+  }
+  .picker:focus { outline: none; border-color: var(--accent); }
+
+  .checkbox-wrap {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--muted);
+    cursor: pointer; user-select: none;
+  }
+
+  /* Status pill */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px 6px 10px;
+    background: var(--bg-2);
+    border: 1px solid var(--border-hi);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 560px;
+    transition: border-color var(--t-med), color var(--t-med);
+  }
+  .status .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+    transition: background var(--t-fast), box-shadow var(--t-fast);
+  }
+  .status.running { color: var(--text); border-color: rgba(248,81,73,0.5); }
+  .status.running .dot {
+    background: var(--red);
+    animation: pulse 1.2s infinite;
+    box-shadow: 0 0 0 0 rgba(248,81,73,0.55);
+  }
+  .status.complete { color: var(--text); border-color: rgba(63,185,80,0.45); }
+  .status.complete .dot { background: var(--green); box-shadow: 0 0 0 4px rgba(63,185,80,0.12); }
+  .status.error    { border-color: rgba(248,81,73,0.5); color: var(--red); }
+  .status.error    .dot { background: var(--red); }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(248,81,73,0.55); }
+    70%  { box-shadow: 0 0 0 8px rgba(248,81,73,0); }
+    100% { box-shadow: 0 0 0 0 rgba(248,81,73,0); }
+  }
+
+  /* ── Timeline ─────────────────────────────────────────────── */
+  .timeline {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 22px;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 14px;
+    overflow-x: auto;
+    transition: border-color var(--t-med);
+  }
+  .timeline.active { border-color: rgba(106,167,255,0.35); }
+  .tl-step {
+    display: flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid transparent;
+    transition: all var(--t-med);
+  }
+  .tl-step .tl-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--border-hi);
+    flex-shrink: 0;
+    transition: all var(--t-med);
+  }
+  .tl-step.done { color: var(--muted); }
+  .tl-step.done .tl-dot { background: var(--green); }
+  .tl-step.active {
+    color: var(--text);
+    background: rgba(106,167,255,0.08);
+    border-color: rgba(106,167,255,0.25);
+  }
+  .tl-step.active .tl-dot {
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(106,167,255,0.18);
+  }
+  .tl-arrow {
+    color: var(--muted-dim);
+    font-size: 11px;
+  }
+
+  /* ── Cards grid ──────────────────────────────────────────── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px 20px;
+    overflow: hidden;
+    transition: border-color var(--t-med), transform var(--t-med), box-shadow var(--t-med);
+    opacity: 0;
+    animation: cardFadeIn var(--t-slow) forwards;
+  }
+  .card:nth-child(1) { animation-delay: 0ms; }
+  .card:nth-child(2) { animation-delay: 60ms; }
+  .card:nth-child(3) { animation-delay: 120ms; }
+  .card:nth-child(4) { animation-delay: 180ms; }
+  @keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card.active {
+    transform: translateY(-2px);
+  }
+  .card[data-key=md_files].active   { border-color: var(--md);   box-shadow: 0 0 0 3px var(--glow-md); }
+  .card[data-key=github_issues].active{ border-color: var(--gh);   box-shadow: 0 0 0 3px var(--glow-gh); }
+  .card[data-key=mem0].active       { border-color: var(--mem0); box-shadow: 0 0 0 3px var(--glow-mem0); }
+  .card[data-key=helixir_mcp].active{ border-color: var(--hlx);  box-shadow: 0 0 0 3px var(--glow-hlx); }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    display: flex; align-items: center; gap: 9px;
+    font-weight: 600; font-size: 15px;
+  }
+  .card-title .swatch {
+    width: 10px; height: 10px; border-radius: 3px;
+  }
+  .card .spinner {
+    display: none;
+    width: 11px; height: 11px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .card.active .spinner { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .badges {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    justify-content: flex-end;
+    max-width: 140px;
+  }
+  .badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    background: rgba(63,185,80,0.1);
+    border: 1px solid rgba(63,185,80,0.35);
+    color: var(--green);
+    text-transform: uppercase;
+    white-space: nowrap;
+    animation: badgePop var(--t-med) both;
+  }
+  @keyframes badgePop {
+    from { opacity: 0; transform: scale(0.8); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .accuracy-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .big-num {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+    line-height: 1;
+  }
+  .big-num-label {
+    font-size: 10px;
+    color: var(--muted-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .bar-track {
+    background: #0d1117;
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .bar-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 520ms cubic-bezier(.25,.1,.25,1), background var(--t-med);
+    border-radius: 4px;
+  }
+
+  .retrieval-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .rs-cell {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .rs-cell .rs-label {
+    font-size: 9px;
+    color: var(--muted-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .rs-cell .rs-score {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .rs-pips {
+    display: flex; gap: 3px;
+  }
+  .rs-pip {
+    flex: 1;
+    height: 4px;
+    border-radius: 1px;
+    background: var(--border-hi);
+    transition: background var(--t-med);
+  }
+  .rs-pip.on { background: currentColor; }
+
+  .metric-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 6px;
+    column-gap: 14px;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+  .metric-list .m-k { color: var(--muted-dim); }
+  .metric-list .m-v { text-align: right; font-weight: 600; }
+
+  /* ── Radar ───────────────────────────────────────────────── */
+  .radar-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px 26px 26px;
+    margin-bottom: 24px;
+  }
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .section-head h2 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .section-head .hint {
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.5;
+  }
+  .radar-wrap {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: center;
+  }
+  .radar-chart {
+    aspect-ratio: 1;
+    max-height: 380px;
+    margin: 0 auto;
+  }
+  .radar-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: #0d1117;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color var(--t-fast), opacity var(--t-fast), background var(--t-fast);
+  }
+  .legend-row:hover { border-color: var(--border-hi); }
+  .legend-row.off { opacity: 0.35; }
+  .legend-row .l-left { display: flex; align-items: center; gap: 9px; }
+  .legend-row .l-dot { width: 11px; height: 11px; border-radius: 50%; }
+  .legend-row .l-name { font-weight: 600; }
+  .legend-row .l-right { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--muted); font-size: 12px; }
+  .legend-row.off .l-right { color: var(--muted-dim); }
+
+  /* ── Comparison bars ─────────────────────────────────────── */
+  .bars-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px 26px 26px;
+    margin-bottom: 24px;
+  }
+  .bar-group {
+    display: grid;
+    grid-template-columns: 120px 1fr 70px;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .bar-group:last-child { margin-bottom: 0; }
+  .bar-group .bg-label {
+    color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .bar-group .bg-label .dot { width: 10px; height: 10px; border-radius: 3px; }
+  .bar-group .bg-track {
+    height: 10px;
+    background: #0d1117;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-group .bg-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 5px;
+    transition: width 600ms cubic-bezier(.25,.1,.25,1), background var(--t-med);
+  }
+  .bar-group .bg-value {
+    text-align: right;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .metric-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .metric-tab {
+    font-size: 11px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border-hi);
+    cursor: pointer;
+    transition: all var(--t-fast);
+    font-family: inherit;
+    letter-spacing: 0.3px;
+  }
+  .metric-tab:hover { color: var(--text); }
+  .metric-tab.active {
+    background: rgba(106,167,255,0.12);
+    color: var(--text);
+    border-color: rgba(106,167,255,0.4);
+  }
+
+  /* ── Table ──────────────────────────────────────────────── */
+  .table-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px 26px 8px;
+    overflow-x: auto;
+    margin-bottom: 24px;
+  }
+  .table-v2 {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .table-v2 th {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+  }
+  .table-v2 td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+  }
+  .table-v2 tr:last-child td { border-bottom: none; }
+  .table-v2 td.num { text-align: right; }
+  .table-v2 .cell-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 12px;
+    min-width: 52px;
+    text-align: center;
+  }
+  .table-v2 tr.leader { background: linear-gradient(90deg, rgba(227,179,65,0.06), transparent 70%); }
+
+  .approach-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-weight: 600;
+  }
+  .approach-tag .swatch { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* ── Footer ─────────────────────────────────────────────── */
+  .footer-v2 {
+    text-align: center;
+    color: var(--muted-dim);
+    font-size: 11px;
+    line-height: 1.7;
+    margin-top: 18px;
+  }
+  .footer-v2 code {
+    color: var(--muted);
+    background: var(--bg-2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+
+  /* ── Modal (same as v1, restyled) ───────────────────────── */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    width: 480px; max-width: 92vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .modal h3 { color: var(--accent); margin-bottom: 10px; font-size: 17px; font-weight: 600; }
+  .modal p { color: var(--muted); font-size: 13px; line-height: 1.55; margin-bottom: 16px; }
+  .modal a { color: var(--accent); }
+  .modal label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .modal input[type=text], .modal input[type=password] {
+    width: 100%; background: var(--bg-1); color: var(--text);
+    border: 1px solid var(--border-hi); border-radius: var(--radius-sm);
+    padding: 11px 13px; font: inherit; font-size: 13px;
+    margin-bottom: 14px;
+    transition: border-color var(--t-fast);
+  }
+  .modal input:focus { outline: none; border-color: var(--accent); }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .modal-msg { font-size: 12px; min-height: 18px; margin-bottom: 8px; }
+  .modal-msg.err { color: var(--red); }
+  .modal-msg.ok { color: var(--green); }
+
+  /* ── Responsive ─────────────────────────────────────────── */
+  @media (max-width: 860px) {
+    .hero { flex-direction: column; align-items: flex-start; }
+    .hero-cta { align-items: flex-start; }
+    .radar-wrap { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-title">
+    <div class="eyebrow">Heisenbug 2026 · Context Recovery</div>
+    <h1>The Cost of AI Agent Onboarding</h1>
+    <div class="sub">
+      Four retrieval strategies face 6 questions about the Bean &amp; Brew project.
+      We score the <b>answers</b> (5 criteria) and — separately — the <b>raw retrieval context</b>
+      (fact coverage, causal density, structure).
+    </div>
+  </div>
+  <div class="hero-cta">
+    <div class="ctrl-row">
+      <select id="recordingPicker" class="picker" title="Choose a recorded run to replay">
+        <option value="">— loading recordings… —</option>
+      </select>
+      <button id="runBtn" class="btn">▶ Run Benchmark</button>
+    </div>
+    <div class="ctrl-row">
+      <label class="checkbox-wrap" title="Live run via runner.py (requires Mem0+Helixir+Ollama+Cerebras)">
+        <input type="checkbox" id="liveChk">
+        <span>live run — needs infra + Cerebras key</span>
+      </label>
+    </div>
+    <div class="status" id="status">
+      <span class="dot"></span>
+      <span class="text">idle — press Run to start</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TIMELINE ═══ -->
+<div class="timeline" id="timeline">
+  <div class="tl-step" data-stage="onboard"><span class="tl-dot"></span><span>Onboarding</span></div>
+  <span class="tl-arrow">›</span>
+  <div class="tl-step" data-stage="retrieval"><span class="tl-dot"></span><span>Retrieval eval</span></div>
+  <span class="tl-arrow">›</span>
+  <div class="tl-step" data-stage="verify"><span class="tl-dot"></span><span>Verification Q1…Q6</span></div>
+  <span class="tl-arrow">›</span>
+  <div class="tl-step" data-stage="complete"><span class="tl-dot"></span><span>Complete</span></div>
+</div>
+
+<!-- ═══ CARDS ═══ -->
+<div class="grid" id="cards"></div>
+
+<!-- ═══ RADAR ═══ -->
+<div class="radar-section">
+  <div class="section-head">
+    <div>
+      <h2>Profile comparison — radar</h2>
+      <div class="hint">6 axes, each auto-zoomed to the observed range (small differences become visible). Cost/Perf = accuracy per dollar — higher is better. Click legend rows to toggle.</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <svg id="radar" class="radar-chart" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="radar-legend" id="radarLegend"></div>
+  </div>
+</div>
+
+<!-- ═══ METRIC BARS ═══ -->
+<div class="bars-section">
+  <div class="section-head">
+    <div>
+      <h2>Head-to-head</h2>
+      <div class="hint">Pick a metric and see all four approaches side-by-side.</div>
+    </div>
+    <div class="metric-tabs" id="metricTabs">
+      <button class="metric-tab active" data-metric="accuracy_pct">Accuracy</button>
+      <button class="metric-tab" data-metric="retrieval_quality_pct">Retrieval</button>
+      <button class="metric-tab" data-metric="part_a_pct">Facts (A)</button>
+      <button class="metric-tab" data-metric="part_b_pct">Reasoning (B)</button>
+      <button class="metric-tab" data-metric="part_c_pct">Decisions (C)</button>
+    </div>
+  </div>
+  <div id="barsContainer"></div>
+</div>
+
+<!-- ═══ TABLE ═══ -->
+<div class="table-section">
+  <table class="table-v2">
+    <thead>
+      <tr>
+        <th>Approach</th>
+        <th class="num">Tokens</th>
+        <th class="num">Time</th>
+        <th class="num">Calls</th>
+        <th class="num">Accuracy</th>
+        <th class="num">Retrieval</th>
+        <th class="num">Facts</th>
+        <th class="num">Reasoning</th>
+        <th class="num">Decisions</th>
+        <th class="num">Cost</th>
+        <th class="num">C/P</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<p class="footer-v2">
+  Generator: <code>gpt-oss-120b</code> · Evaluator: <code>zai-glm-4.7</code> · 5 runs, median · 6 questions, 5×4 scale on answers + 3×4 on retrieval context.<br>
+  Recordings live in <code>results/runs/*.jsonl</code> · Live mode needs <code>python3 server.py</code> + Cerebras key.
+</p>
+
+<!-- Cerebras key modal -->
+<div class="modal-backdrop" id="keyModal">
+  <div class="modal">
+    <h3>Cerebras API key required</h3>
+    <p>
+      The live benchmark calls <a href="https://cerebras.ai/inference" target="_blank" rel="noopener">Cerebras Inference</a>
+      for both the generator (<code>gpt-oss-120b</code>) and the evaluator (<code>zai-glm-4.7</code>).
+      Get a free key at <a href="https://cloud.cerebras.ai/?utm=heisenbug-2026" target="_blank" rel="noopener">cloud.cerebras.ai</a>
+      and paste it below — it will be saved to <code>.env</code> on this machine only.
+    </p>
+    <label for="keyInput">CEREBRAS_API_KEY</label>
+    <input type="password" id="keyInput" placeholder="csk-…" autocomplete="off">
+    <div id="keyMsg" class="modal-msg"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="keyCancel">Cancel</button>
+      <button class="btn ghost" id="keyForce" style="display:none">Save anyway</button>
+      <button class="btn" id="keySave">Test &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Seed data (same shape as v1) -->
+<script type="application/json" id="seedData">
+{
+  "_source": "v3 narrative snapshot (fallback when no recording exists)",
+  "timestamp": "2026-03-31T11:46:20+03:00",
+  "approaches": {
+    "md_files": {
+      "total_tokens": 53195, "total_time_ms": 8200, "tool_calls": 1,
+      "accuracy_pct": 88.8, "cost_estimate_usd": 0.031917, "cost_performance_ratio": 2225.0,
+      "part_a_pct": 63.0, "part_b_pct": 73.8, "part_c_pct": 95.0,
+      "retrieval_quality_pct": 75.0,
+      "retrieval_scores": { "fact_coverage": 4, "causal_density": 2, "structure": 3 }
+    },
+    "github_issues": {
+      "total_tokens": 54397, "total_time_ms": 8500, "tool_calls": 1,
+      "accuracy_pct": 88.8, "cost_estimate_usd": 0.032638, "cost_performance_ratio": 2175.0,
+      "part_a_pct": 70.3, "part_b_pct": 71.2, "part_c_pct": 93.8,
+      "retrieval_quality_pct": 75.0,
+      "retrieval_scores": { "fact_coverage": 4, "causal_density": 2, "structure": 3 }
+    },
+    "mem0": {
+      "total_tokens": 29638, "total_time_ms": 8700, "tool_calls": 6,
+      "accuracy_pct": 58.8, "cost_estimate_usd": 0.017783, "cost_performance_ratio": 2643.0,
+      "part_a_pct": 65.6, "part_b_pct": 68.8, "part_c_pct": 98.8,
+      "retrieval_quality_pct": 50.0,
+      "retrieval_scores": { "fact_coverage": 3, "causal_density": 1, "structure": 2 }
+    },
+    "helixir_mcp": {
+      "total_tokens": 170668, "total_time_ms": 20800, "tool_calls": 15,
+      "accuracy_pct": 75.0, "cost_estimate_usd": 0.102401, "cost_performance_ratio": 586.0,
+      "part_a_pct": 59.9, "part_b_pct": 76.2, "part_c_pct": 98.8,
+      "retrieval_quality_pct": 91.7,
+      "retrieval_scores": { "fact_coverage": 4, "causal_density": 4, "structure": 3 }
+    }
+  }
+}
+</script>
+
+<script>
+/* ────────────────────────────────────────────────────────────────
+   Constants
+   ──────────────────────────────────────────────────────────────── */
+const ORDER  = ["md_files", "github_issues", "mem0", "helixir_mcp"];
+const LABELS = {
+  md_files:      "MD-files",
+  github_issues: "GitHub Issues",
+  mem0:          "Mem0",
+  helixir_mcp:   "Helixir MCP",
+};
+const COLORS = {
+  md_files:      "#6aa7ff",
+  github_issues: "#e3b341",
+  mem0:          "#f778ba",
+  helixir_mcp:   "#3fb950",
+};
+const SWATCH_VAR = {
+  md_files:      "--glow-md",
+  github_issues: "--glow-gh",
+  mem0:          "--glow-mem0",
+  helixir_mcp:   "--glow-hlx",
+};
+// Radar axes. `derive(m)` is an optional per-axis extractor — used for
+// metrics that are "lower is better" (time) and need to be inverted so
+// "further from centre = better" still holds. Speed is onboardings/minute:
+// a flat-MD read (~0.25s) scores ~240, a 20s MCP walk scores ~3.
+const RADAR_AXES = [
+  { key: "accuracy_pct",           label: "Accuracy",  isPct: true,  minSpan: 15 },
+  { key: "retrieval_quality_pct",  label: "Retrieval", isPct: true,  minSpan: 15 },
+  { key: "part_a_pct",             label: "Facts",     isPct: true,  minSpan: 10 },
+  { key: "part_b_pct",             label: "Reasoning", isPct: true,  minSpan: 8  },
+  { key: "part_c_pct",             label: "Decisions", isPct: true,  minSpan: 20 },
+  { key: "cost_performance_ratio", label: "Cost/Perf", unit: "cpr",  minSpan: 500 },
+  {
+    // End-to-end speed: how many full approach runs we'd fit in a minute of
+    // wall-clock time. Uses total_time_ms (wall: onboarding + Phase 1b eval
+    // + all verification runs with evaluator) — matches what the user sees
+    // tick on the "Wall time" row of each card.
+    key: "approach_speed",
+    label: "Speed",
+    unit: "opm",                 // approaches per minute
+    minSpan: 2,
+    derive: (m) => {
+      const t = Number(m && m.total_time_ms) || 0;
+      if (t <= 0) return 0;
+      return Math.round(60000 / t * 10) / 10; // 1 decimal, runs/min
+    },
+  },
+];
+const METRIC_LABEL = {
+  accuracy_pct: "Accuracy",
+  retrieval_quality_pct: "Retrieval",
+  part_a_pct: "Facts (A)",
+  part_b_pct: "Reasoning (B)",
+  part_c_pct: "Decisions (C)",
+};
+const ZERO = {
+  total_tokens: 0, total_time_ms: 0, tool_calls: 0,
+  accuracy_pct: 0, retrieval_quality_pct: 0,
+  part_a_pct: 0, part_b_pct: 0, part_c_pct: 0,
+  cost_estimate_usd: 0, cost_performance_ratio: 0,
+  retrieval_scores: { fact_coverage: 0, causal_density: 0, structure: 0 },
+};
+
+const SEED = (() => {
+  try { return JSON.parse(document.getElementById('seedData').textContent); }
+  catch (e) { return { approaches: {} }; }
+})();
+
+const state  = {};   // live running metrics per approach
+const final  = {};   // full aggregate once approach_complete arrives
+let evtSource = null;
+let running   = false;
+let replayTimers = [];
+let activeMetric = 'accuracy_pct';
+const hiddenInRadar = new Set();
+// Wall-clock ticker: `approach_start` arms it, interval writes to the card
+// every 100ms so "Wall time" increments smoothly even between SSE events.
+// `approach_complete` disarms + snaps to final metric. "Tool time" keeps
+// updating only on progress events — it grows in steps while an LLM call
+// actually runs, flat between calls.
+let wallTickerId = 0;
+let wallTickerKey = null;
+let wallTickerStart = 0;
+
+const SERVED_FROM_HTTP = location.protocol === 'http:' || location.protocol === 'https:';
+
+/* ────────────────────────────────────────────────────────────────
+   Utils
+   ──────────────────────────────────────────────────────────────── */
+const $  = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+function fmtInt(n)  { return Math.round(n).toLocaleString('en-US'); }
+function fmtTime(ms){ return (ms / 1000).toFixed(1) + 's'; }
+function fmtCost(v) { return '$' + v.toFixed(4); }
+function fmtPct(v)  { return v.toFixed(1) + '%'; }
+
+function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
+// Smooth count-up for numeric fields. Keeps last target per slot so
+// back-to-back events tween from current rendered value, not from 0.
+const _tweenState = {};
+function tween(slot, to, duration, format, apply) {
+  const prev = _tweenState[slot];
+  if (prev && prev.rafId) cancelAnimationFrame(prev.rafId);
+  const from = prev ? prev.value : 0;
+  if (from === to) { apply(format(to)); _tweenState[slot] = { value: to, rafId: 0 }; return; }
+  const t0 = performance.now();
+  const ctrl = { value: from, rafId: 0 };
+  _tweenState[slot] = ctrl;
+  function step(now) {
+    const t = Math.min(1, (now - t0) / duration);
+    const e = easeOutQuart(t);
+    ctrl.value = from + (to - from) * e;
+    apply(format(ctrl.value));
+    if (t < 1) ctrl.rafId = requestAnimationFrame(step);
+    else ctrl.rafId = 0;
+  }
+  ctrl.rafId = requestAnimationFrame(step);
+}
+
+function barColor(pct) {
+  if (pct >= 85) return 'var(--green)';
+  if (pct >= 70) return 'var(--yellow)';
+  if (pct > 0)   return 'var(--red)';
+  return 'var(--muted-dim)';
+}
+
+function setStatus(kind, text) {
+  const el = $('#status');
+  el.className = 'status ' + kind;
+  el.querySelector('.text').textContent = text;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Timeline
+   ──────────────────────────────────────────────────────────────── */
+function setTimelineStage(stage) {
+  const order = ['onboard', 'retrieval', 'verify', 'complete'];
+  const idx = order.indexOf(stage);
+  $$('.tl-step').forEach(step => {
+    const i = order.indexOf(step.dataset.stage);
+    step.classList.toggle('done',   i < idx);
+    step.classList.toggle('active', i === idx);
+  });
+  $('#timeline').classList.toggle('active', idx >= 0 && stage !== 'complete');
+}
+
+function resetTimeline() {
+  $$('.tl-step').forEach(s => s.classList.remove('done', 'active'));
+  $('#timeline').classList.remove('active');
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Cards
+   ──────────────────────────────────────────────────────────────── */
+function buildCards() {
+  const cardsEl = $('#cards');
+  cardsEl.innerHTML = '';
+  for (const key of ORDER) {
+    state[key] = structuredClone(ZERO);
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.key = key;
+    card.id = 'card-' + key;
+    card.innerHTML = `
+      <div class="card-head">
+        <div class="card-title">
+          <span class="swatch" style="background:${COLORS[key]}"></span>
+          <span>${LABELS[key]}</span>
+          <span class="spinner"></span>
+        </div>
+        <div class="badges"></div>
+      </div>
+      <div class="accuracy-row">
+        <div>
+          <div class="big-num num" data-field="accuracy" style="color:${COLORS[key]}">0.0<span style="font-size:16px;color:var(--muted)">%</span></div>
+          <div class="big-num-label">Accuracy</div>
+        </div>
+        <div style="text-align:right">
+          <div class="big-num num" data-field="retrieval" style="font-size:22px;color:${COLORS[key]}">0<span style="font-size:12px;color:var(--muted)">%</span></div>
+          <div class="big-num-label">Retrieval</div>
+        </div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" data-field="accBar"></div></div>
+
+      <div class="retrieval-strip" style="color:${COLORS[key]}">
+        <div class="rs-cell">
+          <div class="rs-label">Fact cov</div>
+          <div class="rs-score num" data-field="rs-fact">0/4</div>
+          <div class="rs-pips" data-field="rs-pips-fact">${pipHtml(0)}</div>
+        </div>
+        <div class="rs-cell">
+          <div class="rs-label">Causal</div>
+          <div class="rs-score num" data-field="rs-causal">0/4</div>
+          <div class="rs-pips" data-field="rs-pips-causal">${pipHtml(0)}</div>
+        </div>
+        <div class="rs-cell">
+          <div class="rs-label">Struct</div>
+          <div class="rs-score num" data-field="rs-struct">0/4</div>
+          <div class="rs-pips" data-field="rs-pips-struct">${pipHtml(0)}</div>
+        </div>
+      </div>
+
+      <div class="metric-list">
+        <span class="m-k">Tokens</span>      <span class="m-v num" data-field="tokens">0</span>
+        <span class="m-k">Wall time</span>   <span class="m-v num" data-field="time">0.0s</span>
+        <span class="m-k">Tool time</span>   <span class="m-v num" data-field="toolTime" style="color:var(--muted)">0.0s</span>
+        <span class="m-k">Calls</span>       <span class="m-v num" data-field="calls">0</span>
+        <span class="m-k">Cost</span>        <span class="m-v num" data-field="cost">$0.0000</span>
+      </div>
+    `;
+    cardsEl.appendChild(card);
+  }
+}
+
+function pipHtml(on) {
+  let html = '';
+  for (let i = 0; i < 4; i++) html += `<div class="rs-pip${i < on ? ' on' : ''}"></div>`;
+  return html;
+}
+
+function setCardActive(key, on) {
+  const c = document.getElementById('card-' + key);
+  if (!c) return;
+  if (on) c.classList.add('active');
+  else    c.classList.remove('active');
+}
+
+function startWallTicker(key) {
+  stopWallTicker();
+  wallTickerKey   = key;
+  wallTickerStart = performance.now();
+  const card = document.getElementById('card-' + key);
+  if (!card) return;
+  const fld = card.querySelector('[data-field=time]');
+  if (!fld) return;
+  // Direct DOM writes every ~100ms — no tween, no easing; a real stopwatch.
+  // Does not touch state[key].total_time_ms, so the tween-driven path still
+  // works when a real progress event arrives.
+  wallTickerId = setInterval(() => {
+    const ms = performance.now() - wallTickerStart;
+    fld.textContent = fmtTime(ms);
+  }, 100);
+}
+
+function stopWallTicker() {
+  if (wallTickerId) clearInterval(wallTickerId);
+  wallTickerId = 0;
+  wallTickerKey = null;
+}
+
+function applyCard(key, m) {
+  const card = document.getElementById('card-' + key);
+  if (!card) return;
+  const slot = (f) => key + ':' + f;
+  const fld  = (f) => card.querySelector('[data-field=' + f + ']');
+
+  tween(slot('tokens'), m.total_tokens || 0, 500, fmtInt, s => fld('tokens').textContent = s);
+  // Wall time — only write via tween when the ticker is NOT running for
+  // this approach (i.e. onboarding snapshot or post-complete final value).
+  // While the ticker is running it owns the DOM write to keep the stopwatch
+  // motion smooth without event-driven jumps.
+  if (wallTickerKey !== key) {
+    tween(slot('time'), m.total_time_ms || 0, 500, fmtTime,
+          s => fld('time').textContent = s);
+  }
+  // Tool time — LLM latencies only (generator + evaluator). Steps forward
+  // when a call completes, flat between calls. Replay/legacy data without
+  // the split falls back to total_time_ms.
+  const toolMs = (typeof m.tool_time_ms === 'number') ? m.tool_time_ms : (m.total_time_ms || 0);
+  tween(slot('toolTime'), toolMs, 500, fmtTime,
+        s => fld('toolTime').textContent = s);
+  fld('calls').textContent = (m.tool_calls || 0).toLocaleString('en-US');
+  fld('cost').textContent  = fmtCost(m.cost_estimate_usd || 0);
+
+  const acc  = m.accuracy_pct || 0;
+  const retr = m.retrieval_quality_pct || 0;
+  tween(slot('acc'), acc, 500,
+        v => v.toFixed(1) + '<span style="font-size:16px;color:var(--muted)">%</span>',
+        s => fld('accuracy').innerHTML = s);
+  tween(slot('retr'), retr, 500,
+        v => Math.round(v) + '<span style="font-size:12px;color:var(--muted)">%</span>',
+        s => fld('retrieval').innerHTML = s);
+
+  const bar = fld('accBar');
+  bar.style.width = acc + '%';
+  // Progress bar uses the card accent colour — the per-approach identity.
+  // barColor() stays for table cell pills + radar where green/yellow/red
+  // carries extra signal ("how good is this number on its own?").
+  bar.style.background = COLORS[key] || barColor(acc);
+
+  const rs = m.retrieval_scores || {};
+  fld('rs-fact').textContent   = (rs.fact_coverage  || 0) + '/4';
+  fld('rs-causal').textContent = (rs.causal_density || 0) + '/4';
+  fld('rs-struct').textContent = (rs.structure      || 0) + '/4';
+  fld('rs-pips-fact').innerHTML   = pipHtml(rs.fact_coverage  || 0);
+  fld('rs-pips-causal').innerHTML = pipHtml(rs.causal_density || 0);
+  fld('rs-pips-struct').innerHTML = pipHtml(rs.structure      || 0);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Radar chart (pure SVG) — adaptive per-axis zoom
+   ──────────────────────────────────────────────────────────────── */
+// Per-axis range picked from observed values so small differences (e.g.
+// Reasoning 71–76) aren't squashed against a fixed 0–100 scale.
+// Resolve the numeric value for an axis from a metrics object — prefers
+// `ax.derive(m)` when present, falls back to `m[ax.key]`.
+function axisValue(ax, m) {
+  if (!m) return 0;
+  if (typeof ax.derive === 'function') return Number(ax.derive(m)) || 0;
+  return Number(m[ax.key]) || 0;
+}
+
+function computeAxisRanges() {
+  const vis = ORDER.filter(k => final[k] && !hiddenInRadar.has(k));
+  return RADAR_AXES.map(ax => {
+    const vals = vis.map(k => axisValue(ax, final[k]));
+    if (!vals.length) return { min: 0, max: ax.softMax || 100, vmin: 0, vmax: 0 };
+    const vmin = Math.min(...vals);
+    const vmax = Math.max(...vals);
+    const span = Math.max(ax.minSpan || 10, vmax - vmin);
+    // Anchor floor a bit below min so the smallest point isn't on the centre
+    const pad = span * 0.35;
+    let min = Math.max(0, vmin - pad);
+    let max = vmax + span * 0.15;
+    // Keep axis cap within sensible bounds for % metrics (<=100)
+    if (ax.isPct && max > 100) max = 100;
+    // Round to nicer tick values
+    const tick = niceTick((max - min) / 4);
+    min = Math.max(0, Math.floor(min / tick) * tick);
+    max = Math.ceil(max / tick) * tick;
+    return { min, max, vmin, vmax, tick };
+  });
+}
+
+function niceTick(raw) {
+  if (raw <= 0) return 1;
+  const exp = Math.floor(Math.log10(raw));
+  const base = Math.pow(10, exp);
+  const f = raw / base;
+  let nice;
+  if (f < 1.5)      nice = 1;
+  else if (f < 3.5) nice = 2;
+  else if (f < 7.5) nice = 5;
+  else              nice = 10;
+  return nice * base;
+}
+
+function fmtAxisTick(ax, v) {
+  if (ax.isPct)   return Math.round(v) + '%';
+  if (ax.unit === 'cpr') return Math.round(v);
+  if (ax.unit === 'opm') return Math.round(v) + '/m';
+  return Math.round(v);
+}
+
+function renderRadar() {
+  const svg = $('#radar');
+  const W = 400, H = 400, cx = W / 2, cy = H / 2;
+  const R = 140;
+  const axes = RADAR_AXES;
+  const N = axes.length;
+  const ranges = computeAxisRanges();
+
+  const rings = 4;
+  let html = '';
+
+  // Ring grid
+  for (let i = 1; i <= rings; i++) {
+    const rr = (R / rings) * i;
+    const pts = [];
+    for (let a = 0; a < N; a++) {
+      const ang = (Math.PI * 2 * a / N) - Math.PI / 2;
+      pts.push((cx + Math.cos(ang) * rr).toFixed(1) + ',' + (cy + Math.sin(ang) * rr).toFixed(1));
+    }
+    html += `<polygon points="${pts.join(' ')}" fill="none" stroke="#242a33" stroke-width="1" opacity="${0.4 + i * 0.12}"/>`;
+  }
+
+  // Axis spokes + labels with per-axis range hint
+  for (let a = 0; a < N; a++) {
+    const ang = (Math.PI * 2 * a / N) - Math.PI / 2;
+    const x = cx + Math.cos(ang) * R;
+    const y = cy + Math.sin(ang) * R;
+    html += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#242a33" stroke-width="1"/>`;
+    const lx = cx + Math.cos(ang) * (R + 26);
+    const ly = cy + Math.sin(ang) * (R + 26);
+    const anchor = Math.cos(ang) < -0.15 ? 'end' : (Math.cos(ang) > 0.15 ? 'start' : 'middle');
+    html += `<text x="${lx}" y="${ly}" fill="#e6edf3" font-size="11" font-weight="600" text-anchor="${anchor}" font-family="'Inter',system-ui">${axes[a].label}</text>`;
+    const r = ranges[a];
+    const rangeStr = `${fmtAxisTick(axes[a], r.min)}–${fmtAxisTick(axes[a], r.max)}`;
+    html += `<text x="${lx}" y="${ly + 13}" fill="#6e7681" font-size="9" text-anchor="${anchor}" font-family="'JetBrains Mono',monospace">${rangeStr}</text>`;
+  }
+
+  // Ring-scale numbers on the topmost axis (axis 0 = Accuracy)
+  const topR = ranges[0];
+  for (let i = 1; i <= rings; i++) {
+    const rr = (R / rings) * i;
+    const ty = cy - rr - 2;
+    const val = topR.min + (topR.max - topR.min) * (i / rings);
+    html += `<text x="${cx + 4}" y="${ty}" fill="#484f58" font-size="9" font-family="'JetBrains Mono',monospace">${fmtAxisTick(axes[0], val)}</text>`;
+  }
+
+  // Data polygons
+  for (const key of ORDER) {
+    if (hiddenInRadar.has(key)) continue;
+    const m = final[key];
+    if (!m) continue;
+    const pts = [];
+    for (let a = 0; a < N; a++) {
+      const r = ranges[a];
+      const raw = axisValue(axes[a], m);
+      const clamped = Math.max(r.min, Math.min(r.max, raw));
+      const span = Math.max(1e-6, r.max - r.min);
+      const frac = (clamped - r.min) / span;
+      const ang = (Math.PI * 2 * a / N) - Math.PI / 2;
+      const rr = R * frac;
+      pts.push((cx + Math.cos(ang) * rr).toFixed(1) + ',' + (cy + Math.sin(ang) * rr).toFixed(1));
+    }
+    const color = COLORS[key];
+    html += `<polygon points="${pts.join(' ')}" fill="${color}" fill-opacity="0.14" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+    pts.forEach(p => {
+      const [x, y] = p.split(',');
+      html += `<circle cx="${x}" cy="${y}" r="3" fill="${color}"/>`;
+    });
+  }
+
+  svg.innerHTML = html;
+  renderRadarLegend();
+}
+
+function renderRadarLegend() {
+  const el = $('#radarLegend');
+  el.innerHTML = '';
+  for (const key of ORDER) {
+    const m = final[key];
+    const row = document.createElement('div');
+    row.className = 'legend-row' + (hiddenInRadar.has(key) ? ' off' : '');
+    row.innerHTML = `
+      <div class="l-left">
+        <span class="l-dot" style="background:${COLORS[key]}"></span>
+        <span class="l-name">${LABELS[key]}</span>
+      </div>
+      <div class="l-right">${m ? fmtPct(m.accuracy_pct || 0) : '—'}</div>
+    `;
+    row.addEventListener('click', () => {
+      if (hiddenInRadar.has(key)) hiddenInRadar.delete(key);
+      else hiddenInRadar.add(key);
+      renderRadar();
+    });
+    el.appendChild(row);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Horizontal bars (head-to-head)
+   ──────────────────────────────────────────────────────────────── */
+function renderBars() {
+  const root = $('#barsContainer');
+  root.innerHTML = '';
+  // Max across approaches for the selected metric (to size bars meaningfully)
+  let maxVal = 0;
+  for (const key of ORDER) {
+    if (!final[key]) continue;
+    maxVal = Math.max(maxVal, final[key][activeMetric] || 0);
+  }
+  if (maxVal === 0) maxVal = 100;
+  const denom = Math.max(maxVal, 100);
+
+  // Sort high→low for the selected metric
+  const sorted = ORDER
+    .filter(k => final[k])
+    .sort((a, b) => (final[b][activeMetric] || 0) - (final[a][activeMetric] || 0));
+
+  if (sorted.length === 0) {
+    root.innerHTML = `<div style="color:var(--muted-dim);font-size:12px;padding:8px 0">no data yet — press Run</div>`;
+    return;
+  }
+
+  sorted.forEach((key, i) => {
+    const m = final[key];
+    const val = m[activeMetric] || 0;
+    const row = document.createElement('div');
+    row.className = 'bar-group';
+    row.innerHTML = `
+      <div class="bg-label"><span class="dot" style="background:${COLORS[key]}"></span>${LABELS[key]}</div>
+      <div class="bg-track"><div class="bg-fill" style="background:${COLORS[key]};width:0%"></div></div>
+      <div class="bg-value" style="color:${COLORS[key]}">${fmtPct(val)}</div>
+    `;
+    root.appendChild(row);
+    // animate in next frame
+    const fill = row.querySelector('.bg-fill');
+    requestAnimationFrame(() => { fill.style.width = (val / denom * 100) + '%'; });
+  });
+}
+
+function setMetric(metric) {
+  activeMetric = metric;
+  $$('.metric-tab').forEach(t => t.classList.toggle('active', t.dataset.metric === metric));
+  renderBars();
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Table
+   ──────────────────────────────────────────────────────────────── */
+function renderTable() {
+  const body = $('#tableBody');
+  body.innerHTML = '';
+
+  const bestAcc = Math.max(...ORDER.map(k => (state[k] && state[k].accuracy_pct) || 0));
+
+  for (const key of ORDER) {
+    const m = state[key] || ZERO;
+    const tr = document.createElement('tr');
+    if (m.accuracy_pct > 0 && m.accuracy_pct === bestAcc) tr.classList.add('leader');
+    tr.innerHTML = `
+      <td><span class="approach-tag"><span class="swatch" style="background:${COLORS[key]}"></span>${LABELS[key]}</span></td>
+      <td class="num">${fmtInt(m.total_tokens || 0)}</td>
+      <td class="num">${fmtTime(m.total_time_ms || 0)}</td>
+      <td class="num">${m.tool_calls || 0}</td>
+      <td class="num"><span class="cell-pill" style="background:${hexA(barColor(m.accuracy_pct||0),0.14)};color:${barColor(m.accuracy_pct||0)}">${fmtPct(m.accuracy_pct || 0)}</span></td>
+      <td class="num"><span class="cell-pill" style="background:${hexA(barColor(m.retrieval_quality_pct||0),0.14)};color:${barColor(m.retrieval_quality_pct||0)}">${fmtPct(m.retrieval_quality_pct || 0)}</span></td>
+      <td class="num">${fmtPct(m.part_a_pct || 0)}</td>
+      <td class="num">${fmtPct(m.part_b_pct || 0)}</td>
+      <td class="num">${fmtPct(m.part_c_pct || 0)}</td>
+      <td class="num">${fmtCost(m.cost_estimate_usd || 0)}</td>
+      <td class="num">${Math.round(m.cost_performance_ratio || 0).toLocaleString('en-US')}</td>
+    `;
+    body.appendChild(tr);
+  }
+}
+
+function hexA(cssColor, alpha) {
+  // Convert CSS variables or hex to rgba() for cell pill background
+  const map = {
+    'var(--green)':   'rgba(63,185,80,' + alpha + ')',
+    'var(--yellow)':  'rgba(227,179,65,' + alpha + ')',
+    'var(--red)':     'rgba(248,81,73,' + alpha + ')',
+    'var(--muted-dim)':'rgba(110,118,129,' + alpha + ')',
+  };
+  return map[cssColor] || 'rgba(110,118,129,' + alpha + ')';
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Event handling
+   ──────────────────────────────────────────────────────────────── */
+function handleEvent(evt) {
+  switch (evt.type) {
+    case 'start': {
+      const tag = evt.mode === 'live'
+        ? 'LIVE — calling Cerebras + MCP servers…'
+        : 'REPLAY — ' + (evt.recording_id || 'baseline');
+      setStatus('running', tag);
+      setTimelineStage('onboard');
+      break;
+    }
+    case 'approach_start': {
+      setCardActive(evt.approach, true);
+      const m0 = state[evt.approach] || (state[evt.approach] = structuredClone(ZERO));
+      m0._earnedPts = 0;
+      m0._maxPts = 0;
+      m0.tool_time_ms = 0;
+      m0.total_time_ms = 0;
+      // Start the continuous wall stopwatch on this card. Tool time stays
+      // at 0 until the first progress event with tool_time_ms arrives.
+      startWallTicker(evt.approach);
+      setStatus('running', `[${LABELS[evt.approach] || evt.approach}] retrieving context…`);
+      setTimelineStage('onboard');
+      break;
+    }
+    case 'approach_progress': {
+      const m = state[evt.approach] || (state[evt.approach] = structuredClone(ZERO));
+      m.total_tokens  = evt.tokens ?? m.total_tokens;
+      m.total_time_ms = evt.time_ms ?? m.time_ms ?? m.total_time_ms;
+      // Tool time ticks forward only when the server reports it — baseline
+      // and runner both emit it per verification question and after Phase 1b.
+      if (typeof evt.tool_time_ms === 'number') m.tool_time_ms = evt.tool_time_ms;
+      m.tool_calls    = evt.tool_calls_done ?? m.tool_calls;
+      // Retrieval scores can arrive mid-run (right after Phase 1b eval) so
+      // the card's Retrieval % + pip strip update before verification finishes.
+      if (typeof evt.retrieval_quality_pct === 'number') {
+        m.retrieval_quality_pct = evt.retrieval_quality_pct;
+      }
+      if (evt.retrieval_scores && typeof evt.retrieval_scores === 'object') {
+        m.retrieval_scores = evt.retrieval_scores;
+      }
+      // Heuristic: activity string drives timeline stage + live accuracy
+      // accumulation from per-question evaluator scores.
+      if (typeof evt.activity === 'string') {
+        if (/R\d.*Q\d/i.test(evt.activity))  setTimelineStage('verify');
+        else if (/retrieval eval/i.test(evt.activity)) setTimelineStage('retrieval');
+        else if (/retriev/i.test(evt.activity)) setTimelineStage('onboard');
+        // Per-question: "R1 Q1 → 16/20". Skip the retrieval-eval total
+        // (activity starts with "retrieval eval") so it doesn't pollute
+        // the accuracy running sum.
+        if (!/retrieval eval/i.test(evt.activity)) {
+          const score = evt.activity.match(/→\s*(\d+)\s*\/\s*(\d+)/);
+          if (score) {
+            m._earnedPts = (m._earnedPts || 0) + parseInt(score[1], 10);
+            m._maxPts    = (m._maxPts    || 0) + parseInt(score[2], 10);
+            if (m._maxPts > 0) {
+              m.accuracy_pct = (m._earnedPts / m._maxPts) * 100;
+            }
+          }
+        }
+      }
+      applyCard(evt.approach, m);
+      renderTable();
+      break;
+    }
+    case 'approach_complete': {
+      // Disarm the wall ticker first so applyCard's tween owns the final
+      // snap from whatever the stopwatch last wrote to the final metric.
+      stopWallTicker();
+      final[evt.approach] = evt.metrics;
+      state[evt.approach] = Object.assign(structuredClone(ZERO), evt.metrics);
+      applyCard(evt.approach, evt.metrics);
+      setCardActive(evt.approach, false);
+      renderTable();
+      renderRadar();
+      renderBars();
+      break;
+    }
+    case 'log': {
+      console.log('[runner]', evt.line);
+      break;
+    }
+    case 'need_keys': {
+      stopRun();
+      setStatus('idle', 'Cerebras key required — fill the form and try again');
+      showKeyModal();
+      break;
+    }
+    case 'error': {
+      setStatus('error', 'error: ' + evt.message);
+      stopRun();
+      break;
+    }
+    case 'complete': {
+      setTimelineStage('complete');
+      const tag = evt.mode === 'live'
+        ? `complete (live, exit=${evt.exit_code ?? 0})`
+        : 'complete (replay)';
+      setStatus('complete', tag);
+      markBest();
+      renderRadar();
+      renderBars();
+      stopRun();
+      if (evt.mode === 'live') loadRecordings();
+      break;
+    }
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Badges (per-metric winners)
+   ──────────────────────────────────────────────────────────────── */
+const CATEGORIES = [
+  { key: 'accuracy_pct',           label: 'Accuracy',  best: 'max' },
+  { key: 'retrieval_quality_pct',  label: 'Retrieval', best: 'max' },
+  { key: 'total_time_ms',          label: 'Fastest',   best: 'min' },
+  { key: 'cost_estimate_usd',      label: 'Cheapest',  best: 'min' },
+  { key: 'cost_performance_ratio', label: 'Best CPR',  best: 'max' },
+  { key: 'tool_calls',             label: 'Simplest',  best: 'min' },
+  { key: 'part_a_pct',             label: 'Facts',     best: 'max' },
+  { key: 'part_b_pct',             label: 'Reasoning', best: 'max' },
+  { key: 'part_c_pct',             label: 'Decisions', best: 'max' },
+];
+function markBest() {
+  const have = ORDER.filter(k => final[k]);
+  if (!have.length) return;
+  const winners = {};
+  for (const cat of CATEGORIES) {
+    const vals = have.map(k => final[k][cat.key]).filter(v => typeof v === 'number' && !isNaN(v) && v > 0);
+    if (!vals.length) continue;
+    const target = cat.best === 'max' ? Math.max(...vals) : Math.min(...vals);
+    winners[cat.key] = have.filter(k => final[k][cat.key] === target);
+  }
+  for (const k of ORDER) {
+    const card = document.getElementById('card-' + k);
+    if (!card) continue;
+    const holder = card.querySelector('.badges');
+    holder.innerHTML = '';
+    for (const cat of CATEGORIES) {
+      if ((winners[cat.key] || []).includes(k)) {
+        const b = document.createElement('span');
+        b.className = 'badge';
+        b.textContent = cat.label;
+        holder.appendChild(b);
+      }
+    }
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Run lifecycle
+   ──────────────────────────────────────────────────────────────── */
+function startRun() {
+  if (running) return;
+  running = true;
+  const runBtn = $('#runBtn');
+  runBtn.textContent = '■ Stop';
+  runBtn.classList.add('stop');
+  $('#liveChk').disabled = true;
+
+  buildCards();
+  for (const k of ORDER) { final[k] = null; state[k] = structuredClone(ZERO); }
+  resetTimeline();
+  renderTable();
+  renderRadar();
+  renderBars();
+
+  if ($('#liveChk').checked) startLive();
+  else startReplay();
+}
+
+function stopRun() {
+  // If status is still "running" at this point, the stop was user-initiated
+  // (button click) — not driven by a natural complete/error/need_keys event
+  // which have already set their own terminal status. In that case flip
+  // the pill to "stopped" so the user gets explicit feedback.
+  const wasRunning = $('#status').classList.contains('running');
+  running = false;
+  const runBtn = $('#runBtn');
+  runBtn.textContent = '▶ Run Benchmark';
+  runBtn.classList.remove('stop');
+  $('#liveChk').disabled = false;
+  if (evtSource && SERVED_FROM_HTTP) fetch('/stop').catch(() => {});
+  if (evtSource) { evtSource.close(); evtSource = null; }
+  for (const t of replayTimers) clearTimeout(t);
+  replayTimers = [];
+  // Clear spinner + kill the wall ticker so the stopwatch freezes on the
+  // value it showed at stop time (not drifting while the SSE is closed).
+  for (const k of ORDER) setCardActive(k, false);
+  stopWallTicker();
+  if (wasRunning) setStatus('idle', 'stopped');
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Replay (HTTP or embedded)
+   ──────────────────────────────────────────────────────────────── */
+function startReplay() {
+  if (SERVED_FROM_HTTP) {
+    const rid = $('#recordingPicker').value || '';
+    const url = rid ? '/events?replay=' + encodeURIComponent(rid) : '/events';
+    setStatus('running', 'replay — streaming ' + (rid || 'baseline'));
+    openSse(url);
+  } else {
+    startReplayEmbedded();
+  }
+}
+
+function scheduleEvent(delay, evt) {
+  const h = setTimeout(() => { if (running) handleEvent(evt); }, delay);
+  replayTimers.push(h);
+}
+
+function startReplayEmbedded() {
+  setStatus('running', 'replay — embedded snapshot (' + (SEED._source || 'seed') + ')');
+  scheduleEvent(0, { type: 'start', mode: 'replay' });
+  const approaches = SEED.approaches || {};
+  let cursor = 300;
+  for (const key of ORDER) {
+    const m = approaches[key];
+    if (!m) continue;
+    const wallMs = m.total_time_ms || 3000;
+    const steps = Math.max(8, Math.round(wallMs / 80));
+    const stepDt = wallMs / steps;
+    scheduleEvent(cursor, { type: 'approach_start', approach: key, tool_calls: m.tool_calls || 0 });
+    for (let i = 1; i <= steps; i++) {
+      const frac = i / steps;
+      scheduleEvent(cursor + i * stepDt, {
+        type: 'approach_progress',
+        approach: key,
+        tokens:          Math.round((m.total_tokens  || 0) * frac),
+        time_ms:         Math.round((m.total_time_ms || 0) * frac),
+        tool_calls_done: Math.round((m.tool_calls    || 0) * frac),
+      });
+    }
+    cursor += wallMs;
+    scheduleEvent(cursor, { type: 'approach_complete', approach: key, metrics: m });
+    cursor += 50;
+  }
+  scheduleEvent(cursor, { type: 'complete', mode: 'replay' });
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Live SSE
+   ──────────────────────────────────────────────────────────────── */
+function startLive() {
+  if (!SERVED_FROM_HTTP) {
+    setStatus('error', 'live mode requires server.py — open http://localhost:8765/');
+    stopRun();
+    return;
+  }
+  setStatus('running', 'connecting to server.py…');
+  openSse('/events?live=1');
+}
+
+function openSse(url) {
+  let gotAnyMessage = false;
+  const connectTimeout = setTimeout(() => {
+    if (!gotAnyMessage && running) {
+      setStatus('error', 'server not responding — is python3 server.py running?');
+      stopRun();
+    }
+  }, 3000);
+
+  try { evtSource = new EventSource(url); }
+  catch (e) {
+    clearTimeout(connectTimeout);
+    setStatus('error', 'EventSource failed: ' + e.message);
+    stopRun();
+    return;
+  }
+  evtSource.onmessage = (e) => {
+    gotAnyMessage = true;
+    clearTimeout(connectTimeout);
+    try { handleEvent(JSON.parse(e.data)); }
+    catch (err) { console.error('bad event', e.data, err); }
+  };
+  evtSource.onerror = () => {
+    if (!gotAnyMessage && running) {
+      clearTimeout(connectTimeout);
+      setStatus('error', 'cannot reach ' + url);
+      stopRun();
+    }
+  };
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Recording picker
+   ──────────────────────────────────────────────────────────────── */
+function fmtRecordingLabel(r) {
+  if (r.id === 'baseline') return 'Default run (v3 snapshot)';
+  const src = r.timestamp || r.id;
+  return src.replace('T', ' ').replace(/_/g, ' ').replace(/-(\d\d)-(\d\d)$/, ':$1:$2');
+}
+
+async function loadRecordings() {
+  const picker = $('#recordingPicker');
+  if (!SERVED_FROM_HTTP) {
+    picker.innerHTML = '<option value="">embedded seed (file:// mode)</option>';
+    picker.disabled = true;
+    return;
+  }
+  try {
+    const res = await fetch('/runs');
+    const data = await res.json();
+    const runs = data.runs || [];
+    const hasBaseline = runs.some(r => r.id === 'baseline');
+    picker.innerHTML = '';
+    if (!hasBaseline) {
+      const o = document.createElement('option');
+      o.value = 'baseline';
+      o.textContent = fmtRecordingLabel({ id: 'baseline' });
+      picker.appendChild(o);
+    }
+    for (const r of runs) {
+      const o = document.createElement('option');
+      o.value = r.id;
+      o.textContent = fmtRecordingLabel(r);
+      picker.appendChild(o);
+    }
+    picker.value = 'baseline';
+  } catch (e) {
+    picker.innerHTML = '<option value="baseline">Default run (v3 snapshot)</option>';
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   Key modal
+   ──────────────────────────────────────────────────────────────── */
+function showKeyModal() {
+  const msg = $('#keyMsg'); const input = $('#keyInput');
+  msg.textContent = ''; msg.className = 'modal-msg'; input.value = '';
+  const force = $('#keyForce'); if (force) force.style.display = 'none';
+  $('#keyModal').classList.add('show');
+  setTimeout(() => input.focus(), 50);
+}
+function hideKeyModal() { $('#keyModal').classList.remove('show'); }
+
+/* ────────────────────────────────────────────────────────────────
+   Wire-up
+   ──────────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  buildCards();
+  renderTable();
+  renderRadar();
+  renderBars();
+
+  $('#runBtn').addEventListener('click', () => running ? stopRun() : startRun());
+  $('#recordingPicker').addEventListener('change', () => {
+    if (!running) setStatus('idle', 'ready to replay ' + ($('#recordingPicker').value || 'baseline'));
+  });
+  $$('.metric-tab').forEach(t => t.addEventListener('click', () => setMetric(t.dataset.metric)));
+  $('#keyCancel').addEventListener('click', hideKeyModal);
+  $('#keyModal').addEventListener('click', (e) => { if (e.target === $('#keyModal')) hideKeyModal(); });
+
+  async function postKey(force) {
+    const key = $('#keyInput').value.trim();
+    const msg = $('#keyMsg');
+    if (!key) { msg.textContent = 'paste a key first'; msg.className = 'modal-msg err'; return; }
+    $('#keySave').disabled = true; $('#keyForce').disabled = true;
+    msg.textContent = force ? 'saving without validation…' : 'testing key against Cerebras…';
+    msg.className = 'modal-msg';
+    try {
+      const res = await fetch('/api/save-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cerebras_api_key: key, force: !!force }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        msg.textContent = force ? 'saved (unverified) — starting live run…' : 'saved — starting live run…';
+        msg.className = 'modal-msg ok';
+        setTimeout(() => { hideKeyModal(); $('#liveChk').checked = true; startRun(); }, 600);
+      } else {
+        msg.textContent = 'rejected: ' + (data.error || 'unknown error');
+        msg.className = 'modal-msg err';
+        // Cerebras validator failed — offer a bypass. If /v1/chat/completions
+        // 403s for a key that actually works end-to-end (scope quirks, region,
+        // WAF), skipping the pre-check lets the runner surface the real error.
+        if (data.can_force) $('#keyForce').style.display = 'inline-block';
+      }
+    } catch (e) {
+      msg.textContent = 'request failed: ' + e.message;
+      msg.className = 'modal-msg err';
+    } finally {
+      $('#keySave').disabled = false; $('#keyForce').disabled = false;
+    }
+  }
+  $('#keySave').addEventListener('click', () => postKey(false));
+  $('#keyForce').addEventListener('click', () => postKey(true));
+
+  loadRecordings();
+  setStatus('idle', 'idle — press Run to see the snapshot replay');
+});
+</script>
+</body>
+</html>

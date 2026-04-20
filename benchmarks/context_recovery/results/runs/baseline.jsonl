@@ -1,0 +1,109 @@
+{"type": "start", "mode": "live", "order": ["md_files", "github_issues", "mem0", "helixir_mcp"], "recording_id": "baseline", "timestamp": "2026-04-20T12:21:50", "ts_ms": 0}
+{"type": "approach_start", "approach": "md_files", "ts_ms": 0}
+{"type": "approach_progress", "approach": "md_files", "tokens": 5300, "time_ms": 250, "tool_time_ms": 250, "tool_calls_done": 1, "activity": "retrieving (1)", "ts_ms": 250}
+{"type": "approach_progress", "approach": "md_files", "tokens": 5300, "time_ms": 1750, "tool_time_ms": 250, "tool_calls_done": 1, "activity": "retrieval eval → 9/12", "retrieval_quality_pct": 75.0, "retrieval_scores": {"fact_coverage": 4, "causal_density": 1, "structure": 4, "total": 9}, "ts_ms": 1750}
+{"type": "approach_progress", "approach": "md_files", "tokens": 7971, "time_ms": 3453, "tool_time_ms": 725, "tool_calls_done": 1, "activity": "R1 Q1 → 14/16", "ts_ms": 3453}
+{"type": "approach_progress", "approach": "md_files", "tokens": 10623, "time_ms": 5213, "tool_time_ms": 1143, "tool_calls_done": 1, "activity": "R1 Q2 → 16/16", "ts_ms": 5213}
+{"type": "approach_progress", "approach": "md_files", "tokens": 13295, "time_ms": 6991, "tool_time_ms": 1601, "tool_calls_done": 1, "activity": "R1 Q3 → 11/16", "ts_ms": 6991}
+{"type": "approach_progress", "approach": "md_files", "tokens": 15970, "time_ms": 8722, "tool_time_ms": 2016, "tool_calls_done": 1, "activity": "R1 Q4 → 13/16", "ts_ms": 8722}
+{"type": "approach_progress", "approach": "md_files", "tokens": 18633, "time_ms": 10445, "tool_time_ms": 2495, "tool_calls_done": 1, "activity": "R1 Q5 → 11/16", "ts_ms": 10445}
+{"type": "approach_progress", "approach": "md_files", "tokens": 21257, "time_ms": 12160, "tool_time_ms": 2940, "tool_calls_done": 1, "activity": "R1 Q6 → 14/16", "ts_ms": 12160}
+{"type": "approach_progress", "approach": "md_files", "tokens": 23910, "time_ms": 13925, "tool_time_ms": 3347, "tool_calls_done": 1, "activity": "R2 Q1 → 14/16", "ts_ms": 13925}
+{"type": "approach_progress", "approach": "md_files", "tokens": 26586, "time_ms": 15691, "tool_time_ms": 3757, "tool_calls_done": 1, "activity": "R2 Q2 → 15/16", "ts_ms": 15691}
+{"type": "approach_progress", "approach": "md_files", "tokens": 29215, "time_ms": 17410, "tool_time_ms": 4207, "tool_calls_done": 1, "activity": "R2 Q3 → 12/16", "ts_ms": 17410}
+{"type": "approach_progress", "approach": "md_files", "tokens": 31875, "time_ms": 19111, "tool_time_ms": 4616, "tool_calls_done": 1, "activity": "R2 Q4 → 14/16", "ts_ms": 19111}
+{"type": "approach_progress", "approach": "md_files", "tokens": 34582, "time_ms": 20838, "tool_time_ms": 5048, "tool_calls_done": 1, "activity": "R2 Q5 → 12/16", "ts_ms": 20838}
+{"type": "approach_progress", "approach": "md_files", "tokens": 37187, "time_ms": 22543, "tool_time_ms": 5449, "tool_calls_done": 1, "activity": "R2 Q6 → 11/16", "ts_ms": 22543}
+{"type": "approach_progress", "approach": "md_files", "tokens": 39904, "time_ms": 24257, "tool_time_ms": 5923, "tool_calls_done": 1, "activity": "R3 Q1 → 14/16", "ts_ms": 24257}
+{"type": "approach_progress", "approach": "md_files", "tokens": 42597, "time_ms": 26033, "tool_time_ms": 6371, "tool_calls_done": 1, "activity": "R3 Q2 → 16/16", "ts_ms": 26033}
+{"type": "approach_progress", "approach": "md_files", "tokens": 45251, "time_ms": 27814, "tool_time_ms": 6812, "tool_calls_done": 1, "activity": "R3 Q3 → 12/16", "ts_ms": 27814}
+{"type": "approach_progress", "approach": "md_files", "tokens": 47901, "time_ms": 29571, "tool_time_ms": 7276, "tool_calls_done": 1, "activity": "R3 Q4 → 13/16", "ts_ms": 29571}
+{"type": "approach_progress", "approach": "md_files", "tokens": 50545, "time_ms": 31276, "tool_time_ms": 7721, "tool_calls_done": 1, "activity": "R3 Q5 → 12/16", "ts_ms": 31276}
+{"type": "approach_progress", "approach": "md_files", "tokens": 53206, "time_ms": 32978, "tool_time_ms": 8187, "tool_calls_done": 1, "activity": "R3 Q6 → 13/16", "ts_ms": 32978}
+{"type": "approach_complete", "approach": "md_files", "metrics": {"context_tokens": 5300, "verification_input_tokens": 35895, "verification_output_tokens": 12000, "total_tokens": 53195, "retrieval_time_ms": 250, "verification_time_ms": 7950, "total_time_ms": 32978, "tool_calls": 1, "messages": 6, "accuracy_pct": 88.8, "part_a_pct": 63.0, "part_b_pct": 73.8, "part_c_pct": 95.0, "cost_estimate_usd": 0.031917, "cost_performance_ratio": 2225.0, "retrieval_quality_pct": 75.0, "retrieval_scores": {"fact_coverage": 4, "causal_density": 1, "structure": 4, "total": 9}, "tool_time_ms": 8187}, "ts_ms": 32978}
+{"type": "approach_start", "approach": "github_issues", "ts_ms": 32978}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 5400, "time_ms": 320, "tool_time_ms": 320, "tool_calls_done": 1, "activity": "retrieving (1)", "ts_ms": 33298}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 5400, "time_ms": 1820, "tool_time_ms": 320, "tool_calls_done": 1, "activity": "retrieval eval → 10/12", "retrieval_quality_pct": 83.3, "retrieval_scores": {"fact_coverage": 4, "causal_density": 3, "structure": 3, "total": 10}, "ts_ms": 34798}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 8077, "time_ms": 3570, "tool_time_ms": 767, "tool_calls_done": 1, "activity": "R1 Q1 → 15/16", "ts_ms": 36548}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 10808, "time_ms": 5334, "tool_time_ms": 1248, "tool_calls_done": 1, "activity": "R1 Q2 → 15/16", "ts_ms": 38312}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 13508, "time_ms": 7063, "tool_time_ms": 1682, "tool_calls_done": 1, "activity": "R1 Q3 → 12/16", "ts_ms": 40041}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 16171, "time_ms": 8828, "tool_time_ms": 2099, "tool_calls_done": 1, "activity": "R1 Q4 → 16/16", "ts_ms": 41806}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 18881, "time_ms": 10573, "tool_time_ms": 2550, "tool_calls_done": 1, "activity": "R1 Q5 → 15/16", "ts_ms": 43551}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 21583, "time_ms": 12325, "tool_time_ms": 3001, "tool_calls_done": 1, "activity": "R1 Q6 → 13/16", "ts_ms": 45303}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 24279, "time_ms": 14081, "tool_time_ms": 3441, "tool_calls_done": 1, "activity": "R2 Q1 → 16/16", "ts_ms": 47059}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 26969, "time_ms": 15829, "tool_time_ms": 3888, "tool_calls_done": 1, "activity": "R2 Q2 → 16/16", "ts_ms": 48807}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 29719, "time_ms": 17544, "tool_time_ms": 4360, "tool_calls_done": 1, "activity": "R2 Q3 → 12/16", "ts_ms": 50522}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 32445, "time_ms": 19320, "tool_time_ms": 4789, "tool_calls_done": 1, "activity": "R2 Q4 → 16/16", "ts_ms": 52298}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 35107, "time_ms": 21089, "tool_time_ms": 5280, "tool_calls_done": 1, "activity": "R2 Q5 → 13/16", "ts_ms": 54067}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 37787, "time_ms": 22878, "tool_time_ms": 5720, "tool_calls_done": 1, "activity": "R2 Q6 → 13/16", "ts_ms": 55856}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 40526, "time_ms": 24635, "tool_time_ms": 6202, "tool_calls_done": 1, "activity": "R3 Q1 → 16/16", "ts_ms": 57613}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 43306, "time_ms": 26424, "tool_time_ms": 6682, "tool_calls_done": 1, "activity": "R3 Q2 → 16/16", "ts_ms": 59402}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 46088, "time_ms": 28212, "tool_time_ms": 7158, "tool_calls_done": 1, "activity": "R3 Q3 → 11/16", "ts_ms": 61190}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 48855, "time_ms": 29961, "tool_time_ms": 7587, "tool_calls_done": 1, "activity": "R3 Q4 → 14/16", "ts_ms": 62939}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 51601, "time_ms": 31676, "tool_time_ms": 8020, "tool_calls_done": 1, "activity": "R3 Q5 → 12/16", "ts_ms": 64654}
+{"type": "approach_progress", "approach": "github_issues", "tokens": 54356, "time_ms": 33464, "tool_time_ms": 8471, "tool_calls_done": 1, "activity": "R3 Q6 → 10/16", "ts_ms": 66442}
+{"type": "approach_complete", "approach": "github_issues", "metrics": {"context_tokens": 5400, "verification_input_tokens": 36997, "verification_output_tokens": 12000, "total_tokens": 54397, "retrieval_time_ms": 320, "verification_time_ms": 8180, "total_time_ms": 33464, "tool_calls": 1, "messages": 6, "accuracy_pct": 88.8, "part_a_pct": 70.3, "part_b_pct": 71.2, "part_c_pct": 93.8, "cost_estimate_usd": 0.032638, "cost_performance_ratio": 2175.0, "retrieval_quality_pct": 83.3, "retrieval_scores": {"fact_coverage": 4, "causal_density": 3, "structure": 3, "total": 10}, "tool_time_ms": 8471}, "ts_ms": 66442}
+{"type": "approach_start", "approach": "mem0", "ts_ms": 66442}
+{"type": "approach_progress", "approach": "mem0", "tokens": 491, "time_ms": 300, "tool_time_ms": 300, "tool_calls_done": 1, "activity": "retrieving (1)", "ts_ms": 66742}
+{"type": "approach_progress", "approach": "mem0", "tokens": 982, "time_ms": 600, "tool_time_ms": 600, "tool_calls_done": 2, "activity": "retrieving (2)", "ts_ms": 67042}
+{"type": "approach_progress", "approach": "mem0", "tokens": 1473, "time_ms": 900, "tool_time_ms": 900, "tool_calls_done": 3, "activity": "retrieving (3)", "ts_ms": 67342}
+{"type": "approach_progress", "approach": "mem0", "tokens": 1964, "time_ms": 1200, "tool_time_ms": 1200, "tool_calls_done": 4, "activity": "retrieving (4)", "ts_ms": 67642}
+{"type": "approach_progress", "approach": "mem0", "tokens": 2455, "time_ms": 1500, "tool_time_ms": 1500, "tool_calls_done": 5, "activity": "retrieving (5)", "ts_ms": 67942}
+{"type": "approach_progress", "approach": "mem0", "tokens": 2946, "time_ms": 1800, "tool_time_ms": 1800, "tool_calls_done": 6, "activity": "retrieving (6)", "ts_ms": 68242}
+{"type": "approach_progress", "approach": "mem0", "tokens": 2950, "time_ms": 3300, "tool_time_ms": 1800, "tool_calls_done": 6, "activity": "retrieval eval → 5/12", "retrieval_quality_pct": 41.7, "retrieval_scores": {"fact_coverage": 3, "causal_density": 1, "structure": 1, "total": 5}, "ts_ms": 69742}
+{"type": "approach_progress", "approach": "mem0", "tokens": 4467, "time_ms": 5000, "tool_time_ms": 2162, "tool_calls_done": 6, "activity": "R1 Q1 → 16/16", "ts_ms": 71442}
+{"type": "approach_progress", "approach": "mem0", "tokens": 5898, "time_ms": 6692, "tool_time_ms": 2582, "tool_calls_done": 6, "activity": "R1 Q2 → 9/16", "ts_ms": 73134}
+{"type": "approach_progress", "approach": "mem0", "tokens": 7430, "time_ms": 8381, "tool_time_ms": 2953, "tool_calls_done": 6, "activity": "R1 Q3 → 8/16", "ts_ms": 74823}
+{"type": "approach_progress", "approach": "mem0", "tokens": 8935, "time_ms": 10080, "tool_time_ms": 3313, "tool_calls_done": 6, "activity": "R1 Q4 → 11/16", "ts_ms": 76522}
+{"type": "approach_progress", "approach": "mem0", "tokens": 10455, "time_ms": 11781, "tool_time_ms": 3669, "tool_calls_done": 6, "activity": "R1 Q5 → 5/16", "ts_ms": 78223}
+{"type": "approach_progress", "approach": "mem0", "tokens": 11920, "time_ms": 13450, "tool_time_ms": 4088, "tool_calls_done": 6, "activity": "R1 Q6 → 9/16", "ts_ms": 79892}
+{"type": "approach_progress", "approach": "mem0", "tokens": 13355, "time_ms": 15168, "tool_time_ms": 4437, "tool_calls_done": 6, "activity": "R2 Q1 → 15/16", "ts_ms": 81610}
+{"type": "approach_progress", "approach": "mem0", "tokens": 14845, "time_ms": 16872, "tool_time_ms": 4808, "tool_calls_done": 6, "activity": "R2 Q2 → 9/16", "ts_ms": 83314}
+{"type": "approach_progress", "approach": "mem0", "tokens": 16344, "time_ms": 18585, "tool_time_ms": 5199, "tool_calls_done": 6, "activity": "R2 Q3 → 9/16", "ts_ms": 85027}
+{"type": "approach_progress", "approach": "mem0", "tokens": 17796, "time_ms": 20259, "tool_time_ms": 5601, "tool_calls_done": 6, "activity": "R2 Q4 → 12/16", "ts_ms": 86701}
+{"type": "approach_progress", "approach": "mem0", "tokens": 19289, "time_ms": 21903, "tool_time_ms": 6007, "tool_calls_done": 6, "activity": "R2 Q5 → 7/16", "ts_ms": 88345}
+{"type": "approach_progress", "approach": "mem0", "tokens": 20784, "time_ms": 23571, "tool_time_ms": 6359, "tool_calls_done": 6, "activity": "R2 Q6 → 9/16", "ts_ms": 90013}
+{"type": "approach_progress", "approach": "mem0", "tokens": 22283, "time_ms": 25215, "tool_time_ms": 6748, "tool_calls_done": 6, "activity": "R3 Q1 → 16/16", "ts_ms": 91657}
+{"type": "approach_progress", "approach": "mem0", "tokens": 23770, "time_ms": 26935, "tool_time_ms": 7106, "tool_calls_done": 6, "activity": "R3 Q2 → 9/16", "ts_ms": 93377}
+{"type": "approach_progress", "approach": "mem0", "tokens": 25301, "time_ms": 28656, "tool_time_ms": 7518, "tool_calls_done": 6, "activity": "R3 Q3 → 10/16", "ts_ms": 95098}
+{"type": "approach_progress", "approach": "mem0", "tokens": 26749, "time_ms": 30356, "tool_time_ms": 7920, "tool_calls_done": 6, "activity": "R3 Q4 → 13/16", "ts_ms": 96798}
+{"type": "approach_progress", "approach": "mem0", "tokens": 28215, "time_ms": 32032, "tool_time_ms": 8341, "tool_calls_done": 6, "activity": "R3 Q5 → 6/16", "ts_ms": 98474}
+{"type": "approach_progress", "approach": "mem0", "tokens": 29678, "time_ms": 33749, "tool_time_ms": 8760, "tool_calls_done": 6, "activity": "R3 Q6 → 6/16", "ts_ms": 100191}
+{"type": "approach_complete", "approach": "mem0", "metrics": {"context_tokens": 2950, "verification_input_tokens": 18688, "verification_output_tokens": 8000, "total_tokens": 29638, "retrieval_time_ms": 1800, "verification_time_ms": 6900, "total_time_ms": 33749, "tool_calls": 6, "messages": 12, "accuracy_pct": 58.8, "part_a_pct": 65.6, "part_b_pct": 68.8, "part_c_pct": 98.8, "cost_estimate_usd": 0.017783, "cost_performance_ratio": 2643.0, "retrieval_quality_pct": 41.7, "retrieval_scores": {"fact_coverage": 3, "causal_density": 1, "structure": 1, "total": 5}, "tool_time_ms": 8760}, "ts_ms": 100191}
+{"type": "approach_start", "approach": "helixir_mcp", "ts_ms": 100191}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 1133, "time_ms": 586, "tool_time_ms": 586, "tool_calls_done": 1, "activity": "retrieving (1)", "ts_ms": 100777}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 2266, "time_ms": 1172, "tool_time_ms": 1172, "tool_calls_done": 2, "activity": "retrieving (2)", "ts_ms": 101363}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 3399, "time_ms": 1758, "tool_time_ms": 1758, "tool_calls_done": 3, "activity": "retrieving (3)", "ts_ms": 101949}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 4532, "time_ms": 2344, "tool_time_ms": 2344, "tool_calls_done": 4, "activity": "retrieving (4)", "ts_ms": 102535}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 5665, "time_ms": 2930, "tool_time_ms": 2930, "tool_calls_done": 5, "activity": "retrieving (5)", "ts_ms": 103121}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 6798, "time_ms": 3516, "tool_time_ms": 3516, "tool_calls_done": 6, "activity": "retrieving (6)", "ts_ms": 103707}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 7931, "time_ms": 4102, "tool_time_ms": 4102, "tool_calls_done": 7, "activity": "retrieving (7)", "ts_ms": 104293}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 9064, "time_ms": 4688, "tool_time_ms": 4688, "tool_calls_done": 8, "activity": "retrieving (8)", "ts_ms": 104879}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 10197, "time_ms": 5274, "tool_time_ms": 5274, "tool_calls_done": 9, "activity": "retrieving (9)", "ts_ms": 105465}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 11330, "time_ms": 5860, "tool_time_ms": 5860, "tool_calls_done": 10, "activity": "retrieving (10)", "ts_ms": 106051}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 12463, "time_ms": 6446, "tool_time_ms": 6446, "tool_calls_done": 11, "activity": "retrieving (11)", "ts_ms": 106637}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 13596, "time_ms": 7032, "tool_time_ms": 7032, "tool_calls_done": 12, "activity": "retrieving (12)", "ts_ms": 107223}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 14729, "time_ms": 7618, "tool_time_ms": 7618, "tool_calls_done": 13, "activity": "retrieving (13)", "ts_ms": 107809}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 15862, "time_ms": 8204, "tool_time_ms": 8204, "tool_calls_done": 14, "activity": "retrieving (14)", "ts_ms": 108395}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 16995, "time_ms": 8790, "tool_time_ms": 8790, "tool_calls_done": 15, "activity": "retrieving (15)", "ts_ms": 108981}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 17000, "time_ms": 10300, "tool_time_ms": 8800, "tool_calls_done": 15, "activity": "retrieval eval → 11/12", "retrieval_quality_pct": 91.7, "retrieval_scores": {"fact_coverage": 3, "causal_density": 4, "structure": 4, "total": 11}, "ts_ms": 110491}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 25542, "time_ms": 12262, "tool_time_ms": 9482, "tool_calls_done": 15, "activity": "R1 Q1 → 14/16", "ts_ms": 112453}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 34062, "time_ms": 14232, "tool_time_ms": 10164, "tool_calls_done": 15, "activity": "R1 Q2 → 14/16", "ts_ms": 114423}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 42600, "time_ms": 16218, "tool_time_ms": 10810, "tool_calls_done": 15, "activity": "R1 Q3 → 14/16", "ts_ms": 116409}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 51174, "time_ms": 18183, "tool_time_ms": 11458, "tool_calls_done": 15, "activity": "R1 Q4 → 12/16", "ts_ms": 118374}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 59725, "time_ms": 20187, "tool_time_ms": 12085, "tool_calls_done": 15, "activity": "R1 Q5 → 11/16", "ts_ms": 120378}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 68241, "time_ms": 22184, "tool_time_ms": 12714, "tool_calls_done": 15, "activity": "R1 Q6 → 11/16", "ts_ms": 122375}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 76771, "time_ms": 24158, "tool_time_ms": 13401, "tool_calls_done": 15, "activity": "R2 Q1 → 12/16", "ts_ms": 124349}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 85318, "time_ms": 26131, "tool_time_ms": 14068, "tool_calls_done": 15, "activity": "R2 Q2 → 12/16", "ts_ms": 126322}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 93877, "time_ms": 28114, "tool_time_ms": 14701, "tool_calls_done": 15, "activity": "R2 Q3 → 15/16", "ts_ms": 128305}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 102424, "time_ms": 30086, "tool_time_ms": 15400, "tool_calls_done": 15, "activity": "R2 Q4 → 12/16", "ts_ms": 130277}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 110951, "time_ms": 32028, "tool_time_ms": 16063, "tool_calls_done": 15, "activity": "R2 Q5 → 12/16", "ts_ms": 132219}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 119514, "time_ms": 33964, "tool_time_ms": 16745, "tool_calls_done": 15, "activity": "R2 Q6 → 12/16", "ts_ms": 134155}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 127993, "time_ms": 35914, "tool_time_ms": 17371, "tool_calls_done": 15, "activity": "R3 Q1 → 11/16", "ts_ms": 136105}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 136499, "time_ms": 37913, "tool_time_ms": 18054, "tool_calls_done": 15, "activity": "R3 Q2 → 12/16", "ts_ms": 138104}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 144995, "time_ms": 39856, "tool_time_ms": 18683, "tool_calls_done": 15, "activity": "R3 Q3 → 13/16", "ts_ms": 140047}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 153585, "time_ms": 41860, "tool_time_ms": 19336, "tool_calls_done": 15, "activity": "R3 Q4 → 12/16", "ts_ms": 142051}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 162142, "time_ms": 43791, "tool_time_ms": 19994, "tool_calls_done": 15, "activity": "R3 Q5 → 13/16", "ts_ms": 143982}
+{"type": "approach_progress", "approach": "helixir_mcp", "tokens": 170649, "time_ms": 45775, "tool_time_ms": 20666, "tool_calls_done": 15, "activity": "R3 Q6 → 13/16", "ts_ms": 145966}
+{"type": "approach_complete", "approach": "helixir_mcp", "metrics": {"context_tokens": 17000, "verification_input_tokens": 138668, "verification_output_tokens": 15000, "total_tokens": 170668, "retrieval_time_ms": 8800, "verification_time_ms": 12000, "total_time_ms": 45775, "tool_calls": 15, "messages": 24, "accuracy_pct": 75.0, "part_a_pct": 59.9, "part_b_pct": 76.2, "part_c_pct": 98.8, "cost_estimate_usd": 0.102401, "cost_performance_ratio": 586.0, "retrieval_quality_pct": 91.7, "retrieval_scores": {"fact_coverage": 3, "causal_density": 4, "structure": 4, "total": 11}, "tool_time_ms": 20666}, "ts_ms": 145966}
+{"type": "complete", "mode": "live", "exit_code": 0, "recording_id": "baseline", "ts_ms": 146016}

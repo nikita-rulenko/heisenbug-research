@@ -1,0 +1,113 @@
+{
+  "benchmark": "context_recovery",
+  "version": "1.0",
+  "timestamp": "2026-04-20T15:21:45.132937",
+  "generator_model": "gpt-oss-120b",
+  "evaluator_model": "zai-glm-4.7",
+  "num_runs": 5,
+  "num_questions": 6,
+  "max_score": 120,
+  "max_retrieval_score": 12,
+  "approaches": {
+    "md_files": {
+      "context_tokens": 6949,
+      "verification_input_tokens": 47389,
+      "verification_output_tokens": 8061,
+      "total_tokens": 62399,
+      "retrieval_time_ms": 0,
+      "verification_time_ms": 8934,
+      "total_time_ms": 161008,
+      "tool_time_ms": 8934,
+      "tool_calls": 1,
+      "messages": 6,
+      "accuracy_pct": 90.8,
+      "part_a_pct": 91.7,
+      "part_b_pct": 87.5,
+      "part_c_pct": 95.0,
+      "retrieval_quality_pct": 50.0,
+      "retrieval_scores": {
+        "fact_coverage": 2,
+        "causal_density": 1,
+        "structure": 3,
+        "total": 6
+      },
+      "cost_estimate_usd": 0.037439,
+      "cost_performance_ratio": 2911.4
+    },
+    "github_issues": {
+      "context_tokens": 7164,
+      "verification_input_tokens": 49488,
+      "verification_output_tokens": 8329,
+      "total_tokens": 64981,
+      "retrieval_time_ms": 85,
+      "verification_time_ms": 10417,
+      "total_time_ms": 165720,
+      "tool_time_ms": 10502,
+      "tool_calls": 1,
+      "messages": 6,
+      "accuracy_pct": 89.2,
+      "part_a_pct": 91.7,
+      "part_b_pct": 82.5,
+      "part_c_pct": 95.0,
+      "retrieval_quality_pct": 50.0,
+      "retrieval_scores": {
+        "fact_coverage": 2,
+        "causal_density": 1,
+        "structure": 3,
+        "total": 6
+      },
+      "cost_estimate_usd": 0.038989,
+      "cost_performance_ratio": 2744.4
+    },
+    "mem0": {
+      "context_tokens": 4965,
+      "verification_input_tokens": 36754,
+      "verification_output_tokens": 7858,
+      "total_tokens": 49577,
+      "retrieval_time_ms": 831,
+      "verification_time_ms": 10627,
+      "total_time_ms": 176410,
+      "tool_time_ms": 11458,
+      "tool_calls": 6,
+      "messages": 6,
+      "accuracy_pct": 84.2,
+      "part_a_pct": 71.7,
+      "part_b_pct": 100.0,
+      "part_c_pct": 95.0,
+      "retrieval_quality_pct": 58.3,
+      "retrieval_scores": {
+        "fact_coverage": 2,
+        "causal_density": 3,
+        "structure": 2,
+        "total": 7
+      },
+      "cost_estimate_usd": 0.029746,
+      "cost_performance_ratio": 3395.4
+    },
+    "helixir_mcp": {
+      "context_tokens": 25647,
+      "verification_input_tokens": 195825,
+      "verification_output_tokens": 8533,
+      "total_tokens": 230005,
+      "retrieval_time_ms": 24598,
+      "verification_time_ms": 11912,
+      "total_time_ms": 196906,
+      "tool_time_ms": 36510,
+      "tool_calls": 15,
+      "messages": 6,
+      "accuracy_pct": 94.2,
+      "part_a_pct": 90.0,
+      "part_b_pct": 100.0,
+      "part_c_pct": 100.0,
+      "retrieval_quality_pct": 75.0,
+      "retrieval_scores": {
+        "fact_coverage": 2,
+        "causal_density": 3,
+        "structure": 4,
+        "total": 9
+      },
+      "cost_estimate_usd": 0.138003,
+      "cost_performance_ratio": 818.8
+    }
+  }
+}
