@@ -176,18 +176,19 @@
   }
 
   .stand {
-    margin-top: 30px;
+    margin-top: 36px;
     max-width: 780px;
-    font-family: "Inter Tight", sans-serif;
+    font-family: "EB Garamond", serif;
+    font-style: italic;
     font-weight: 400;
-    font-size: 22px;
-    line-height: 1.5;
+    font-size: 32px;
+    line-height: 1.32;
     color: var(--sumi-soft);
     letter-spacing: -0.005em;
-    padding-left: 22px;
+    padding-left: 24px;
     border-left: 2px solid var(--seal);
   }
-  .stand b { color: var(--sumi); font-weight: 600; }
+  .stand b { color: var(--sumi); font-style: normal; font-weight: 600; font-family: "Inter Tight", sans-serif; font-size: 0.78em; letter-spacing: 0.12em; text-transform: uppercase; }
 
   /* ────────── goals list ────────────────────────── */
   .goals {
@@ -215,18 +216,18 @@
 
   .goal {
     display: grid;
-    grid-template-columns: 80px 1fr;
-    gap: 24px;
-    padding: 22px 0 22px;
+    grid-template-columns: 100px 1fr;
+    gap: 28px;
+    padding: 24px 0 24px;
     border-bottom: 1px solid var(--rule-hair);
-    align-items: baseline;
+    align-items: center;
   }
   .goal:last-child { border-bottom: none; }
   .goal .idx {
     font-family: "EB Garamond", serif;
     font-style: italic;
     font-weight: 500;
-    font-size: 56px;
+    font-size: 72px;
     line-height: 1;
     color: var(--seal);
     letter-spacing: -0.04em;
@@ -234,26 +235,18 @@
   .goal .body {
     font-family: "Inter Tight", sans-serif;
     font-weight: 500;
-    font-size: 26px;
-    line-height: 1.28;
+    font-size: 34px;
+    line-height: 1.12;
     color: var(--sumi);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
   }
-  .goal .body .it {
+  .goal .body .hit {
     font-family: "EB Garamond", serif;
     font-style: italic;
-    font-weight: 500;
-    color: var(--sumi);
-    font-size: 1.15em;
-    letter-spacing: -0.02em;
-  }
-  .goal .body .dim {
-    color: var(--sumi-mute);
-    font-weight: 400;
-  }
-  .goal .body .mark {
+    font-weight: 600;
     color: var(--seal);
-    font-weight: 700;
+    font-size: 1.22em;
+    letter-spacing: -0.02em;
   }
 
   /* seal mark — bottom-left, over the title area */
@@ -335,7 +328,7 @@
       <span>Chapter · Goals</span>
     </div>
     <div class="rule" aria-hidden="true"></div>
-    <div class="chapter">§&nbsp;05&nbsp;·&nbsp;Heisenbug&nbsp;2026</div>
+    <div class="chapter">Heisenbug&nbsp;2026</div>
   </div>
 
   <div class="lang" aria-label="Язык">
@@ -348,15 +341,15 @@
     <div class="eyebrow">
       <span class="bar" aria-hidden="true"></span>
       <span>Цели, которые&nbsp;я&nbsp;ставил</span>
-      <span class="num">/ 05</span>
+      <span class="num">/ audit</span>
     </div>
     <div class="title">
       Проект<br>
       <span class="it">после</span> <span class="amp">&amp;</span> онбординга<span class="it">.</span>
     </div>
     <div class="stand">
-      Что должно быть <b>правдой о&nbsp;проекте</b>, когда агент в&nbsp;нём освоился. Не&nbsp;метрика качества модели,
-      а&nbsp;контракт&nbsp;— условия, при которых агент перестаёт «тупить» и&nbsp;начинает приносить тесты, которые мы&nbsp;готовы мержить.
+      <b>Контракт, не&nbsp;метрика.</b><br>
+      Условия, при&nbsp;которых агент перестаёт «тупить»<br>и&nbsp;начинает приносить мерджабельные тесты.
     </div>
   </div>
 
@@ -368,44 +361,32 @@
 
     <div class="goal">
       <div class="idx">01</div>
-      <div class="body">
-        Агент <span class="it">знает</span> структуру проекта&nbsp;— <span class="dim">без повторного объяснения на&nbsp;каждой сессии.</span>
-      </div>
+      <div class="body">Знает <span class="hit">структуру</span> проекта.</div>
     </div>
 
     <div class="goal">
       <div class="idx">02</div>
-      <div class="body">
-        Следует <span class="mark">нашим конвенциям</span>: именование, слои, паттерны. <span class="dim">Не&nbsp;изобретает свои.</span>
-      </div>
+      <div class="body">Следует <span class="hit">нашим конвенциям</span>.</div>
     </div>
 
     <div class="goal">
       <div class="idx">03</div>
-      <div class="body">
-        Сам находит, где <span class="it">живут</span> тесты, фикстуры, моки и&nbsp;test&#8209;данные.
-      </div>
+      <div class="body">Находит <span class="hit">тесты, фикстуры, моки</span>.</div>
     </div>
 
     <div class="goal">
       <div class="idx">04</div>
-      <div class="body">
-        Задаёт <span class="mark">уточняющие вопросы</span>, <span class="dim">а&nbsp;не&nbsp;галлюцинирует API, которого нет.</span>
-      </div>
+      <div class="body">Задаёт <span class="hit">уточняющие вопросы</span>.</div>
     </div>
 
     <div class="goal">
       <div class="idx">05</div>
-      <div class="body">
-        Не&nbsp;ломает <span class="it">legacy</span> при правках — <span class="dim">видит инварианты, а&nbsp;не&nbsp;только сигнатуры.</span>
-      </div>
+      <div class="body">Не&nbsp;ломает <span class="hit">legacy</span> при&nbsp;правках.</div>
     </div>
 
     <div class="goal">
       <div class="idx">06</div>
-      <div class="body">
-        Сохраняет <span class="mark">контекст</span> между сессиями. <span class="dim">Онбординг&nbsp;— один раз, не&nbsp;каждое утро.</span>
-      </div>
+      <div class="body">Сохраняет <span class="hit">контекст</span> между сессиями.</div>
     </div>
   </aside>
 
@@ -419,7 +400,7 @@
   <div class="footer">
     <div>Helixir · Context Recovery</div>
     <div class="mid">Не&nbsp;качество модели <span class="acc">—</span> качество контракта с&nbsp;проектом</div>
-    <div>стр. 05 / Heisenbug 2026</div>
+    <div>Heisenbug&nbsp;·&nbsp;2026</div>
   </div>
 
 </div>

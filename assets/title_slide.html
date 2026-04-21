@@ -139,39 +139,41 @@
   /* ────────── hero title ─────────────────────────── */
   .hero {
     position: absolute;
-    top: 240px;
+    top: 200px;
     left: 120px;
-    right: 520px;
+    right: 120px;
     z-index: 3;
   }
 
   .kicker {
     font-family: "DM Mono", monospace;
     font-weight: 500;
-    font-size: 14px;
+    font-size: 15px;
     letter-spacing: 0.36em;
     text-transform: uppercase;
     color: var(--copper);
-    margin-bottom: 30px;
-    display: inline-flex; align-items: center; gap: 12px;
+    margin-bottom: 28px;
+    display: inline-flex; align-items: center; gap: 14px;
   }
   .kicker::before {
     content: "";
-    width: 36px; height: 1px; background: var(--copper);
+    width: 48px; height: 1px; background: var(--copper);
   }
+  .kicker .sep { color: var(--bone-mute); font-weight: 400; letter-spacing: 0.2em; }
 
   .title {
     font-family: "Cormorant Garamond", serif;
     font-style: italic;
     font-weight: 500;
-    font-size: 168px;
-    line-height: 0.94;
-    letter-spacing: -0.02em;
+    font-size: 224px;
+    line-height: 0.9;
+    letter-spacing: -0.025em;
     color: var(--bone);
+    max-width: 1500px;
   }
   .title .lg2 {
     display: block;
-    padding-left: 72px;    /* второе слово со смещением, как у книжной обложки */
+    padding-left: 120px;   /* смещение второго слова как у книжной обложки */
   }
   .title em {
     color: var(--copper);
@@ -180,15 +182,20 @@
   }
 
   .subtitle {
-    margin-top: 46px;
+    position: absolute;
+    top: 696px;
+    left: 120px;
+    right: 460px;
+    z-index: 3;
     font-family: "Cormorant Garamond", serif;
     font-weight: 500;
     font-style: normal;
-    font-size: 42px;
-    line-height: 1.28;
-    letter-spacing: 0;
+    font-size: 46px;
+    line-height: 1.22;
+    letter-spacing: -0.005em;
     color: var(--bone);
-    max-width: 1280px;
+    padding-left: 28px;
+    border-left: 2px solid var(--copper);
   }
   .subtitle em {
     font-style: italic;
@@ -199,14 +206,18 @@
   /* ────────── speaker block ──────────────────────── */
   .speaker {
     position: absolute;
-    bottom: 140px;
+    bottom: 130px;
     left: 120px;
+    right: 460px;
     z-index: 3;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 34px;
+    align-items: center;
   }
-  .speaker .divider {
-    width: 80px; height: 2px;
-    background: var(--copper);
-    margin-bottom: 22px;
+  .speaker .left {
+    border-right: 1px solid var(--copper-dim);
+    padding-right: 34px;
   }
   .speaker .role {
     font-family: "DM Mono", monospace;
@@ -214,37 +225,39 @@
     font-size: 13px;
     letter-spacing: 0.36em;
     text-transform: uppercase;
-    color: var(--bone-mute);
-    margin-bottom: 14px;
+    color: var(--copper);
+    margin-bottom: 10px;
   }
   .speaker .name {
     font-family: "Cormorant Garamond", serif;
     font-weight: 600;
     font-style: italic;
-    font-size: 56px;
-    line-height: 1;
-    letter-spacing: -0.01em;
+    font-size: 64px;
+    line-height: 0.95;
+    letter-spacing: -0.015em;
     color: var(--bone);
+    white-space: nowrap;
   }
-  .speaker .org {
-    margin-top: 12px;
+  .speaker .right {
     font-family: "DM Mono", monospace;
     font-weight: 400;
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 0.28em;
     text-transform: uppercase;
     color: var(--bone-mute);
+    line-height: 1.8;
   }
-  .speaker .org b { color: var(--copper); font-weight: 500; }
+  .speaker .right b { color: var(--copper); font-weight: 500; }
+  .speaker .right .row { display: block; }
 
   /* ────────── compass rose (декоративный знак) ───── */
   .compass {
     position: absolute;
     right: 160px;
-    bottom: 200px;
-    width: 280px; height: 280px;
+    bottom: 180px;
+    width: 340px; height: 340px;
     z-index: 3;
-    opacity: 0.82;
+    opacity: 0.85;
   }
 
   /* ────────── нижняя служебная линия ──────────────── */
@@ -315,25 +328,35 @@
 
   <!-- hero -->
   <div class="hero">
-    <div class="kicker">Доклад · 01</div>
+    <div class="kicker">
+      <span>Доклад</span>
+      <span class="sep">/</span>
+      <span>Heisenbug&nbsp;2026</span>
+      <span class="sep">/</span>
+      <span>Track&nbsp;AI&nbsp;·&nbsp;QA</span>
+    </div>
 
     <h1 class="title">
       Управление<br>
       <span class="lg2"><em>контекстом</em></span>
     </h1>
-
-    <p class="subtitle">
-      при растущей кодовой базе автотестов —<br>
-      <em>с&nbsp;помощью ИИ</em>.
-    </p>
   </div>
+
+  <p class="subtitle">
+    при растущей кодовой базе автотестов&nbsp;—<br>
+    <em>с&nbsp;помощью&nbsp;ИИ</em>.
+  </p>
 
   <!-- speaker -->
   <div class="speaker">
-    <div class="divider" aria-hidden="true"></div>
-    <div class="role">Докладчик</div>
-    <div class="name">Никита&nbsp;Руленко</div>
-    <div class="org"><b>Rambler</b>&nbsp;·&nbsp;QA&nbsp;Automation&nbsp;·&nbsp;Helixir</div>
+    <div class="left">
+      <div class="role">Докладчик</div>
+      <div class="name">Никита&nbsp;Руленко</div>
+    </div>
+    <div class="right">
+      <span class="row"><b>Rambler</b>&nbsp;·&nbsp;Почта&nbsp;·&nbsp;QA&nbsp;Automation</span>
+      <span class="row">Автор&nbsp;<b>Helixir</b>&nbsp;·&nbsp;6+&nbsp;лет&nbsp;в&nbsp;индустрии</span>
+    </div>
   </div>
 
   <!-- compass rose SVG -->
@@ -421,7 +444,7 @@
   <div class="meta-bot">
     <div class="left">
       <span class="dot" aria-hidden="true"></span>
-      <span>Heisenbug&nbsp;/&nbsp;2026&nbsp;·&nbsp;Листинг&nbsp;01</span>
+      <span>Context&nbsp;Recovery&nbsp;·&nbsp;Helixir</span>
     </div>
     <div class="right">скан контекстного ландшафта</div>
   </div>
