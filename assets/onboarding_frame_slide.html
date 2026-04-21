@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Онбординг агента · принцип</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;0,6..96,900;1,6..96,400;1,6..96,700;1,6..96,900&family=Space+Mono:wght@400;700&display=swap"
+  rel="stylesheet">
+<style>
+  /* ────────── tokens ─────────────────────────────── */
+  :root {
+    --ink:        #0B0D12;
+    --ink-2:      #07080C;
+    --cream:      #F1E8D3;
+    --cream-dim:  #A79F8D;
+    --cream-mute: #6E6959;
+    --amber:      #E4A441;
+    --amber-soft: rgba(228,164,65, 0.18);
+    --rule:       rgba(241,232,211, 0.20);
+
+    --slide-w: 1920px;
+    --slide-h: 1080px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { background: var(--ink-2); }
+  body { color: var(--cream); font-family: "Bodoni Moda", serif; }
+
+  /* preview-режим */
+  body.preview { display: grid; place-items: center; padding: 40px; min-height: 100vh; background: #030405; }
+  body.preview .slide {
+    box-shadow: 0 60px 180px rgba(0,0,0,0.9), 0 15px 40px rgba(0,0,0,0.5);
+  }
+
+  .slide {
+    position: relative;
+    width: var(--slide-w); height: var(--slide-h);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 70% 50% at 85% 95%, rgba(228,164,65,0.18), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 10% 0%, rgba(228,164,65,0.06), transparent 55%),
+      linear-gradient(165deg, #10131A 0%, #0B0D12 45%, #07080C 100%);
+  }
+
+  /* виньетка — чтобы края темнели, как у фотокадра */
+  .slide::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 90% 80% at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%);
+    pointer-events: none;
+  }
+
+  /* зерно */
+  .slide::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.95  0 0 0 0 0.85  0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: screen;
+    pointer-events: none;
+    opacity: 0.9;
+    z-index: 1;
+  }
+
+  /* ────────── гигантский декоративный & ────────── */
+  .glyph {
+    position: absolute;
+    right: -90px;
+    bottom: -240px;
+    font-family: "Bodoni Moda", serif;
+    font-variation-settings: "opsz" 96;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1200px;
+    line-height: 1;
+    color: var(--amber);
+    opacity: 0.11;
+    letter-spacing: -0.06em;
+    user-select: none; pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ────────── eyebrow ─────────────────────────────── */
+  .eyebrow {
+    position: absolute;
+    top: 96px; left: 120px;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    font-family: "Space Mono", monospace;
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    z-index: 3;
+  }
+  .eyebrow .square {
+    width: 10px; height: 10px;
+    background: var(--amber);
+    display: inline-block;
+    transform: rotate(45deg);
+  }
+  .eyebrow b { color: var(--cream); font-weight: 700; letter-spacing: 0.28em; }
+
+  /* ────────── hero block ─────────────────────────── */
+  .hero {
+    position: absolute;
+    top: 250px; left: 120px;
+    right: 120px;
+    z-index: 3;
+  }
+
+  .statement-1 {
+    font-family: "Bodoni Moda", serif;
+    font-variation-settings: "opsz" 96;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 158px;
+    line-height: 0.96;
+    letter-spacing: -0.025em;
+    color: var(--cream);
+    max-width: 1500px;
+  }
+
+  .divider {
+    margin: 72px 0 56px;
+    display: flex; align-items: center; gap: 20px;
+    height: 22px;
+  }
+  .divider .line {
+    width: 140px; height: 2px;
+    background: var(--amber);
+  }
+  .divider .diamond {
+    width: 14px; height: 14px;
+    background: var(--amber);
+    transform: rotate(45deg);
+  }
+
+  .statement-2 {
+    font-family: "Bodoni Moda", serif;
+    font-variation-settings: "opsz" 36;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 58px;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--cream);
+    max-width: 1400px;
+  }
+  .statement-2 em {
+    font-family: "Bodoni Moda", serif;
+    font-style: italic;
+    font-weight: 700;
+    color: var(--amber);
+  }
+
+  /* ────────── footer ─────────────────────────────── */
+  .sig, .folio {
+    position: absolute;
+    bottom: 80px;
+    font-family: "Space Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    z-index: 3;
+  }
+  .sig { left: 120px; display: inline-flex; gap: 14px; align-items: center; }
+  .sig .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); display: inline-block; }
+  .folio { right: 120px; color: var(--cream-mute); }
+
+  /* мелкая декоративная правило справа от eyebrow — как у газеты */
+  .eyebrow::after {
+    content: "";
+    width: 240px; height: 1px;
+    background: var(--rule);
+    margin-left: 10px;
+  }
+
+  /* ────────── animations (только с #play в URL) ───── */
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes riseWidth {
+    from { opacity: 0; width: 0; }
+    to   { opacity: 1; width: 140px; }
+  }
+  @keyframes fadeInGlyph {
+    from { opacity: 0; }
+    to   { opacity: 0.11; }
+  }
+
+  body.play .eyebrow     { opacity: 0; animation: riseIn 1.0s cubic-bezier(.22,.72,.31,1) 0.05s forwards; }
+  body.play .statement-1 { opacity: 0; animation: riseIn 1.4s cubic-bezier(.22,.72,.31,1) 0.20s forwards; }
+  body.play .divider .line    { opacity: 0; animation: riseWidth 1.2s cubic-bezier(.22,.72,.31,1) 0.80s forwards; }
+  body.play .divider .diamond { opacity: 0; animation: riseIn 1.0s cubic-bezier(.22,.72,.31,1) 1.00s forwards; }
+  body.play .statement-2 { opacity: 0; animation: riseIn 1.2s cubic-bezier(.22,.72,.31,1) 1.10s forwards; }
+  body.play .glyph       { opacity: 0; animation: fadeInGlyph 2.2s ease-out 0.10s forwards; }
+  body.play .sig, body.play .folio { opacity: 0; animation: riseIn 1.0s cubic-bezier(.22,.72,.31,1) 1.40s forwards; }
+</style>
+</head>
+<body>
+<script>
+  if (location.hash === "#preview") document.body.classList.add("preview");
+  if (location.hash === "#play" || location.hash === "#preview-play") document.body.classList.add("play");
+</script>
+
+<div class="slide" aria-label="Слайд: принцип онбординга агента">
+
+  <div class="glyph" aria-hidden="true">&amp;</div>
+
+  <div class="eyebrow">
+    <span class="square" aria-hidden="true"></span>
+    <span>Тезис</span>
+    <b>Helixir × Heisenbug 2026</b>
+  </div>
+
+  <div class="hero">
+    <div class="statement-1">
+      Онбординг&nbsp;агента<br>
+      задаёт&nbsp;рамку&nbsp;работы.
+    </div>
+
+    <div class="divider" aria-hidden="true">
+      <span class="line"></span>
+      <span class="diamond"></span>
+    </div>
+
+    <div class="statement-2">
+      Чем <em>точнее</em> онбординг —<br>
+      тем <em>меньше</em> затрат.
+    </div>
+  </div>
+
+  <div class="sig">
+    <span class="dot" aria-hidden="true"></span>
+    Context Recovery · принцип 02
+  </div>
+  <div class="folio">стр. 02 / Heisenbug 2026</div>
+
+</div>
+</body>
+</html>
