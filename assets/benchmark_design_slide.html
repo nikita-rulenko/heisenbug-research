@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Дизайн бенчмарка · спецификация</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700;800&family=Instrument+Sans:wght@400;500;600;700;800&display=swap"
+  rel="stylesheet">
+<style>
+  :root {
+    --void:        #06080F;
+    --void-2:      #0C1020;
+    --panel:       #111729;
+    --panel-2:     #182042;
+    --wire:        rgba(110,180,255,0.10);
+    --wire-bold:   rgba(110,180,255,0.22);
+    --ink-soft:    #8B9AB5;
+    --ink:         #E6EEFB;
+    --ink-dim:     #A6B4CC;
+    --cyan:        #52E0D4;
+    --cyan-deep:   #1AA89C;
+    --magenta:     #FF4D94;
+    --yellow:      #F8D247;
+
+    --slide-w: 1920px;
+    --slide-h: 1080px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--void); }
+  body { color: var(--ink); font-family: "Instrument Sans", system-ui, sans-serif; }
+  body.preview { background: #020307; display: grid; place-items: center; padding: 40px; min-height: 100vh; }
+  body.preview .slide { box-shadow: 0 60px 180px rgba(0,0,0,0.9), 0 15px 40px rgba(0,0,0,0.5); }
+
+  .slide {
+    position: relative;
+    width: var(--slide-w); height: var(--slide-h);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 60% 50% at 15% 25%, rgba(82,224,212,0.10), transparent 55%),
+      radial-gradient(ellipse 50% 45% at 90% 90%, rgba(255,77,148,0.10), transparent 55%),
+      linear-gradient(160deg, #0C1020 0%, #06080F 70%);
+  }
+
+  .slide::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--wire) 1px, transparent 1px),
+      linear-gradient(90deg, var(--wire) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, #000 40%, transparent 100%);
+    opacity: 0.8;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ────────── top row ─────────────────── */
+  .top {
+    position: absolute;
+    top: 58px; left: 104px; right: 104px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    z-index: 4;
+  }
+  .top .lhs { display: inline-flex; align-items: center; gap: 14px; }
+  .top .mark {
+    width: 12px; height: 12px;
+    background: var(--cyan);
+    display: inline-block;
+    box-shadow: 0 0 16px var(--cyan);
+  }
+  .top .rhs { color: var(--ink); font-weight: 700; letter-spacing: 0.28em; }
+
+  /* ────────── title ─────────────────────── */
+  .header {
+    position: absolute;
+    top: 150px;
+    left: 104px;
+    right: 104px;
+    z-index: 4;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 80px;
+  }
+  .header h1 {
+    font-family: "Instrument Serif", serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 144px;
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+  }
+  .header h1 .it { color: var(--cyan); }
+
+  .header .meta {
+    text-align: right;
+    padding-bottom: 18px;
+    color: var(--ink-dim);
+  }
+  .header .meta .code {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+  }
+  .header .meta .spec {
+    font-family: "Instrument Sans", sans-serif;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 1.35;
+    color: var(--ink-dim);
+    max-width: 420px;
+  }
+
+  /* divider line across width */
+  .divider {
+    position: absolute;
+    left: 104px; right: 104px;
+    top: 388px;
+    height: 1.5px;
+    background: var(--wire-bold);
+    z-index: 3;
+  }
+  .divider::before, .divider::after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    width: 12px; height: 12px;
+    background: var(--cyan);
+  }
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+
+  /* ────────── spec cards ────────────────── */
+  .specs {
+    position: absolute;
+    top: 440px;
+    left: 104px;
+    right: 104px;
+    bottom: 120px;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 32px;
+  }
+
+  .spec-card {
+    position: relative;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border: 1.5px solid var(--wire-bold);
+    padding: 34px 36px 38px;
+    display: flex; flex-direction: column; gap: 22px;
+  }
+  /* LED corner */
+  .spec-card::before {
+    content: "";
+    position: absolute;
+    right: 20px; top: 20px;
+    width: 10px; height: 10px;
+    background: var(--cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 14px var(--cyan);
+  }
+  .spec-card.c2::before { background: var(--magenta); box-shadow: 0 0 14px var(--magenta); }
+  .spec-card.c3::before { background: var(--yellow); box-shadow: 0 0 14px var(--yellow); }
+
+  .spec-card .n {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    display: flex; align-items: baseline; gap: 14px;
+  }
+  .spec-card .n .num {
+    font-family: "Instrument Serif", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 76px;
+    line-height: 0.9;
+    color: var(--cyan);
+    letter-spacing: -0.04em;
+  }
+  .spec-card.c2 .n .num { color: var(--magenta); }
+  .spec-card.c3 .n .num { color: var(--yellow); }
+
+  .spec-card .title {
+    font-family: "Instrument Sans", sans-serif;
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .spec-card .title .em {
+    font-family: "Instrument Serif", serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--cyan);
+    font-size: 1.06em;
+  }
+  .spec-card.c2 .title .em { color: var(--magenta); }
+  .spec-card.c3 .title .em { color: var(--yellow); }
+
+  .spec-card .items {
+    display: flex; flex-direction: column; gap: 10px;
+    margin-top: 8px;
+  }
+  .spec-card .items .it {
+    display: flex; align-items: center; gap: 14px;
+    padding: 10px 14px;
+    border: 1px solid var(--wire-bold);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+  }
+  .spec-card .items .it .k {
+    width: 7px; height: 7px;
+    background: var(--cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--cyan);
+  }
+  .spec-card.c2 .items .it .k { background: var(--magenta); box-shadow: 0 0 8px var(--magenta); }
+  .spec-card.c3 .items .it .k { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+
+  .spec-card .ft {
+    font-family: "Instrument Serif", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--ink-dim);
+    margin-top: auto;
+  }
+
+  /* big highlight bar at bottom */
+  .highlight {
+    grid-column: 1 / -1;
+    margin-top: 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 40px;
+    background: linear-gradient(90deg, rgba(82,224,212,0.14), rgba(82,224,212,0.02));
+    border: 1.5px solid var(--cyan-deep);
+    font-family: "Instrument Sans", sans-serif;
+    font-size: 24px;
+  }
+  .highlight .label {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+  .highlight .val {
+    font-family: "Instrument Serif", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 46px;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .highlight .val .num {
+    color: var(--yellow);
+    font-weight: 400;
+  }
+  .highlight .val .unit {
+    font-family: "JetBrains Mono", monospace;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--ink-dim);
+    letter-spacing: 0.1em;
+    margin-left: 8px;
+  }
+
+  /* ────────── footer ───────────────────── */
+  .footer {
+    position: absolute;
+    bottom: 48px;
+    left: 104px; right: 104px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    z-index: 4;
+  }
+  .footer .mid { color: var(--ink); font-weight: 700; letter-spacing: 0.26em; }
+  .footer .mid .acc { color: var(--cyan); }
+</style>
+</head>
+<body>
+<script>
+  if (location.hash === "#preview") document.body.classList.add("preview");
+</script>
+
+<div class="slide" aria-label="Дизайн бенчмарка — спецификация">
+
+  <div class="top">
+    <div class="lhs">
+      <span class="mark" aria-hidden="true"></span>
+      <span>Helixir · Measurement</span>
+    </div>
+    <div class="rhs">Heisenbug · 2026</div>
+  </div>
+
+  <header class="header">
+    <h1>Дизайн <span class="it">бенчмарка.</span></h1>
+    <div class="meta">
+      <div class="code">SPEC · BM-01</div>
+      <div class="spec">Три теста&nbsp;+ судья&nbsp;+ быстрый источник. Инструмент, который можно перезапустить.</div>
+    </div>
+  </header>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <section class="specs" aria-label="Три теста">
+
+    <article class="spec-card">
+      <div class="n">
+        <span class="num">01</span>
+        <span>Test&nbsp;suite</span>
+      </div>
+      <div class="title">Три&nbsp;<span class="em">вектора</span>&nbsp;проверки</div>
+      <div class="items">
+        <span class="it"><span class="k" aria-hidden="true"></span>Факты</span>
+        <span class="it"><span class="k" aria-hidden="true"></span>Связи</span>
+        <span class="it"><span class="k" aria-hidden="true"></span>Понимание решений</span>
+      </div>
+      <div class="ft">Что агент вообще знает о&nbsp;проекте.</div>
+    </article>
+
+    <article class="spec-card c2">
+      <div class="n">
+        <span class="num">02</span>
+        <span>Judge</span>
+      </div>
+      <div class="title">LLM-as-a-<span class="em">Judge</span></div>
+      <div class="items">
+        <span class="it"><span class="k" aria-hidden="true"></span>Одна модель &nbsp;→&nbsp; другую</span>
+        <span class="it"><span class="k" aria-hidden="true"></span>Единый rubric</span>
+        <span class="it"><span class="k" aria-hidden="true"></span>Повторяемый балл</span>
+      </div>
+      <div class="ft">Оценка без&nbsp;ручной разметки.</div>
+    </article>
+
+    <article class="spec-card c3">
+      <div class="n">
+        <span class="num">03</span>
+        <span>Source</span>
+      </div>
+      <div class="title">Самый&nbsp;<span class="em">быстрый</span>&nbsp;инференс</div>
+      <div class="items">
+        <span class="it"><span class="k" aria-hidden="true"></span>Cerebras</span>
+        <span class="it"><span class="k" aria-hidden="true"></span>~&thinsp;3000&nbsp;tok/s</span>
+        <span class="it"><span class="k" aria-hidden="true"></span>Low&nbsp;latency</span>
+      </div>
+      <div class="ft">Прогон сьюта&nbsp;— минуты, не&nbsp;часы.</div>
+    </article>
+
+    <div class="highlight">
+      <span class="label">Throughput</span>
+      <span class="val"><span class="num">3&thinsp;000</span><span class="unit">tok/s</span></span>
+      <span class="label">= весь&nbsp;сьют за&nbsp;один перекур</span>
+    </div>
+  </section>
+
+  <div class="footer">
+    <div>Helixir · Measurement</div>
+    <div class="mid">Три теста <span class="acc">·</span> судья <span class="acc">·</span> быстрый инференс</div>
+    <div>Heisenbug · 2026</div>
+  </div>
+</div>
+</body>
+</html>

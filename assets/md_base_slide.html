@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>MD — это БАЗА · основа работы агента</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400;1,600;1,700;1,800;1,900&display=swap"
+  rel="stylesheet">
+<style>
+  :root {
+    --ink:        #0D0F12;
+    --ink-2:      #151820;
+    --paper:      #EFE8D8;          /* aged file paper */
+    --paper-2:    #D9D0BB;
+    --paper-mat:  #F5EFE0;          /* photo mat */
+    --stamp:      #C83726;          /* evidence stamp red */
+    --stamp-2:    #8B1F10;
+    --cord:       #C9A560;          /* twine/cord */
+    --rule:       rgba(13,15,18,0.22);
+
+    --slide-w: 1920px;
+    --slide-h: 1080px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--ink); }
+  body { color: var(--paper); font-family: "Archivo", system-ui, sans-serif; }
+  body.preview { background: #050607; display: grid; place-items: center; padding: 40px; min-height: 100vh; }
+  body.preview .slide { box-shadow: 0 60px 180px rgba(0,0,0,0.8), 0 15px 40px rgba(0,0,0,0.5); }
+
+  .slide {
+    position: relative;
+    width: var(--slide-w); height: var(--slide-h);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 70% 60% at 80% 20%, rgba(200,55,38,0.08), transparent 55%),
+      radial-gradient(ellipse 60% 50% at 0% 100%, rgba(201,165,96,0.07), transparent 55%),
+      linear-gradient(165deg, #1A1D24 0%, #0D0F12 60%, #08090B 100%);
+  }
+
+  /* grain */
+  .slide::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.95  0 0 0 0 0.85  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: screen;
+    opacity: 0.75;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  /* vignette */
+  .slide::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 95% 85% at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ────────── top row ─────────────────── */
+  .top {
+    position: absolute;
+    top: 54px; left: 96px; right: 96px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: "DM Mono", monospace;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(239,232,216,0.6);
+    z-index: 3;
+  }
+  .top .lhs { display: inline-flex; align-items: center; gap: 14px; }
+  .top .mark {
+    width: 14px; height: 14px;
+    background: var(--stamp);
+    display: inline-block;
+  }
+  .top .rhs { color: var(--paper); font-weight: 700; letter-spacing: 0.26em; }
+
+  /* ────────── main grid ───────────────── */
+  .grid {
+    position: absolute;
+    top: 140px;
+    left: 96px;
+    right: 96px;
+    bottom: 120px;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: 820px 1fr;
+    gap: 72px;
+    align-items: center;
+  }
+
+  /* ────────── image frame (reusable) ──── */
+  .photo-frame {
+    position: relative;
+    background: var(--paper-mat);
+    padding: 34px 34px 110px 34px;
+    box-shadow:
+      0 30px 60px rgba(0,0,0,0.5),
+      0 12px 20px rgba(0,0,0,0.35),
+      inset 0 0 0 1px rgba(13,15,18,0.06);
+    transform: rotate(-1.4deg);
+  }
+  .photo-frame::before {
+    /* inner hairline border */
+    content: "";
+    position: absolute;
+    left: 24px; right: 24px; top: 24px;
+    bottom: 96px;
+    border: 1px solid rgba(13,15,18,0.18);
+    pointer-events: none;
+    z-index: 3;
+  }
+  /* masking tape corners */
+  .photo-frame::after {
+    content: "";
+    position: absolute;
+    top: -16px; left: 34%;
+    width: 160px; height: 44px;
+    background: rgba(201,165,96,0.55);
+    border-left: 1px dashed rgba(201,165,96,0.8);
+    border-right: 1px dashed rgba(201,165,96,0.8);
+    transform: rotate(-4deg);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+    mix-blend-mode: multiply;
+    filter: saturate(1.1);
+    z-index: 4;
+  }
+
+  .photo-frame .img-wrap {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background: #222;
+  }
+  .photo-frame .img-wrap img {
+    display: block;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  /* subtle film tint */
+  .photo-frame .img-wrap::after {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 90% 80% at 50% 50%, transparent 65%, rgba(0,0,0,0.22) 100%),
+      linear-gradient(180deg, rgba(255,240,200,0.05), transparent 30%);
+    pointer-events: none;
+  }
+
+  /* brass plaque / caption */
+  .photo-frame .plaque {
+    position: absolute;
+    left: 34px; right: 34px; bottom: 30px;
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 12px 20px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "DM Mono", monospace;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+  .photo-frame .plaque .label {
+    color: var(--stamp);
+    font-weight: 700;
+  }
+  .photo-frame .plaque .tag {
+    color: rgba(239,232,216,0.6);
+  }
+
+  /* evidence stamp over image */
+  .stamp {
+    position: absolute;
+    right: -24px; top: 60px;
+    width: 170px; height: 170px;
+    transform: rotate(10deg);
+    z-index: 5;
+    pointer-events: none;
+  }
+  .stamp .ring {
+    position: absolute; inset: 0;
+    border: 4px solid var(--stamp);
+    border-radius: 50%;
+    opacity: 0.92;
+  }
+  .stamp .ring-2 {
+    position: absolute; inset: 10px;
+    border: 1.5px solid var(--stamp);
+    border-radius: 50%;
+    opacity: 0.65;
+  }
+  .stamp .label {
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    font-family: "Archivo Black", sans-serif;
+    font-weight: 900;
+    font-size: 34px;
+    line-height: 0.9;
+    color: var(--stamp);
+    text-align: center;
+    letter-spacing: -0.01em;
+  }
+  .stamp .label .sub {
+    display: block;
+    font-family: "DM Mono", monospace;
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    margin-top: 6px;
+    color: var(--stamp);
+  }
+
+  /* ────────── text column ─────────────── */
+  .text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 16px;
+    font-family: "DM Mono", monospace;
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--stamp);
+    margin-bottom: 28px;
+  }
+  .eyebrow .bar { width: 56px; height: 2px; background: var(--stamp); }
+
+  .title {
+    font-family: "Fraunces", serif;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 152px;
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    color: var(--paper);
+  }
+  .title .hit {
+    font-family: "Archivo Black", sans-serif;
+    font-style: normal;
+    font-weight: 900;
+    color: var(--stamp);
+    letter-spacing: -0.03em;
+    display: inline-block;
+    transform: translateY(0.02em);
+  }
+  .title .hit .under {
+    position: relative;
+    display: inline-block;
+    padding: 0 6px;
+  }
+  .title .hit .under::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: -4px; bottom: -4px;
+    background: var(--stamp);
+    z-index: -1;
+  }
+  .title .hit .under { color: var(--paper); }
+
+  .sub {
+    margin-top: 34px;
+    max-width: 860px;
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+    color: rgba(239,232,216,0.78);
+  }
+  .sub b {
+    font-family: "Archivo", sans-serif;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--paper);
+    font-size: 0.82em;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ────────── footer ───────────────────── */
+  .footer {
+    position: absolute;
+    bottom: 46px;
+    left: 96px; right: 96px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "DM Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(239,232,216,0.55);
+    z-index: 3;
+  }
+  .footer .mid { color: var(--paper); font-weight: 700; letter-spacing: 0.26em; }
+  .footer .mid .acc { color: var(--stamp); }
+</style>
+</head>
+<body>
+<script>
+  if (location.hash === "#preview") document.body.classList.add("preview");
+</script>
+
+<div class="slide" aria-label="MD — это БАЗА, основа работы ИИ-агента">
+
+  <div class="top">
+    <div class="lhs">
+      <span class="mark" aria-hidden="true"></span>
+      <span>Helixir · Context Recovery</span>
+    </div>
+    <div class="rhs">Heisenbug&nbsp;·&nbsp;2026</div>
+  </div>
+
+  <div class="grid">
+    <figure class="photo-frame" aria-label="Фотография: офисная собака с кипой документов">
+      <div class="img-wrap">
+        <img src="./doge_1.jpg" alt="Офисный shiba с документами">
+      </div>
+      <div class="plaque">
+        <span class="label">Exhibit A</span>
+        <span class="tag">Documentation&nbsp;·&nbsp;Sr.&nbsp;Officer</span>
+      </div>
+
+      <div class="stamp" aria-hidden="true">
+        <span class="ring"></span>
+        <span class="ring-2"></span>
+        <span class="label">
+          BASE
+          <span class="sub">context&nbsp;·&nbsp;root</span>
+        </span>
+      </div>
+    </figure>
+
+    <div class="text">
+      <div class="eyebrow">
+        <span class="bar" aria-hidden="true"></span>
+        <span>Основа работы агента</span>
+      </div>
+
+      <h1 class="title">
+        MD‑файлы&nbsp;—<br>
+        <span class="hit"><span class="under">это БАЗА</span></span>
+      </h1>
+
+      <p class="sub">
+        Первое, что читает агент. <b>Не&nbsp;prompt</b>, не&nbsp;подсказка&nbsp;— <br>
+        markdown в&nbsp;репозитории. Живой, версионируемый, рядом с&nbsp;кодом.
+      </p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Helixir · Context Recovery</div>
+    <div class="mid">Документация <span class="acc">·</span> рядом с&nbsp;кодом <span class="acc">·</span> в&nbsp;репозитории</div>
+    <div>Heisenbug&nbsp;·&nbsp;2026</div>
+  </div>
+</div>
+</body>
+</html>

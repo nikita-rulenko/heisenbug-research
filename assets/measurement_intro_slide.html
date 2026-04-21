@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Как я это измерил · Бенчмарк</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Sans:wght@400;500;600;700&display=swap"
+  rel="stylesheet">
+<style>
+  :root {
+    --void:        #06080F;
+    --void-2:      #0C1020;
+    --panel:       #101628;
+    --wire:        rgba(110,180,255,0.12);
+    --wire-bold:   rgba(110,180,255,0.28);
+    --ink-soft:    #8B9AB5;
+    --ink:         #E6EEFB;
+    --cyan:        #52E0D4;
+    --magenta:     #FF4D94;
+    --yellow:      #F8D247;
+
+    --slide-w: 1920px;
+    --slide-h: 1080px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--void); }
+  body { color: var(--ink); font-family: "Instrument Sans", system-ui, sans-serif; }
+  body.preview { background: #020307; display: grid; place-items: center; padding: 40px; min-height: 100vh; }
+  body.preview .slide { box-shadow: 0 60px 180px rgba(0,0,0,0.9), 0 15px 40px rgba(0,0,0,0.5); }
+
+  .slide {
+    position: relative;
+    width: var(--slide-w); height: var(--slide-h);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 60% 45% at 50% 50%, rgba(82,224,212,0.14), transparent 60%),
+      radial-gradient(ellipse 40% 40% at 15% 95%, rgba(255,77,148,0.12), transparent 60%),
+      linear-gradient(160deg, #0C1020 0%, #06080F 70%);
+  }
+
+  /* measurement grid */
+  .slide::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--wire) 1px, transparent 1px),
+      linear-gradient(90deg, var(--wire) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 40%, transparent 95%);
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* tick marks on major gridlines */
+  .ticks {
+    position: absolute; inset: 0;
+    pointer-events: none; z-index: 2;
+    background-image:
+      linear-gradient(var(--wire-bold) 1.5px, transparent 1.5px),
+      linear-gradient(90deg, var(--wire-bold) 1.5px, transparent 1.5px);
+    background-size: 320px 320px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 30%, transparent 90%);
+    opacity: 0.6;
+  }
+
+  /* ────────── top row ─────────────────── */
+  .top {
+    position: absolute;
+    top: 58px; left: 104px; right: 104px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    z-index: 4;
+  }
+  .top .lhs { display: inline-flex; align-items: center; gap: 14px; }
+  .top .mark {
+    width: 12px; height: 12px;
+    background: var(--cyan);
+    display: inline-block;
+    box-shadow: 0 0 16px var(--cyan);
+  }
+  .top .rhs { color: var(--ink); font-weight: 700; letter-spacing: 0.28em; }
+
+  /* ────────── axis labels (L/R edges) ── */
+  .axis-x, .axis-y {
+    position: absolute;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    opacity: 0.7;
+    z-index: 3;
+  }
+  .axis-x { bottom: 118px; left: 104px; right: 104px; display: flex; justify-content: space-between; }
+  .axis-y { top: 170px; bottom: 170px; left: 56px; display: flex; flex-direction: column; justify-content: space-between; writing-mode: vertical-rl; transform: rotate(180deg); }
+
+  /* ────────── eyebrow + section number ── */
+  .eyebrow {
+    position: absolute;
+    top: 208px;
+    left: 104px;
+    display: inline-flex; align-items: center; gap: 20px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    z-index: 4;
+  }
+  .eyebrow .bar { width: 72px; height: 2px; background: var(--cyan); box-shadow: 0 0 14px var(--cyan); }
+
+  /* ────────── question hero ───────────── */
+  .question {
+    position: absolute;
+    top: 278px;
+    left: 104px;
+    right: 104px;
+    z-index: 4;
+    font-family: "Instrument Serif", serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 216px;
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+  }
+  .question .it { color: var(--cyan); }
+  .question .q { color: var(--magenta); font-weight: 400; }
+
+  /* ────────── answer block ────────────── */
+  .answer {
+    position: absolute;
+    top: 760px;
+    left: 104px;
+    right: 104px;
+    z-index: 4;
+    display: flex; align-items: baseline; gap: 36px;
+    padding-left: 28px;
+    border-left: 3px solid var(--cyan);
+  }
+  .answer .label {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    flex-shrink: 0;
+    padding-top: 8px;
+  }
+  .answer .body {
+    font-family: "Instrument Sans", sans-serif;
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .answer .body b {
+    font-family: "Instrument Serif", serif;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--yellow);
+    font-size: 1.08em;
+  }
+  .answer .body .arrow { color: var(--magenta); margin: 0 10px; }
+
+  /* probe marker — measurement crosshair on hero */
+  .probe {
+    position: absolute;
+    right: 180px;
+    top: 320px;
+    width: 120px; height: 120px;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .probe::before, .probe::after {
+    content: "";
+    position: absolute;
+    background: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan);
+  }
+  .probe::before { left: 50%; top: 0; width: 1.5px; height: 100%; transform: translateX(-0.75px); }
+  .probe::after  { top: 50%; left: 0; height: 1.5px; width: 100%; transform: translateY(-0.75px); }
+  .probe .ring {
+    position: absolute; inset: 28px;
+    border: 1.5px solid var(--cyan);
+    border-radius: 50%;
+    opacity: 0.8;
+  }
+  .probe .dot {
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+  }
+  .probe .dot::after {
+    content: "";
+    width: 8px; height: 8px;
+    background: var(--magenta);
+    border-radius: 50%;
+    box-shadow: 0 0 14px var(--magenta);
+  }
+  .probe .readout {
+    position: absolute;
+    top: -8px; left: 132px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.24em;
+    color: var(--magenta);
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+  .probe .readout .dim { color: var(--ink-soft); font-weight: 500; }
+
+  /* ────────── footer ───────────────────── */
+  .footer {
+    position: absolute;
+    bottom: 48px;
+    left: 104px; right: 104px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    z-index: 4;
+  }
+  .footer .mid { color: var(--ink); font-weight: 700; letter-spacing: 0.26em; }
+  .footer .mid .acc { color: var(--cyan); }
+</style>
+</head>
+<body>
+<script>
+  if (location.hash === "#preview") document.body.classList.add("preview");
+</script>
+
+<div class="slide" aria-label="Как я это измерил? Бенчмарк — одна LLM проверяет другую">
+  <div class="ticks" aria-hidden="true"></div>
+
+  <div class="top">
+    <div class="lhs">
+      <span class="mark" aria-hidden="true"></span>
+      <span>Helixir · Measurement</span>
+    </div>
+    <div class="rhs">Heisenbug · 2026</div>
+  </div>
+
+  <div class="axis-y" aria-hidden="true">
+    <span>sample · 00</span>
+    <span>sample · n</span>
+  </div>
+  <div class="axis-x" aria-hidden="true">
+    <span>т&nbsp;·&nbsp;start</span>
+    <span>т&nbsp;·&nbsp;scored</span>
+  </div>
+
+  <div class="eyebrow">
+    <span class="bar" aria-hidden="true"></span>
+    <span>Раздел · Измерение</span>
+  </div>
+
+  <h1 class="question">
+    Как я это<br>
+    <span class="it">измерил</span><span class="q">?</span>
+  </h1>
+
+  <div class="probe" aria-hidden="true">
+    <span class="ring"></span>
+    <span class="dot"></span>
+    <span class="readout">probe&nbsp;·&nbsp;<span class="dim">LLM→LLM</span></span>
+  </div>
+
+  <div class="answer">
+    <span class="label">Ответ</span>
+    <div class="body">
+      Бенчмарк. <b>Одна&nbsp;LLM</b> <span class="arrow">→</span> проверяет <b>другую</b>.
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Helixir · Measurement</div>
+    <div class="mid">Инструмент, а&nbsp;не&nbsp;мнение <span class="acc">·</span> цифры, а&nbsp;не&nbsp;ощущения</div>
+    <div>Heisenbug · 2026</div>
+  </div>
+</div>
+</body>
+</html>
