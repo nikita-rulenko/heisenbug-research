@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Управление контекстом · Heisenbug 2026</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap"
+  rel="stylesheet">
+<style>
+  /* ────────── tokens ─────────────────────────────── */
+  :root {
+    --deep:       #0C252A;    /* deep petrol */
+    --deep-2:     #081D21;
+    --deep-3:     #112F34;    /* чуть светлее для контура */
+    --bone:       #EADFCB;    /* тёплая кость */
+    --bone-mute:  #9EAAA4;
+    --copper:     #C68A46;    /* копперный акцент */
+    --copper-dim: rgba(198, 138, 70, 0.55);
+    --contour:    rgba(198, 138, 70, 0.07);
+
+    --slide-w: 1920px;
+    --slide-h: 1080px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { background: var(--deep-2); }
+  body {
+    font-family: "Cormorant Garamond", serif;
+    color: var(--bone);
+  }
+
+  body.preview { display: grid; place-items: center; padding: 40px; min-height: 100vh; background: #040C0E; }
+  body.preview .slide { box-shadow: 0 60px 180px rgba(0,0,0,0.8), 0 15px 40px rgba(0,0,0,0.5); }
+
+  /* ────────── slide ─────────────────────────────── */
+  .slide {
+    position: relative;
+    width: var(--slide-w); height: var(--slide-h);
+    overflow: hidden;
+    background:
+      /* изолинии: слой 1 — крупный круг */
+      repeating-radial-gradient(
+        circle at 82% 28%,
+        transparent 0 96px,
+        var(--contour) 96px 97px
+      ),
+      /* изолинии: слой 2 — средний круг с другой точки */
+      repeating-radial-gradient(
+        circle at 12% 82%,
+        transparent 0 64px,
+        rgba(198, 138, 70, 0.05) 64px 65px
+      ),
+      /* изолинии: слой 3 — мелкий */
+      repeating-radial-gradient(
+        circle at 60% 60%,
+        transparent 0 40px,
+        rgba(234, 223, 203, 0.03) 40px 41px
+      ),
+      /* основной градиент */
+      radial-gradient(ellipse 80% 60% at 85% 20%, rgba(198, 138, 70, 0.12), transparent 55%),
+      linear-gradient(160deg, #0F2B31 0%, #0B2125 50%, #08181B 100%);
+  }
+
+  /* зерно */
+  .slide::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.93  0 0 0 0 0.8  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: screen;
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* виньетка */
+  .slide::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 95% 80% at 50% 50%, transparent 50%, rgba(0,0,0,0.55) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ────────── верхняя метаданная шапка ────────────── */
+  .meta-top {
+    position: absolute;
+    top: 90px; left: 120px; right: 120px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "DM Mono", monospace;
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--bone-mute);
+    z-index: 3;
+  }
+  .meta-top .coords {
+    display: inline-flex; align-items: center; gap: 18px;
+  }
+  .meta-top .coords .cross {
+    width: 14px; height: 14px;
+    position: relative;
+  }
+  .meta-top .coords .cross::before,
+  .meta-top .coords .cross::after {
+    content: "";
+    position: absolute; background: var(--copper);
+  }
+  .meta-top .coords .cross::before {
+    left: 50%; top: 0; width: 1px; height: 100%; transform: translateX(-0.5px);
+  }
+  .meta-top .coords .cross::after {
+    top: 50%; left: 0; height: 1px; width: 100%; transform: translateY(-0.5px);
+  }
+  .meta-top b { color: var(--bone); font-weight: 500; }
+  .meta-top .event b { color: var(--copper); }
+
+  /* тонкое «правило» под шапкой */
+  .rule-top {
+    position: absolute;
+    top: 128px;
+    left: 120px;
+    right: 120px;
+    height: 1px;
+    background: linear-gradient(90deg,
+      rgba(234, 223, 203, 0.22) 0%,
+      rgba(234, 223, 203, 0.08) 50%,
+      transparent 100%
+    );
+    z-index: 2;
+  }
+
+  /* ────────── hero title ─────────────────────────── */
+  .hero {
+    position: absolute;
+    top: 240px;
+    left: 120px;
+    right: 520px;
+    z-index: 3;
+  }
+
+  .kicker {
+    font-family: "DM Mono", monospace;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--copper);
+    margin-bottom: 30px;
+    display: inline-flex; align-items: center; gap: 12px;
+  }
+  .kicker::before {
+    content: "";
+    width: 36px; height: 1px; background: var(--copper);
+  }
+
+  .title {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 168px;
+    line-height: 0.94;
+    letter-spacing: -0.02em;
+    color: var(--bone);
+  }
+  .title .lg2 {
+    display: block;
+    padding-left: 72px;    /* второе слово со смещением, как у книжной обложки */
+  }
+  .title em {
+    color: var(--copper);
+    font-style: italic;
+    font-weight: 600;
+  }
+
+  .subtitle {
+    margin-top: 46px;
+    font-family: "Cormorant Garamond", serif;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 42px;
+    line-height: 1.28;
+    letter-spacing: 0;
+    color: var(--bone);
+    max-width: 1280px;
+  }
+  .subtitle em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--copper);
+  }
+
+  /* ────────── speaker block ──────────────────────── */
+  .speaker {
+    position: absolute;
+    bottom: 140px;
+    left: 120px;
+    z-index: 3;
+  }
+  .speaker .divider {
+    width: 80px; height: 2px;
+    background: var(--copper);
+    margin-bottom: 22px;
+  }
+  .speaker .role {
+    font-family: "DM Mono", monospace;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--bone-mute);
+    margin-bottom: 14px;
+  }
+  .speaker .name {
+    font-family: "Cormorant Garamond", serif;
+    font-weight: 600;
+    font-style: italic;
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--bone);
+  }
+  .speaker .org {
+    margin-top: 12px;
+    font-family: "DM Mono", monospace;
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--bone-mute);
+  }
+  .speaker .org b { color: var(--copper); font-weight: 500; }
+
+  /* ────────── compass rose (декоративный знак) ───── */
+  .compass {
+    position: absolute;
+    right: 160px;
+    bottom: 200px;
+    width: 280px; height: 280px;
+    z-index: 3;
+    opacity: 0.82;
+  }
+
+  /* ────────── нижняя служебная линия ──────────────── */
+  .rule-bottom {
+    position: absolute;
+    bottom: 96px;
+    left: 120px;
+    right: 120px;
+    height: 1px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(234, 223, 203, 0.08) 50%,
+      rgba(234, 223, 203, 0.22) 100%
+    );
+    z-index: 2;
+  }
+
+  .meta-bot {
+    position: absolute;
+    bottom: 60px;
+    left: 120px; right: 120px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "DM Mono", monospace;
+    font-weight: 400;
+    font-size: 12px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--bone-mute);
+    z-index: 3;
+  }
+  .meta-bot .left { display: inline-flex; align-items: center; gap: 14px; }
+  .meta-bot .left .dot {
+    width: 7px; height: 7px;
+    background: var(--copper);
+    border-radius: 50%;
+  }
+  .meta-bot .right {
+    font-style: italic;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    color: var(--bone-mute);
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+<script>
+  if (location.hash === "#preview") document.body.classList.add("preview");
+</script>
+
+<div class="slide" aria-label="Титульный слайд: Управление контекстом, Heisenbug 2026">
+
+  <!-- верхняя шапка с координатами -->
+  <div class="meta-top">
+    <div class="coords">
+      <span class="cross" aria-hidden="true"></span>
+      <span>55°45′N&nbsp;·&nbsp;37°37′E</span>
+      <span>·</span>
+      <b>Москва</b>
+    </div>
+    <div class="event"><b>Heisenbug&nbsp;·&nbsp;MMXXVI</b>&nbsp;&nbsp;·&nbsp;&nbsp;Track&nbsp;AI&nbsp;/&nbsp;QA</div>
+  </div>
+  <div class="rule-top" aria-hidden="true"></div>
+
+  <!-- hero -->
+  <div class="hero">
+    <div class="kicker">Доклад · 01</div>
+
+    <h1 class="title">
+      Управление<br>
+      <span class="lg2"><em>контекстом</em></span>
+    </h1>
+
+    <p class="subtitle">
+      при растущей кодовой базе автотестов —<br>
+      <em>с&nbsp;помощью ИИ</em>.
+    </p>
+  </div>
+
+  <!-- speaker -->
+  <div class="speaker">
+    <div class="divider" aria-hidden="true"></div>
+    <div class="role">Докладчик</div>
+    <div class="name">Никита&nbsp;Руленко</div>
+    <div class="org"><b>Rambler</b>&nbsp;·&nbsp;QA&nbsp;Automation&nbsp;·&nbsp;Helixir</div>
+  </div>
+
+  <!-- compass rose SVG -->
+  <svg class="compass" viewBox="0 0 200 200" aria-hidden="true">
+    <defs>
+      <linearGradient id="cmpFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#C68A46" stop-opacity="0.9"/>
+        <stop offset="1" stop-color="#C68A46" stop-opacity="0.4"/>
+      </linearGradient>
+    </defs>
+
+    <!-- внешнее тонкое кольцо -->
+    <circle cx="100" cy="100" r="96" fill="none" stroke="#C68A46" stroke-opacity="0.35" stroke-width="1"/>
+    <circle cx="100" cy="100" r="88" fill="none" stroke="#C68A46" stroke-opacity="0.20" stroke-width="0.6"/>
+
+    <!-- насечки по кругу: каждые 15° короткая, каждые 45° длинная -->
+    <g stroke="#C68A46" stroke-opacity="0.55" stroke-width="1">
+      <!-- длинные деления 8 штук -->
+      <line x1="100" y1="4"   x2="100" y2="18"/>
+      <line x1="100" y1="196" x2="100" y2="182"/>
+      <line x1="4"   y1="100" x2="18"  y2="100"/>
+      <line x1="196" y1="100" x2="182" y2="100"/>
+      <line x1="32"  y1="32"  x2="42"  y2="42"/>
+      <line x1="168" y1="32"  x2="158" y2="42"/>
+      <line x1="32"  y1="168" x2="42"  y2="158"/>
+      <line x1="168" y1="168" x2="158" y2="158"/>
+    </g>
+    <!-- короткие деления по 15° (не все, для минимализма) -->
+    <g stroke="#C68A46" stroke-opacity="0.25" stroke-width="0.6">
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(15 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(30 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(60 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(75 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(105 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(120 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(150 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(165 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(195 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(210 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(240 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(255 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(285 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(300 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(330 100 100)"/>
+      <line x1="100" y1="8"   x2="100" y2="14" transform="rotate(345 100 100)"/>
+    </g>
+
+    <!-- кардинальные N·E·S·W -->
+    <g font-family="DM Mono, monospace" font-size="12" font-weight="500"
+       fill="#C68A46" text-anchor="middle" letter-spacing="3">
+      <text x="100" y="32">N</text>
+      <text x="100" y="178">S</text>
+      <text x="172" y="104">E</text>
+      <text x="28"  y="104">W</text>
+    </g>
+
+    <!-- главная 4-конечная звезда (N-S-E-W стрелки) -->
+    <!-- вертикальная ось (север-юг) -->
+    <polygon points="100,20 92,100 100,108 108,100"
+             fill="url(#cmpFill)" opacity="0.95"/>
+    <polygon points="100,180 92,100 100,92 108,100"
+             fill="#C68A46" opacity="0.45"/>
+
+    <!-- горизонтальная (восток-запад) -->
+    <polygon points="180,100 100,92 92,100 100,108"
+             fill="#C68A46" opacity="0.35"/>
+    <polygon points="20,100 100,92 108,100 100,108"
+             fill="#C68A46" opacity="0.35"/>
+
+    <!-- центр -->
+    <circle cx="100" cy="100" r="5" fill="#EADFCB"/>
+    <circle cx="100" cy="100" r="2" fill="#0C252A"/>
+
+    <!-- наклонные тонкие -->
+    <g stroke="#C68A46" stroke-opacity="0.45" stroke-width="0.8" fill="none">
+      <line x1="100" y1="100" x2="152" y2="48"/>
+      <line x1="100" y1="100" x2="48"  y2="48"/>
+      <line x1="100" y1="100" x2="152" y2="152"/>
+      <line x1="100" y1="100" x2="48"  y2="152"/>
+    </g>
+  </svg>
+
+  <!-- нижняя линия и служебный ряд -->
+  <div class="rule-bottom" aria-hidden="true"></div>
+  <div class="meta-bot">
+    <div class="left">
+      <span class="dot" aria-hidden="true"></span>
+      <span>Heisenbug&nbsp;/&nbsp;2026&nbsp;·&nbsp;Листинг&nbsp;01</span>
+    </div>
+    <div class="right">скан контекстного ландшафта</div>
+  </div>
+
+</div>
+</body>
+</html>
