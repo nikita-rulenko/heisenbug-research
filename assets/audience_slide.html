@@ -2,25 +2,25 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8" />
-<title>Для кого этот доклад · Field Guide</title>
+<title>Для кого этот доклад · Matrix</title>
 <meta name="viewport" content="width=1920" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link
-  href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Red+Hat+Mono:wght@400;500;700&display=swap"
+  href="https://fonts.googleapis.com/css2?family=Commissioner:wght@300;400;500;600;700&family=Unbounded:wght@300;400;500;600;700;800;900&display=swap"
   rel="stylesheet">
 <style>
   /* ────────── tokens ─────────────────────────────── */
   :root {
-    --paper:     #ECE2CA;
-    --paper-2:   #DFD2B0;
-    --ink:       #1E1511;
-    --ink-soft:  #5A4A3C;
-    --ink-mute:  #7D6B58;
-    --ox:        #7D1F1C;
-    --ox-soft:   rgba(125,31,28,0.08);
-    --rule:      rgba(30,21,17,0.22);
-    --rule-soft: rgba(30,21,17,0.10);
+    --paper:       #F3EFE7;
+    --paper-2:     #EAE5D9;
+    --ink:         #0A0B0E;
+    --ink-soft:    #55585E;
+    --ink-mute:    #8A8B91;
+    --accent:      #2944DD;           /* electric cobalt */
+    --accent-soft: rgba(41, 68, 221, 0.12);
+    --rule:        rgba(10,11,14,0.22);
+    --rule-strong: #0A0B0E;
 
     --slide-w: 1920px;
     --slide-h: 1080px;
@@ -29,10 +29,10 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   html, body { background: var(--paper); }
-  body { color: var(--ink); font-family: "Alegreya", serif; }
+  body { color: var(--ink); font-family: "Commissioner", system-ui, sans-serif; }
 
-  /* preview (add #preview to URL) */
-  body.preview { background: #1a1814; display: grid; place-items: center; padding: 40px; min-height: 100vh; }
+  /* preview mode (add #preview to URL) */
+  body.preview { background: #151513; display: grid; place-items: center; padding: 40px; min-height: 100vh; }
   body.preview .slide { box-shadow: 0 40px 120px rgba(0,0,0,0.45), 0 10px 30px rgba(0,0,0,0.25); }
 
   .slide {
@@ -42,188 +42,237 @@
     overflow: hidden;
   }
 
-  /* paper grain */
+  /* subtle paper grain (very light) */
   .slide::before {
     content: "";
     position: absolute; inset: 0;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.10  0 0 0 0 0.08  0 0 0 0 0.05  0 0 0 0.16 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.06  0 0 0 0 0.06  0 0 0 0 0.07  0 0 0 0.07 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
     mix-blend-mode: multiply;
-    opacity: 0.55;
+    opacity: 0.5;
     pointer-events: none;
-    z-index: 10;
-  }
-
-  /* foxing / aged corners */
-  .slide::after {
-    content: "";
-    position: absolute; inset: 0;
-    background:
-      radial-gradient(ellipse 30% 22% at 4% 4%,   rgba(125,31,28,0.05), transparent 60%),
-      radial-gradient(ellipse 28% 20% at 96% 96%, rgba(125,31,28,0.05), transparent 58%),
-      radial-gradient(ellipse 24% 18% at 96% 4%,  rgba(125,31,28,0.04), transparent 55%);
-    pointer-events: none;
-    z-index: 2;
+    z-index: 20;
   }
 
   /* ────────── top bar ───────────────────────────── */
   .top {
     position: absolute;
-    top: 74px; left: 120px; right: 120px;
+    top: 64px;
+    left: 96px; right: 96px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-family: "Red Hat Mono", monospace;
-    font-size: 14px;
+    font-family: "Unbounded", sans-serif;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.32em;
     text-transform: uppercase;
     color: var(--ink-soft);
     z-index: 3;
   }
-  .top .lhs { display: inline-flex; align-items: center; gap: 14px; flex-shrink: 0; }
-  .top .mark { color: var(--ox); font-weight: 700; font-size: 16px; }
-  .top .rhs { color: var(--ink); font-weight: 700; letter-spacing: 0.3em; flex-shrink: 0; }
-  .top .rule { flex: 1; height: 1px; background: var(--rule); margin: 0 22px; }
+  .top .lhs { display: inline-flex; align-items: center; gap: 18px; flex-shrink: 0; }
+  .top .square {
+    display: inline-block;
+    width: 11px; height: 11px;
+    background: var(--accent);
+  }
+  .top .rule {
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+    margin: 0 24px;
+  }
+  .top .rhs {
+    display: inline-flex;
+    gap: 14px;
+    align-items: center;
+    color: var(--ink);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .top .rhs .dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
 
   /* ────────── title ─────────────────────────────── */
   .title {
     position: absolute;
-    top: 150px; left: 120px; right: 120px;
+    top: 128px;
+    left: 96px;
+    right: 96px;
     z-index: 3;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    align-items: end;
+    gap: 60px;
   }
   .title h1 {
-    font-family: "Alegreya", serif;
-    font-weight: 900;
-    font-style: italic;
-    font-size: 124px;
-    line-height: 0.96;
-    letter-spacing: -0.025em;
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 128px;
+    line-height: 0.92;
+    letter-spacing: -0.045em;
     color: var(--ink);
   }
-  .title h1 em {
-    font-style: italic;
-    font-weight: 900;
-    color: var(--ox);
+  .title h1 .accent { color: var(--accent); }
+  .title h1 .punct {
+    color: var(--accent);
+    display: inline-block;
+    transform: translateY(0.02em);
   }
-  .title h1 .shift { display: inline-block; margin-left: 86px; }
+  .title .standfirst {
+    border-left: 2px solid var(--accent);
+    padding: 8px 0 8px 24px;
+    margin-bottom: 30px;
+    font-family: "Commissioner", sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    letter-spacing: -0.005em;
+  }
+  .title .standfirst b {
+    font-weight: 600;
+    color: var(--ink);
+  }
 
-  /* ────────── species list ──────────────────────── */
-  .species {
+  /* ────────── matrix ────────────────────────────── */
+  .matrix {
     position: absolute;
-    left: 120px; right: 120px;
-    top: 440px;
+    left: 96px;
+    right: 96px;
+    top: 450px;
+    height: 520px;
     z-index: 3;
-    border-top: 2.5px solid var(--ink);
-  }
-
-  .row {
     display: grid;
-    grid-template-columns: 110px 72px 1fr 360px;
-    align-items: baseline;
-    column-gap: 28px;
-    padding: 22px 0 18px;
-    border-bottom: 1px solid var(--rule);
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    border: 1.5px solid var(--rule-strong);
+  }
+
+  .cell {
     position: relative;
-  }
-  .row:last-child { border-bottom: 2.5px solid var(--ink); }
-
-  /* roman numeral */
-  .num {
-    font-family: "Alegreya", serif;
-    font-weight: 900;
-    font-style: italic;
-    font-size: 76px;
-    line-height: 1;
-    color: var(--ox);
-    letter-spacing: -0.02em;
-  }
-
-  /* specimen icon */
-  .icon {
-    width: 56px; height: 56px;
-    color: var(--ox);
-    transform: translateY(-8px);
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  .name-block {
+    padding: 28px 36px 28px 36px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    justify-content: space-between;
+    overflow: hidden;
   }
-  .name {
-    font-family: "Alegreya", serif;
-    font-weight: 700;
-    font-style: italic;
-    font-size: 60px;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    color: var(--ink);
+  .cell + .cell { border-left: 1.5px solid var(--rule-strong); }
+  .matrix > .cell:nth-child(2) { border-left: 1.5px solid var(--rule-strong); }
+  .matrix > .cell:nth-child(3),
+  .matrix > .cell:nth-child(4) { border-top: 1.5px solid var(--rule-strong); }
+  .matrix > .cell:nth-child(4) { border-left: 1.5px solid var(--rule-strong); }
+  .matrix > .cell:nth-child(3) { border-left: none; }
+
+  .cell-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
   }
-  .name .smile {
-    display: inline-block;
-    color: var(--ox);
+  .cell-num {
+    font-family: "Unbounded", sans-serif;
     font-weight: 900;
-    font-style: italic;
-    margin-left: 8px;
-    font-size: 54px;
-    vertical-align: 0.04em;
+    font-size: 90px;
+    line-height: 0.9;
+    letter-spacing: -0.055em;
+    color: var(--accent);
   }
-  .latin {
-    font-family: "Alegreya", serif;
-    font-style: italic;
-    font-weight: 400;
-    font-size: 22px;
-    color: var(--ink-mute);
-    letter-spacing: 0.01em;
+  .cell-code {
+    font-family: "Unbounded", sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    align-self: flex-start;
+    margin-top: 14px;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
   }
-  .latin .tax {
-    color: var(--ox);
-    font-style: italic;
+  .cell-code::before {
+    content: "";
+    width: 24px; height: 1.5px;
+    background: var(--ink);
+    display: inline-block;
   }
 
-  /* right-side tag */
-  .tag {
-    font-family: "Red Hat Mono", monospace;
-    text-align: right;
-  }
-  .tag .big {
-    display: block;
+  .cell-name {
+    font-family: "Unbounded", sans-serif;
     font-weight: 700;
-    font-size: 17px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
+    font-size: 52px;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
     color: var(--ink);
-    margin-bottom: 6px;
+    margin-top: 18px;
+    margin-bottom: 22px;
   }
-  .tag .small {
+  .cell-name .smile {
+    display: inline-block;
+    color: var(--accent);
+    font-weight: 800;
+    margin-left: 8px;
+    letter-spacing: -0.04em;
+  }
+
+  .cell-meta {
+    font-family: "Commissioner", sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    letter-spacing: -0.005em;
+    max-width: 92%;
+  }
+  .cell-meta b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .cell-meta .tools {
     display: block;
+    margin-top: 12px;
+    font-family: "Unbounded", sans-serif;
     font-weight: 500;
-    font-size: 14px;
-    letter-spacing: 0.22em;
+    font-size: 12px;
+    letter-spacing: 0.26em;
     text-transform: uppercase;
     color: var(--ink-mute);
+  }
+
+  /* diagonal accent strip inside cell 1 for visual anchor */
+  .cell::after {
+    content: "";
+    position: absolute;
+    right: 28px; top: 28px;
+    width: 10px; height: 10px;
+    border: 1.5px solid var(--ink);
   }
 
   /* ────────── footer ────────────────────────────── */
   .footer {
     position: absolute;
-    bottom: 56px;
-    left: 120px; right: 120px;
+    bottom: 48px;
+    left: 96px; right: 96px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: "Red Hat Mono", monospace;
-    font-size: 13px;
+    font-family: "Unbounded", sans-serif;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.32em;
     text-transform: uppercase;
     color: var(--ink-mute);
     z-index: 3;
   }
-  .footer .mid { color: var(--ox); font-weight: 700; letter-spacing: 0.32em; }
-  .footer .dot { width: 5px; height: 5px; background: var(--ox); display: inline-block; border-radius: 50%; margin: 0 10px; vertical-align: middle; }
+  .footer .mid {
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .footer .mid .acc {
+    color: var(--accent);
+  }
 </style>
 </head>
 <body>
@@ -231,103 +280,90 @@
   if (location.hash === "#preview") document.body.classList.add("preview");
 </script>
 
-<div class="slide" aria-label="Слайд: для кого этот доклад — полевой определитель видов">
+<div class="slide" aria-label="Слайд: для кого этот доклад — матрица аудитории">
 
   <div class="top">
     <div class="lhs">
-      <span class="mark">◆</span>
-      <span>Field Guide · Auditorium</span>
-      <span>·</span>
-      <span>Species&nbsp;IV</span>
+      <span class="square" aria-hidden="true"></span>
+      <span>Index · Audience Matrix</span>
     </div>
     <div class="rule" aria-hidden="true"></div>
-    <div class="rhs">Plate&nbsp;III &nbsp;·&nbsp; Heisenbug&nbsp;2026</div>
+    <div class="rhs">
+      <span>§&nbsp;03</span>
+      <span class="dot" aria-hidden="true"></span>
+      <span>Heisenbug&nbsp;2026</span>
+    </div>
   </div>
 
   <div class="title">
     <h1>
       Для&nbsp;кого<br>
-      <span class="shift">этот&nbsp;<em>доклад?</em></span>
+      этот&nbsp;<span class="accent">доклад</span><span class="punct">?</span>
     </h1>
+    <div class="standfirst">
+      Четыре типа слушателей в&nbsp;зале. <b>У&nbsp;каждого&nbsp;— свой контракт</b> с&nbsp;агентом: разный язык, разные привычки, разный ожидаемый результат.
+    </div>
   </div>
 
-  <section class="species" aria-label="Четыре вида слушателей">
+  <section class="matrix" aria-label="Матрица из четырёх типов аудитории">
 
-    <!-- I. Автотестировщики -->
-    <div class="row">
-      <div class="num">I.</div>
-      <svg class="icon" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
-        <!-- test tube -->
-        <path d="M22 5 L22 36 C22 43 28 46.5 33 43 C37 40 37 33.5 33 31 L33 5 Z"/>
-        <line x1="18" y1="5" x2="37" y2="5"/>
-        <line x1="22" y1="24" x2="33" y2="24"/>
-        <circle cx="26.5" cy="36" r="1.4" fill="currentColor"/>
-        <circle cx="30" cy="39.5" r="1" fill="currentColor"/>
-        <circle cx="27" cy="41.5" r="0.9" fill="currentColor"/>
-      </svg>
-      <div class="name-block">
-        <div class="name">Автотестировщики</div>
-        <div class="latin">— <span class="tax">qa automatarii</span> · обитают в&nbsp;CI/CD, питаются зелёными ранами</div>
+    <!-- 01 -->
+    <div class="cell">
+      <div class="cell-head">
+        <div class="cell-num">01</div>
+        <div class="cell-code">QA · Automation</div>
       </div>
-      <div class="tag">
-        <span class="big">01 / QA</span>
-        <span class="small">Selenium · Playwright · Pytest · K6</span>
-      </div>
-    </div>
-
-    <!-- II. Программисты -->
-    <div class="row">
-      <div class="num">II.</div>
-      <svg class="icon" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
-        <!-- curly braces -->
-        <path d="M22 8 C16 8 16 15 16 21 C16 25 12 28 10 28 C12 28 16 31 16 35 C16 41 16 48 22 48"/>
-        <path d="M34 8 C40 8 40 15 40 21 C40 25 44 28 46 28 C44 28 40 31 40 35 C40 41 40 48 34 48"/>
-        <circle cx="28" cy="28" r="1.6" fill="currentColor"/>
-      </svg>
-      <div class="name-block">
-        <div class="name">Программисты</div>
-        <div class="latin">— <span class="tax">codex scriptor</span> · живут в&nbsp;IDE, узнаваемы по&nbsp;клавиатурному щёлку</div>
-      </div>
-      <div class="tag">
-        <span class="big">02 / DEV</span>
-        <span class="small">Backend · Frontend · Platform · SRE</span>
-      </div>
-    </div>
-
-    <!-- III. Нагрузочные -->
-    <div class="row">
-      <div class="num">III.</div>
-      <svg class="icon" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
-        <!-- lightning -->
-        <path d="M31 4 L13 30 L25 30 L21 52 L43 22 L30 22 L34 4 Z"/>
-      </svg>
-      <div class="name-block">
-        <div class="name">Нагрузочные&nbsp;тестировщики</div>
-        <div class="latin">— <span class="tax">stressor systemae</span> · слышат p99&nbsp;в&nbsp;тишине, говорят графиками</div>
-      </div>
-      <div class="tag">
-        <span class="big">03 / LOAD</span>
-        <span class="small">k6 · Gatling · JMeter · Yandex&nbsp;Tank</span>
-      </div>
-    </div>
-
-    <!-- IV. Вайбкодеры -->
-    <div class="row">
-      <div class="num">IV.</div>
-      <svg class="icon" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
-        <!-- sparkle / four-point star -->
-        <path d="M28 5 L31 24 L50 28 L31 32 L28 51 L25 32 L6 28 L25 24 Z"/>
-        <circle cx="28" cy="28" r="1.4" fill="currentColor"/>
-      </svg>
-      <div class="name-block">
-        <div class="name">
-          Вайбкодеры<span class="smile">:)</span>
+      <div>
+        <div class="cell-name">Автотестировщики</div>
+        <div class="cell-meta">
+          <b>Пишут</b> и&nbsp;поддерживают авто-сьюты. Измеряют здоровье в&nbsp;flaky-rate и&nbsp;времени прогона.
+          <span class="tools">Selenium · Playwright · Pytest · Appium</span>
         </div>
-        <div class="latin">— <span class="tax">scriptor vibrans</span> · пишут «на&nbsp;вайбе», промт вместо документации</div>
       </div>
-      <div class="tag">
-        <span class="big">04 / VIBE</span>
-        <span class="small">Cursor · Claude · GPT · Prompt-driven</span>
+    </div>
+
+    <!-- 02 -->
+    <div class="cell">
+      <div class="cell-head">
+        <div class="cell-num">02</div>
+        <div class="cell-code">Dev · Engineering</div>
+      </div>
+      <div>
+        <div class="cell-name">Программисты</div>
+        <div class="cell-meta">
+          <b>Пишут</b> продукт. Тесты воспринимают как контракт, а&nbsp;не&nbsp;как ритуал.
+          <span class="tools">Backend · Frontend · Platform · SRE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 -->
+    <div class="cell">
+      <div class="cell-head">
+        <div class="cell-num">03</div>
+        <div class="cell-code">Load · Performance</div>
+      </div>
+      <div>
+        <div class="cell-name">Нагрузочные</div>
+        <div class="cell-meta">
+          <b>Слышат</b> p99 в&nbsp;тишине. Говорят графиками и&nbsp;перцентилями, ищут узкие места.
+          <span class="tools">k6 · Gatling · JMeter · Yandex&nbsp;Tank</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 -->
+    <div class="cell">
+      <div class="cell-head">
+        <div class="cell-num">04</div>
+        <div class="cell-code">Vibe · Prompt-driven</div>
+      </div>
+      <div>
+        <div class="cell-name">Вайбкодеры<span class="smile">:)</span></div>
+        <div class="cell-meta">
+          <b>Пишут</b> промтами. Контракт с&nbsp;агентом — главный артефакт, код — его&nbsp;следствие.
+          <span class="tools">Cursor · Claude · GPT · Prompt&nbsp;ops</span>
+        </div>
       </div>
     </div>
 
@@ -335,7 +371,7 @@
 
   <div class="footer">
     <div>Helixir · Context Recovery</div>
-    <div class="mid">◆&nbsp;&nbsp;Признаки<span class="dot"></span>Привычки<span class="dot"></span>Язык&nbsp;&nbsp;◆</div>
+    <div class="mid">Четыре <span class="acc">·</span> разных <span class="acc">·</span> контракта</div>
     <div>стр. 03 / Heisenbug 2026</div>
   </div>
 

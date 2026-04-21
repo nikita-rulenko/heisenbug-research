@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Большой проект · стратиграфия легаси</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Prata&family=PT+Mono&family=Lora:ital,wght@0,500;1,500&display=swap"
+  rel="stylesheet">
+<style>
+  /* ────────── tokens ─────────────────────────────── */
+  :root {
+    --paper:      #ECDDB8;
+    --paper-2:    #E0CFA4;
+    --paper-edge: #C4B082;
+    --ink:        #1C1208;
+    --ink-soft:   #57422A;
+    --ink-mute:   #8B7552;
+    --rust:       #A64D2A;
+    --mustard:    #D4A023;
+    --accent:     #A42018;
+    --rule:       rgba(28,18,8,0.28);
+    --rule-soft:  rgba(28,18,8,0.14);
+
+    /* strata colors (newest at top → oldest at bottom) */
+    --s1: #DBC795;
+    --s2: #B6854A;
+    --s3: #8B562C;
+    --s4: #593520;
+    --s5: #2E1C10;
+
+    --slide-w: 1920px;
+    --slide-h: 1080px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { background: var(--paper); }
+  body { color: var(--ink); font-family: "Lora", "Prata", serif; }
+
+  body.preview { background: #18120a; display: grid; place-items: center; padding: 40px; min-height: 100vh; }
+  body.preview .slide { box-shadow: 0 40px 120px rgba(0,0,0,0.5); }
+
+  .slide {
+    position: relative;
+    width: var(--slide-w); height: var(--slide-h);
+    background:
+      radial-gradient(ellipse 90% 70% at 50% 0%, rgba(236,221,184,1) 0%, var(--paper) 60%),
+      var(--paper);
+    overflow: hidden;
+  }
+
+  /* paper grain */
+  .slide::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.07  0 0 0 0 0.04  0 0 0 0.17 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  /* foxed corners */
+  .slide::after {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 28% 20% at 3% 3%,   rgba(120,50,15,0.07), transparent 60%),
+      radial-gradient(ellipse 30% 22% at 97% 97%, rgba(120,50,15,0.06), transparent 58%);
+    pointer-events: none; z-index: 2;
+  }
+
+  /* ────────── top bar ───────────────────────────── */
+  .top {
+    position: absolute;
+    top: 62px; left: 96px; right: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: "PT Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    z-index: 3;
+  }
+  .top .lhs { display: inline-flex; align-items: center; gap: 16px; flex-shrink: 0; }
+  .top .mark {
+    color: var(--accent);
+    font-size: 15px;
+  }
+  .top .rule { flex: 1; height: 1px; background: var(--rule); margin: 0 24px; }
+  .top .rhs { color: var(--ink); font-weight: 700; flex-shrink: 0; letter-spacing: 0.3em; }
+
+  /* ────────── title ─────────────────────────────── */
+  .title {
+    position: absolute;
+    top: 122px; left: 96px; right: 96px;
+    z-index: 3;
+  }
+  .title h1 {
+    font-family: "Prata", serif;
+    font-weight: 400;
+    font-size: 132px;
+    line-height: 0.98;
+    letter-spacing: -0.022em;
+    color: var(--ink);
+  }
+  .title h1 .accent {
+    color: var(--accent);
+    font-style: italic;
+  }
+  .title h1 .quotes {
+    color: var(--mustard);
+    font-family: "Prata", serif;
+    font-size: 132px;
+    line-height: 0;
+    letter-spacing: 0;
+    display: inline-block;
+    margin-right: 10px;
+    transform: translateY(20px);
+  }
+
+  .subtitle {
+    margin-top: 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+  }
+  .subtitle .tick {
+    width: 56px; height: 2px;
+    background: var(--accent);
+    transform: translateY(-10px);
+    flex-shrink: 0;
+  }
+  .subtitle .text {
+    font-family: "Prata", serif;
+    font-style: italic;
+    font-size: 32px;
+    line-height: 1.25;
+    color: var(--ink-soft);
+    letter-spacing: 0.002em;
+  }
+  .subtitle .text b {
+    font-style: normal;
+    font-family: "PT Mono", monospace;
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-right: 8px;
+  }
+
+  /* ────────── stratigraphy cross-section ────────── */
+  .section {
+    position: absolute;
+    left: 96px; right: 96px;
+    top: 520px;
+    height: 430px;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* scale labels */
+  .section-head {
+    display: flex; justify-content: space-between;
+    padding-bottom: 10px;
+    font-family: "PT Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .section-head .caption .hl { color: var(--accent); font-weight: 700; }
+
+  .strata {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 160px 1fr 160px;
+    grid-template-rows: repeat(5, 1fr);
+    position: relative;
+  }
+
+  .layer-label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 22px;
+    font-family: "PT Mono", monospace;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    border-right: 1.5px solid var(--ink);
+    position: relative;
+  }
+  .layer-label .roman {
+    font-family: "Prata", serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-right: 10px;
+  }
+  .layer-label::after {
+    content: "";
+    position: absolute;
+    right: -6px; top: 50%;
+    width: 12px; height: 12px;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    transform: translate(0,-50%) rotate(45deg);
+  }
+
+  .layer-body {
+    position: relative;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    color: var(--ink);
+    overflow: hidden;
+  }
+  .layer-body .annot {
+    font-family: "Prata", serif;
+    font-style: italic;
+    font-size: 26px;
+    letter-spacing: 0.005em;
+    line-height: 1.2;
+    position: relative; z-index: 2;
+    mix-blend-mode: normal;
+    max-width: 780px;
+  }
+  .layer-body .annot b {
+    font-family: "PT Mono", monospace;
+    font-style: normal;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: rgba(236,221,184,0.75);
+    padding: 4px 10px;
+    margin-right: 12px;
+    vertical-align: 0.18em;
+  }
+
+  /* per-layer color + texture */
+  .layer-body.l1 { background: var(--s1); }
+  .layer-body.l2 { background: var(--s2); }
+  .layer-body.l3 { background: var(--s3); color: var(--paper); }
+  .layer-body.l3 .annot b { color: var(--s3); }
+  .layer-body.l4 { background: var(--s4); color: var(--paper); }
+  .layer-body.l4 .annot b { color: var(--s4); }
+  .layer-body.l5 { background: var(--s5); color: var(--paper-2); }
+  .layer-body.l5 .annot b { color: var(--s5); }
+
+  /* texture overlays per layer — dots / dashes / hatches */
+  .layer-body::before {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    opacity: 0.5;
+    z-index: 1;
+  }
+  .layer-body.l1::before {
+    background-image: radial-gradient(rgba(28,18,8,0.4) 1px, transparent 1.5px);
+    background-size: 14px 14px;
+  }
+  .layer-body.l2::before {
+    background-image: repeating-linear-gradient(90deg, rgba(28,18,8,0.35) 0 2px, transparent 2px 22px);
+  }
+  .layer-body.l3::before {
+    background-image: repeating-linear-gradient(135deg, rgba(236,221,184,0.22) 0 2px, transparent 2px 14px);
+    opacity: 0.6;
+  }
+  .layer-body.l4::before {
+    background-image:
+      repeating-linear-gradient(45deg, rgba(236,221,184,0.18) 0 1.5px, transparent 1.5px 14px),
+      repeating-linear-gradient(-45deg, rgba(236,221,184,0.18) 0 1.5px, transparent 1.5px 14px);
+    opacity: 0.55;
+  }
+  .layer-body.l5::before {
+    background-image: radial-gradient(rgba(236,221,184,0.25) 1px, transparent 1.4px);
+    background-size: 10px 10px;
+    opacity: 0.5;
+  }
+
+  /* depth scale on right */
+  .depth {
+    border-left: 1.5px solid var(--ink);
+    position: relative;
+  }
+  .depth .tick {
+    position: absolute;
+    left: 0; width: 18px;
+    height: 0;
+    border-top: 1.5px solid var(--ink);
+  }
+  .depth .n {
+    position: absolute;
+    left: 26px;
+    transform: translateY(-0.65em);
+    font-family: "PT Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--ink-mute);
+    white-space: nowrap;
+  }
+  .depth-label {
+    position: absolute;
+    right: -96px;
+    top: 50%;
+    transform: rotate(90deg) translate(-50%, 0);
+    transform-origin: right center;
+    font-family: "PT Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    white-space: nowrap;
+  }
+
+  /* "you are here" marker on layer I */
+  .you-here {
+    position: absolute;
+    left: 42px; top: -24px;
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: "PT Mono", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    z-index: 4;
+  }
+  .you-here .arrow {
+    width: 14px; height: 14px;
+    background: var(--accent);
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  }
+
+  /* ────────── footer ────────────────────────────── */
+  .footer {
+    position: absolute;
+    bottom: 38px;
+    left: 96px; right: 96px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "PT Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    z-index: 3;
+  }
+  .footer .mid { color: var(--accent); font-weight: 700; }
+</style>
+</head>
+<body>
+<script>
+  if (location.hash === "#preview") document.body.classList.add("preview");
+</script>
+
+<div class="slide" aria-label="Слайд: стратиграфия большого легаси-проекта">
+
+  <div class="top">
+    <div class="lhs">
+      <span class="mark">◆</span>
+      <span>Стратиграфия · Legacy cross-section</span>
+    </div>
+    <div class="rule" aria-hidden="true"></div>
+    <div class="rhs">§&nbsp;04 · Heisenbug&nbsp;2026</div>
+  </div>
+
+  <div class="title">
+    <h1>
+      <span class="quotes">«</span>У&nbsp;меня <span class="accent">большой проект</span><br>
+      и&nbsp;<span class="accent">много кода!</span><span class="quotes">»</span>
+    </h1>
+
+    <div class="subtitle">
+      <span class="tick" aria-hidden="true"></span>
+      <span class="text"><b>диагноз</b> боль легаси и&nbsp;отсутствия документации — диагностируется на&nbsp;первом же онбординге</span>
+    </div>
+  </div>
+
+  <section class="section" aria-label="Разрез по слоям проекта">
+
+    <div class="section-head">
+      <div>Слой · Layer</div>
+      <div class="caption">← поверхность <span class="hl">сейчас</span> &nbsp;·&nbsp; глубже &nbsp;·&nbsp; коренная порода →</div>
+      <div>Глубина · depth</div>
+    </div>
+
+    <div class="strata">
+
+      <!-- L I surface -->
+      <div class="layer-label">
+        <span class="roman">I.</span>
+        <span>surface · сегодня</span>
+      </div>
+      <div class="layer-body l1">
+        <div class="you-here"><span class="arrow"></span>вы здесь</div>
+        <div class="annot">
+          <b>0—6 мес</b>то, что вы пишете прямо сейчас · PR открыт, CI зелёный
+        </div>
+      </div>
+      <div class="depth" style="position: relative;">
+        <span class="tick" style="top: 0;"></span>
+        <span class="n" style="top: 6px;">0 м</span>
+        <div class="depth-label">возраст · age of code</div>
+      </div>
+
+      <!-- L II recent -->
+      <div class="layer-label">
+        <span class="roman">II.</span>
+        <span>recent</span>
+      </div>
+      <div class="layer-body l2">
+        <div class="annot">
+          <b>6—24 мес</b>последний большой рефакторинг · автор ещё в&nbsp;команде, помнит, зачем
+        </div>
+      </div>
+      <div class="depth">
+        <span class="tick" style="top: 0;"></span>
+        <span class="n" style="top: 6px;">~ 15 м</span>
+      </div>
+
+      <!-- L III mid -->
+      <div class="layer-label">
+        <span class="roman">III.</span>
+        <span>mid</span>
+      </div>
+      <div class="layer-body l3">
+        <div class="annot">
+          <b>2—4 года</b>миграция на&nbsp;новый стек · документация устарела, но&nbsp;читаема
+        </div>
+      </div>
+      <div class="depth">
+        <span class="tick" style="top: 0;"></span>
+        <span class="n" style="top: 6px;">~ 45 м</span>
+      </div>
+
+      <!-- L IV deep -->
+      <div class="layer-label">
+        <span class="roman">IV.</span>
+        <span>deep</span>
+      </div>
+      <div class="layer-body l4">
+        <div class="annot">
+          <b>4—7 лет</b>тёмная эпоха · «трогать нельзя, сломается биллинг»
+        </div>
+      </div>
+      <div class="depth">
+        <span class="tick" style="top: 0;"></span>
+        <span class="n" style="top: 6px;">~ 90 м</span>
+      </div>
+
+      <!-- L V bedrock -->
+      <div class="layer-label">
+        <span class="roman">V.</span>
+        <span>bedrock</span>
+      </div>
+      <div class="layer-body l5">
+        <div class="annot">
+          <b>7+ лет</b>коренная порода · первый коммит, авторов нет, тестов нет
+        </div>
+      </div>
+      <div class="depth">
+        <span class="tick" style="top: 0;"></span>
+        <span class="n" style="top: 6px;">~ 200 м</span>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="footer">
+    <div>Helixir · Context Recovery</div>
+    <div class="mid">Чем глубже — тем дороже онбординг агента</div>
+    <div>стр. 04 / Heisenbug 2026</div>
+  </div>
+
+</div>
+</body>
+</html>
