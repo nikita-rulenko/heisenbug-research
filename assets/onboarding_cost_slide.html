@@ -54,7 +54,7 @@
   .accent-rule {
     position: absolute;
     left: 120px;
-    top: 120px;
+    top: 72px;
     width: 96px;
     height: 6px;
     background: var(--accent);
@@ -63,7 +63,7 @@
   /* ────────── hero ─────────────────────────────── */
   .title {
     position: absolute;
-    top: 152px;
+    top: 100px;
     left: 120px;
     right: 120px;
     font-family: "Fraunces", serif;
@@ -83,8 +83,24 @@
     left: 120px;
     right: 120px;
     bottom: 96px;
-    border-top: 3px solid var(--rule);
   }
+
+  .head {
+    display: grid;
+    grid-template-columns: 1fr 380px 460px;
+    align-items: baseline;
+    padding-bottom: 18px;
+    border-bottom: 3px solid var(--rule);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .head span:nth-child(2),
+  .head span:nth-child(3) { text-align: right; }
+  .head span:nth-child(1) { color: var(--accent); font-weight: 700; }
 
   .row {
     display: grid;
@@ -96,11 +112,11 @@
     transform: translateY(16px);
     animation: reveal 0.7s cubic-bezier(.22,.72,.31,1) forwards;
   }
-  .row:nth-child(1) { animation-delay: 0.10s; }
-  .row:nth-child(2) { animation-delay: 0.20s; }
-  .row:nth-child(3) { animation-delay: 0.30s; }
-  .row:nth-child(4) { animation-delay: 0.40s; }
-  .row:nth-child(5) { animation-delay: 0.50s; }
+  .row:nth-of-type(1) { animation-delay: 0.10s; }
+  .row:nth-of-type(2) { animation-delay: 0.20s; }
+  .row:nth-of-type(3) { animation-delay: 0.30s; }
+  .row:nth-of-type(4) { animation-delay: 0.40s; }
+  .row:nth-of-type(5) { animation-delay: 0.50s; }
 
   @keyframes reveal {
     to { opacity: 1; transform: translateY(0); }
@@ -165,6 +181,12 @@
   </h1>
 
   <section class="data" aria-label="Стоимость онбординга по регионам">
+    <div class="head" aria-hidden="true">
+      <span>Регион</span>
+      <span>Сетап</span>
+      <span>В&nbsp;месяц</span>
+    </div>
+
     <div class="row">
       <div class="name">Европа</div>
       <div class="setup">€&nbsp;3–5k</div>
