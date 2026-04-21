@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Цели онбординга · проект после</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+  rel="stylesheet">
+<style>
+  /* ────────── tokens ─────────────────────────────── */
+  :root {
+    --washi:        #ECE6D9;       /* warm washi paper */
+    --washi-2:      #E2DBCB;
+    --washi-deep:   #D6CEB9;
+    --sumi:         #16140F;       /* sumi ink */
+    --sumi-soft:    #4A463C;
+    --sumi-mute:    #8A8372;
+    --seal:         #A8321D;       /* vermillion seal */
+    --seal-deep:    #7E1F10;
+    --gold-leaf:    #B8923A;       /* muted gold */
+    --rule:         rgba(22,20,15,0.22);
+    --rule-hair:    rgba(22,20,15,0.14);
+
+    --slide-w: 1920px;
+    --slide-h: 1080px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { background: var(--washi); }
+  body { color: var(--sumi); font-family: "Inter Tight", system-ui, sans-serif; }
+
+  body.preview { background: #0E0D0A; display: grid; place-items: center; padding: 40px; min-height: 100vh; }
+  body.preview .slide { box-shadow: 0 60px 140px rgba(0,0,0,0.55), 0 15px 40px rgba(0,0,0,0.35); }
+
+  .slide {
+    position: relative;
+    width: var(--slide-w); height: var(--slide-h);
+    background:
+      radial-gradient(ellipse 80% 60% at 80% 110%, rgba(168,50,29,0.06), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 5% -10%, rgba(184,146,58,0.08), transparent 60%),
+      var(--washi);
+    overflow: hidden;
+  }
+
+  /* washi paper fibers */
+  .slide::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0.10 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  /* giant kanji-like glyph as background mark — "目" (goal/eye) */
+  .glyph {
+    position: absolute;
+    right: -60px;
+    bottom: -140px;
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1100px;
+    line-height: 0.8;
+    color: var(--seal);
+    opacity: 0.06;
+    user-select: none; pointer-events: none;
+    z-index: 0;
+    letter-spacing: -0.06em;
+  }
+
+  /* ────────── top bar ───────────────────────────── */
+  .top {
+    position: absolute;
+    top: 56px;
+    left: 104px; right: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--sumi-soft);
+    z-index: 4;
+  }
+  .top .lhs { display: inline-flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .top .mark {
+    width: 10px; height: 10px;
+    background: var(--seal);
+    display: inline-block;
+  }
+  .top .rule { flex: 1; height: 1px; background: var(--rule); margin: 0 22px; }
+  .top .chapter { color: var(--sumi); font-weight: 700; letter-spacing: 0.28em; flex-shrink: 0; }
+
+  /* ────────── language switcher ─────────────────── */
+  .lang {
+    position: absolute;
+    top: 46px;
+    right: 104px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    z-index: 10;
+    border: 1.5px solid var(--sumi);
+    background: var(--washi);
+    padding: 0;
+  }
+  .lang .seg {
+    padding: 8px 14px;
+    color: var(--sumi);
+    display: inline-block;
+  }
+  .lang .seg.active {
+    background: var(--sumi);
+    color: var(--washi);
+  }
+  .lang .sep {
+    width: 1.5px;
+    align-self: stretch;
+    background: var(--sumi);
+  }
+
+  /* ────────── title block ───────────────────────── */
+  .title-block {
+    position: absolute;
+    top: 150px;
+    left: 104px;
+    width: 860px;
+    z-index: 4;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--seal);
+    margin-bottom: 26px;
+  }
+  .eyebrow .bar { width: 48px; height: 2px; background: var(--seal); }
+  .eyebrow .num { color: var(--sumi-soft); font-weight: 400; }
+
+  .title {
+    font-family: "EB Garamond", serif;
+    font-weight: 500;
+    font-size: 108px;
+    line-height: 0.96;
+    letter-spacing: -0.025em;
+    color: var(--sumi);
+  }
+  .title .it {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--seal);
+  }
+  .title .amp {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--gold-leaf);
+    display: inline-block;
+    transform: translateY(0.04em);
+    margin: 0 6px;
+  }
+
+  .stand {
+    margin-top: 30px;
+    max-width: 780px;
+    font-family: "Inter Tight", sans-serif;
+    font-weight: 400;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--sumi-soft);
+    letter-spacing: -0.005em;
+    padding-left: 22px;
+    border-left: 2px solid var(--seal);
+  }
+  .stand b { color: var(--sumi); font-weight: 600; }
+
+  /* ────────── goals list ────────────────────────── */
+  .goals {
+    position: absolute;
+    top: 150px;
+    right: 104px;
+    width: 820px;
+    z-index: 4;
+  }
+  .goals-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--sumi);
+    margin-bottom: 0;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--sumi);
+  }
+  .goals-head .count { color: var(--sumi-mute); font-weight: 500; }
+
+  .goal {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+    padding: 22px 0 22px;
+    border-bottom: 1px solid var(--rule-hair);
+    align-items: baseline;
+  }
+  .goal:last-child { border-bottom: none; }
+  .goal .idx {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--seal);
+    letter-spacing: -0.04em;
+  }
+  .goal .body {
+    font-family: "Inter Tight", sans-serif;
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.28;
+    color: var(--sumi);
+    letter-spacing: -0.01em;
+  }
+  .goal .body .it {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--sumi);
+    font-size: 1.15em;
+    letter-spacing: -0.02em;
+  }
+  .goal .body .dim {
+    color: var(--sumi-mute);
+    font-weight: 400;
+  }
+  .goal .body .mark {
+    color: var(--seal);
+    font-weight: 700;
+  }
+
+  /* seal mark — bottom-left, over the title area */
+  .seal {
+    position: absolute;
+    left: 104px;
+    bottom: 160px;
+    width: 124px; height: 124px;
+    border: 3px solid var(--seal);
+    display: grid;
+    place-items: center;
+    transform: rotate(-5deg);
+    background: var(--washi);
+    z-index: 5;
+  }
+  .seal::before {
+    content: "";
+    position: absolute; inset: 6px;
+    border: 1.5px solid var(--seal);
+    opacity: 0.5;
+  }
+  .seal .txt {
+    font-family: "EB Garamond", serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--seal);
+    text-align: center;
+    letter-spacing: -0.01em;
+  }
+  .seal .txt .big {
+    display: block;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 2px 0;
+  }
+  .seal .txt .sub {
+    display: block;
+    font-family: "JetBrains Mono", monospace;
+    font-style: normal;
+    font-size: 8px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ────────── footer ────────────────────────────── */
+  .footer {
+    position: absolute;
+    bottom: 46px;
+    left: 104px; right: 104px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--sumi-mute);
+    z-index: 4;
+  }
+  .footer .mid { color: var(--sumi); font-weight: 700; letter-spacing: 0.26em; }
+  .footer .mid .acc { color: var(--seal); }
+</style>
+</head>
+<body>
+<script>
+  if (location.hash === "#preview") document.body.classList.add("preview");
+</script>
+
+<div class="slide" aria-label="Слайд: цели, которые ставил — проект после онбординга">
+
+  <div class="glyph" aria-hidden="true">目</div>
+
+  <div class="top">
+    <div class="lhs">
+      <span class="mark" aria-hidden="true"></span>
+      <span>Chapter · Goals</span>
+    </div>
+    <div class="rule" aria-hidden="true"></div>
+    <div class="chapter">§&nbsp;05&nbsp;·&nbsp;Heisenbug&nbsp;2026</div>
+  </div>
+
+  <div class="lang" aria-label="Язык">
+    <span class="seg active">RU</span>
+    <span class="sep" aria-hidden="true"></span>
+    <span class="seg">A</span>
+  </div>
+
+  <div class="title-block">
+    <div class="eyebrow">
+      <span class="bar" aria-hidden="true"></span>
+      <span>Цели, которые&nbsp;я&nbsp;ставил</span>
+      <span class="num">/ 05</span>
+    </div>
+    <div class="title">
+      Проект<br>
+      <span class="it">после</span> <span class="amp">&amp;</span> онбординга<span class="it">.</span>
+    </div>
+    <div class="stand">
+      Что должно быть <b>правдой о&nbsp;проекте</b>, когда агент в&nbsp;нём освоился. Не&nbsp;метрика качества модели,
+      а&nbsp;контракт&nbsp;— условия, при которых агент перестаёт «тупить» и&nbsp;начинает приносить тесты, которые мы&nbsp;готовы мержить.
+    </div>
+  </div>
+
+  <aside class="goals" aria-label="Список целей">
+    <div class="goals-head">
+      <span>Цели · Goals</span>
+      <span class="count">06 / шесть</span>
+    </div>
+
+    <div class="goal">
+      <div class="idx">01</div>
+      <div class="body">
+        Агент <span class="it">знает</span> структуру проекта&nbsp;— <span class="dim">без повторного объяснения на&nbsp;каждой сессии.</span>
+      </div>
+    </div>
+
+    <div class="goal">
+      <div class="idx">02</div>
+      <div class="body">
+        Следует <span class="mark">нашим конвенциям</span>: именование, слои, паттерны. <span class="dim">Не&nbsp;изобретает свои.</span>
+      </div>
+    </div>
+
+    <div class="goal">
+      <div class="idx">03</div>
+      <div class="body">
+        Сам находит, где <span class="it">живут</span> тесты, фикстуры, моки и&nbsp;test&#8209;данные.
+      </div>
+    </div>
+
+    <div class="goal">
+      <div class="idx">04</div>
+      <div class="body">
+        Задаёт <span class="mark">уточняющие вопросы</span>, <span class="dim">а&nbsp;не&nbsp;галлюцинирует API, которого нет.</span>
+      </div>
+    </div>
+
+    <div class="goal">
+      <div class="idx">05</div>
+      <div class="body">
+        Не&nbsp;ломает <span class="it">legacy</span> при правках — <span class="dim">видит инварианты, а&nbsp;не&nbsp;только сигнатуры.</span>
+      </div>
+    </div>
+
+    <div class="goal">
+      <div class="idx">06</div>
+      <div class="body">
+        Сохраняет <span class="mark">контекст</span> между сессиями. <span class="dim">Онбординг&nbsp;— один раз, не&nbsp;каждое утро.</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="seal" aria-hidden="true">
+    <div class="txt">
+      после<span class="big">目標</span>onboarding
+      <span class="sub">Helixir · 2026</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Helixir · Context Recovery</div>
+    <div class="mid">Не&nbsp;качество модели <span class="acc">—</span> качество контракта с&nbsp;проектом</div>
+    <div>стр. 05 / Heisenbug 2026</div>
+  </div>
+
+</div>
+</body>
+</html>
