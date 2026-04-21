@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Бенчмарк · три вектора · Heisenbug 2026</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./_base.css">
+<style>
+  .hero { top: 50%; transform: translateY(-52%); }
+  .hero .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .card {
+    padding: 48px 40px;
+    border: 1px solid var(--hairline);
+    background: rgba(30,111,255,0.03);
+    min-height: 420px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .card .num {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.28em;
+    color: var(--rambler);
+    margin-bottom: 36px;
+  }
+  .card .title {
+    font-family: "Unbounded", sans-serif;
+    font-weight: 700;
+    font-size: 64px;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    color: var(--paper);
+  }
+  .card .title .hi { color: var(--rambler); }
+  .card .foot {
+    margin-top: 36px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--aluminium);
+  }
+  .card.accent { background: rgba(30,111,255,0.08); border-color: var(--rambler-mid); }
+</style>
+</head>
+<body>
+<script>if (location.hash === "#preview") document.body.classList.add("preview");</script>
+
+<div class="slide" aria-label="Три вектора бенчмарка">
+  <div class="mark-bg left" aria-hidden="true">/</div>
+
+  <div class="top">
+    <div class="lhs">
+      <span class="dot" aria-hidden="true"></span>
+      <span>Benchmark <span class="slash">/</span> Vectors</span>
+    </div>
+    <div class="rhs">Heisenbug · 2026</div>
+  </div>
+  <div class="rule-top" aria-hidden="true"></div>
+
+  <div class="hero">
+    <div class="eyebrow">
+      <span class="bar" aria-hidden="true"></span>
+      <span>Три вектора <span class="hi">· проверки</span></span>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div>
+          <div class="num">01 / SUITE</div>
+          <div class="title"><span class="hi">Факты</span></div>
+        </div>
+        <div class="foot">test&nbsp;·&nbsp;что знает</div>
+      </div>
+      <div class="card accent">
+        <div>
+          <div class="num">02 / SUITE</div>
+          <div class="title"><span class="hi">Связи</span></div>
+        </div>
+        <div class="foot">graph&nbsp;·&nbsp;как связано</div>
+      </div>
+      <div class="card">
+        <div>
+          <div class="num">03 / SUITE</div>
+          <div class="title">Понимание<br><span class="hi">решений</span></div>
+        </div>
+        <div class="foot">rationale&nbsp;·&nbsp;почему так</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule-bot" aria-hidden="true"></div>
+  <div class="footer">
+    <div class="l"><span class="mark">/</span><span>Rambler</span></div>
+    <div class="r"><span>Heisenbug</span><span class="mark">/</span></div>
+  </div>
+</div>
+</body>
+</html>

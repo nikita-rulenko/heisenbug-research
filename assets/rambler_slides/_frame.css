@@ -1,0 +1,118 @@
+/* ─────────── frame-only slide (no text, image showcase) ──── */
+.frame-slide {
+  position: relative;
+  width: var(--slide-w); height: var(--slide-h);
+  overflow: hidden;
+  background: var(--black);
+}
+.frame-slide::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 50% 52%, rgba(30,111,255,0.12), transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* giant slash behind */
+.frame-slide .bg-slash {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: "Unbounded", sans-serif;
+  font-weight: 900;
+  font-size: 1600px;
+  line-height: 0.8;
+  color: var(--rambler);
+  opacity: 0.04;
+  letter-spacing: -0.05em;
+  user-select: none;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* picture container */
+.frame-slide .picture {
+  position: absolute;
+  left: 160px; right: 160px;
+  top: 90px; bottom: 140px;
+  display: grid; place-items: center;
+  z-index: 2;
+}
+.frame-slide .picture .hold {
+  position: relative;
+  max-width: 100%; max-height: 100%;
+  line-height: 0;
+}
+.frame-slide .picture img {
+  display: block;
+  max-width: 1600px;
+  max-height: 800px;
+  width: auto; height: auto;
+  object-fit: contain;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.8),
+              0 12px 32px rgba(0,0,0,0.55);
+}
+
+/* corner crosshairs (measurement look) */
+.frame-slide .corner {
+  position: absolute;
+  width: 44px; height: 44px;
+  pointer-events: none;
+  z-index: 4;
+}
+.frame-slide .corner::before,
+.frame-slide .corner::after {
+  content: "";
+  position: absolute;
+  background: var(--rambler);
+  box-shadow: 0 0 10px var(--rambler);
+}
+.frame-slide .corner::before { left: 0; top: 0; width: 100%; height: 2px; }
+.frame-slide .corner::after  { left: 0; top: 0; width: 2px; height: 100%; }
+.frame-slide .corner.tr { transform: scaleX(-1); }
+.frame-slide .corner.bl { transform: scaleY(-1); }
+.frame-slide .corner.br { transform: scale(-1, -1); }
+
+/* thin blue rules above/below image */
+.frame-slide .rule-hi {
+  position: absolute;
+  left: 160px; right: 160px;
+  height: 1px;
+  background: var(--rambler);
+  opacity: 0.35;
+  z-index: 3;
+}
+.frame-slide .rule-hi.t { top: 70px; }
+.frame-slide .rule-hi.b { bottom: 122px; }
+
+/* tiny meta labels on rules */
+.frame-slide .meta {
+  position: absolute;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--aluminium);
+  z-index: 4;
+}
+.frame-slide .meta.tl { top: 50px; left: 160px; }
+.frame-slide .meta.tr { top: 50px; right: 160px; color: var(--rambler); }
+
+/* footer (reuse base) */
+.frame-slide .footer {
+  position: absolute;
+  bottom: 52px;
+  left: 96px; right: 96px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--paper);
+  z-index: 4;
+}
+.frame-slide .footer .mark { color: var(--rambler); }

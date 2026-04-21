@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Шесть целей · сетка · Heisenbug 2026</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./_base.css">
+<style>
+  .hero { top: 48%; transform: translateY(-50%); }
+  .hero .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  .g {
+    position: relative;
+    padding: 40px 34px 36px;
+    border: 1px solid var(--hairline);
+    background: rgba(30,111,255,0.03);
+    min-height: 220px;
+  }
+  .g .num {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.28em;
+    color: var(--rambler);
+    margin-bottom: 22px;
+  }
+  .g .word {
+    font-family: "Unbounded", sans-serif;
+    font-weight: 700;
+    font-size: 68px;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: var(--paper);
+  }
+  .g.accent { background: rgba(30,111,255,0.08); border-color: var(--rambler-mid); }
+  .g.accent .word { color: var(--rambler); }
+</style>
+</head>
+<body>
+<script>if (location.hash === "#preview") document.body.classList.add("preview");</script>
+
+<div class="slide" aria-label="Шесть целей онбординга">
+  <div class="mark-bg right" aria-hidden="true">/</div>
+
+  <div class="top">
+    <div class="lhs">
+      <span class="dot" aria-hidden="true"></span>
+      <span>Goals <span class="slash">/</span> Grid</span>
+    </div>
+    <div class="rhs">Heisenbug · 2026</div>
+  </div>
+  <div class="rule-top" aria-hidden="true"></div>
+
+  <div class="hero">
+    <div class="eyebrow">
+      <span class="bar" aria-hidden="true"></span>
+      <span>Сетка целей <span class="hi">· 6 из 6</span></span>
+    </div>
+
+    <div class="grid">
+      <div class="g"><div class="num">01 / GOAL</div><div class="word">Структура</div></div>
+      <div class="g"><div class="num">02 / GOAL</div><div class="word">Конвенции</div></div>
+      <div class="g accent"><div class="num">03 / GOAL</div><div class="word">Тесты&nbsp;&amp; моки</div></div>
+      <div class="g"><div class="num">04 / GOAL</div><div class="word">Вопросы</div></div>
+      <div class="g accent"><div class="num">05 / GOAL</div><div class="word">Legacy</div></div>
+      <div class="g"><div class="num">06 / GOAL</div><div class="word">Контекст</div></div>
+    </div>
+  </div>
+
+  <div class="rule-bot" aria-hidden="true"></div>
+  <div class="footer">
+    <div class="l"><span class="mark">/</span><span>Rambler</span></div>
+    <div class="r"><span>Heisenbug</span><span class="mark">/</span></div>
+  </div>
+</div>
+</body>
+</html>
