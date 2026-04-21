@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Кто я? · Никита Руленко</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500;1,700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap"
+  rel="stylesheet">
+<style>
+  /* ────────── tokens ─────────────────────────────── */
+  :root {
+    --paper:      #E8DCBA;    /* тёплая паспортная бумага */
+    --paper-2:    #DFD2AA;    /* чуть темнее, край страницы */
+    --ink:        #1A150B;
+    --ink-mute:   #6B6042;
+    --ink-soft:   #453E28;
+    --navy:       #1F3A5F;    /* официальный синий */
+    --navy-2:     #2A4E7C;
+    --stamp:      #A83328;    /* штемпельная краснота */
+    --stamp-soft: rgba(168, 51, 40, 0.72);
+    --green:      #2D5A3F;
+    --gold:       #A98041;
+
+    --slide-w: 1920px;
+    --slide-h: 1080px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { background: var(--paper-2); }
+  body { font-family: "Crimson Pro", serif; color: var(--ink); }
+
+  body.preview { display: grid; place-items: center; padding: 40px; min-height: 100vh; background: #1a1814; }
+  body.preview .slide { box-shadow: 0 60px 180px rgba(0,0,0,0.75), 0 15px 40px rgba(0,0,0,0.4); }
+
+  /* ────────── slide ─────────────────────────────── */
+  .slide {
+    position: relative;
+    width: var(--slide-w); height: var(--slide-h);
+    overflow: hidden;
+    background:
+      /* guilloche-паттерн: пересечение двух волновых градиентов */
+      repeating-linear-gradient(
+        45deg,
+        transparent 0 22px,
+        rgba(31, 58, 95, 0.022) 22px 23px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        transparent 0 22px,
+        rgba(31, 58, 95, 0.022) 22px 23px
+      ),
+      /* круговой узор в центре — как водяной знак */
+      repeating-radial-gradient(
+        circle at 50% 50%,
+        transparent 0 80px,
+        rgba(168, 51, 40, 0.025) 80px 81px
+      ),
+      radial-gradient(ellipse 60% 60% at 90% 10%, rgba(169, 128, 65, 0.10), transparent 55%),
+      radial-gradient(ellipse 60% 60% at 10% 90%, rgba(31, 58, 95, 0.06), transparent 55%),
+      linear-gradient(165deg, #EDE1C0 0%, #E5D9B6 50%, #D9CCA4 100%);
+  }
+
+  /* зерно сверху */
+  .slide::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.07  0 0 0 0 0.05  0 0 0 0.16 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* верхняя и нижняя «официальные» полосы */
+  .slide::after {
+    content: "";
+    position: absolute;
+    top: 56px; bottom: 56px;
+    left: 72px; right: 72px;
+    border: 1.5px solid rgba(31, 58, 95, 0.28);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .edge-inner {
+    position: absolute;
+    top: 64px; bottom: 64px;
+    left: 80px; right: 80px;
+    border: 0.75px solid rgba(31, 58, 95, 0.18);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ────────── passport head ──────────────────────── */
+  .passport-head {
+    position: absolute;
+    top: 88px; left: 112px; right: 112px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "Courier Prime", monospace;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--navy);
+    z-index: 3;
+  }
+  .passport-head .l {
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  .passport-head .l .eagle {
+    width: 18px; height: 18px;
+    background: var(--stamp);
+    transform: rotate(45deg);
+  }
+  .passport-head .l b { color: var(--ink); font-weight: 700; }
+  .passport-head .r { color: var(--ink-mute); }
+  .passport-head .r b { color: var(--ink); font-weight: 700; letter-spacing: 0.38em; }
+
+  /* ────────── hero "Кто я?" ──────────────────────── */
+  .who {
+    position: absolute;
+    top: 150px;
+    left: 112px;
+    font-family: "Crimson Pro", serif;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 128px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    z-index: 3;
+  }
+  .who::after {
+    content: "";
+    display: block;
+    width: 96px; height: 4px;
+    background: var(--stamp);
+    margin-top: 26px;
+  }
+
+  /* ru/en подзаголовок «Кто я? / Who am I?» */
+  .who-en {
+    position: absolute;
+    top: 178px;
+    left: 520px;
+    font-family: "Courier Prime", monospace;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 22px;
+    letter-spacing: 0.12em;
+    color: var(--ink-mute);
+    z-index: 3;
+  }
+  .who-en::before {
+    content: "· ";
+    color: var(--stamp);
+  }
+
+  /* ────────── content: photo + data ──────────────── */
+  .content {
+    position: absolute;
+    top: 360px;
+    left: 112px;
+    right: 112px;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 80px;
+    z-index: 3;
+  }
+
+  /* photo slot */
+  .photo-slot {
+    position: relative;
+    width: 380px;
+    height: 480px;
+    background: linear-gradient(165deg, #F2E8CC 0%, #E4D6B0 100%);
+    border: 3px solid var(--navy);
+    box-shadow:
+      inset 0 0 0 2px var(--paper),
+      inset 0 0 0 3px rgba(31, 58, 95, 0.25),
+      0 8px 24px rgba(26, 20, 10, 0.18);
+    display: grid; place-items: center;
+    overflow: hidden;
+  }
+  .photo-slot .photo-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .photo-slot .photo-placeholder {
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    text-align: center;
+    color: var(--navy);
+    opacity: 0.55;
+  }
+  .photo-slot .photo-placeholder .icon {
+    width: 72px; height: 72px;
+    border: 2px dashed var(--navy);
+    display: grid; place-items: center;
+    font-family: "Crimson Pro", serif;
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .photo-slot .photo-placeholder .tt {
+    font-family: "Courier Prime", monospace;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+  }
+  .photo-slot .photo-placeholder .st {
+    font-family: "Courier Prime", monospace;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  /* угловые уголки-крестики на фото-слоте */
+  .photo-slot .corner {
+    position: absolute;
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--stamp);
+  }
+  .photo-slot .corner.tl { top: 10px; left: 10px;  border-right: 0; border-bottom: 0; }
+  .photo-slot .corner.tr { top: 10px; right: 10px; border-left: 0;  border-bottom: 0; }
+  .photo-slot .corner.bl { bottom: 10px; left: 10px;  border-right: 0; border-top: 0; }
+  .photo-slot .corner.br { bottom: 10px; right: 10px; border-left: 0;  border-top: 0; }
+
+  .photo-caption {
+    margin-top: 14px;
+    font-family: "Courier Prime", monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    text-align: center;
+    width: 380px;
+  }
+  .photo-caption span { color: var(--stamp); }
+
+  /* data column */
+  .data { padding-top: 4px; }
+
+  .field + .field { margin-top: 26px; }
+
+  .field .label {
+    display: block;
+    font-family: "Courier Prime", monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 8px;
+  }
+  .field .val {
+    display: block;
+    font-family: "Crimson Pro", serif;
+    font-weight: 600;
+    font-size: 42px;
+    line-height: 1.1;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+  }
+  .field .val.big {
+    font-size: 58px;
+    font-weight: 900;
+    letter-spacing: -0.015em;
+  }
+  .field .val.big .last {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--navy);
+  }
+  .field .val em {
+    color: var(--stamp);
+    font-style: italic;
+    font-weight: 700;
+  }
+  .field .val .small-tag {
+    display: inline-block;
+    margin-left: 14px;
+    padding: 5px 12px 3px;
+    font-family: "Courier Prime", monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--navy);
+    border: 1.5px solid var(--navy);
+    vertical-align: middle;
+    transform: translateY(-6px);
+  }
+
+  /* ────────── visas row ──────────────────────────── */
+  .visas {
+    position: absolute;
+    left: 112px;
+    right: 112px;
+    bottom: 152px;
+    display: flex;
+    align-items: center;
+    gap: 42px;
+    z-index: 3;
+  }
+  .visas .visas-label {
+    font-family: "Courier Prime", monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    max-width: 240px;
+    line-height: 1.5;
+  }
+  .visas .visas-label b { color: var(--stamp); font-weight: 700; }
+
+  .visas-row {
+    display: flex;
+    gap: 26px;
+    align-items: center;
+  }
+
+  .visa {
+    position: relative;
+    width: 148px; height: 96px;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    box-shadow: 0 3px 0 var(--paper-2), 0 6px 14px rgba(26, 20, 10, 0.12);
+    display: flex; flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+  .visa .flag {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .visa .tag {
+    background: var(--paper);
+    border-top: 2px solid var(--ink);
+    padding: 5px 8px 4px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: "Courier Prime", monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .visa .tag span.year { color: var(--ink-mute); font-weight: 400; font-size: 10px; }
+
+  .visa.tilt-1 { transform: rotate(-2.2deg); }
+  .visa.tilt-2 { transform: rotate( 1.6deg); }
+  .visa.tilt-3 { transform: rotate(-1.1deg); }
+
+  /* штампики-печати поверх виз */
+  .visa::after {
+    content: "VISA";
+    position: absolute;
+    top: 6px; right: 6px;
+    padding: 2px 6px 1px;
+    font-family: "Courier Prime", monospace;
+    font-weight: 700;
+    font-size: 9px;
+    letter-spacing: 0.26em;
+    color: var(--stamp);
+    border: 1.2px solid var(--stamp);
+    opacity: 0.8;
+    background: rgba(232, 220, 186, 0.7);
+    z-index: 2;
+  }
+
+  /* ────────── MRZ-line внизу ─────────────────────── */
+  .mrz {
+    position: absolute;
+    left: 112px; right: 112px;
+    bottom: 92px;
+    font-family: "Courier Prime", monospace;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.18em;
+    color: var(--ink-soft);
+    padding-top: 14px;
+    border-top: 1.5px solid rgba(31, 58, 95, 0.30);
+    white-space: nowrap;
+    overflow: hidden;
+    z-index: 3;
+  }
+  .mrz + .mrz { bottom: 66px; padding-top: 4px; border: 0; color: var(--ink-mute); font-size: 16px; }
+
+  /* ────────── big decorative stamp ───────────────── */
+  .big-stamp {
+    position: absolute;
+    right: 170px;
+    top: 150px;
+    width: 230px; height: 230px;
+    transform: rotate(9deg);
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0.78;
+  }
+  .big-stamp-circle {
+    width: 100%; height: 100%;
+    border: 4px solid var(--stamp);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: var(--stamp);
+    text-align: center;
+    padding: 18px;
+    position: relative;
+  }
+  .big-stamp-circle::before {
+    content: "";
+    position: absolute; inset: 8px;
+    border: 2px solid var(--stamp);
+    border-radius: 50%;
+    opacity: 0.55;
+  }
+  .big-stamp-circle::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='230' height='230'><filter id='sn'><feTurbulence type='fractalNoise' baseFrequency='1.3' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.91  0 0 0 0 0.85  0 0 0 0 0.73  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23sn)'/></svg>");
+    border-radius: 50%;
+    mix-blend-mode: screen;
+    opacity: 0.65;
+  }
+  .big-stamp-circle .top-arc,
+  .big-stamp-circle .bot-arc {
+    font-family: "Courier Prime", monospace;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+  }
+  .big-stamp-circle .mid {
+    font-family: "Crimson Pro", serif;
+    font-weight: 900;
+    font-style: italic;
+    font-size: 38px;
+    line-height: 0.95;
+    text-transform: uppercase;
+    margin: 8px 0;
+  }
+  .big-stamp-circle .dot {
+    width: 6px; height: 6px;
+    background: var(--stamp);
+    border-radius: 50%;
+    margin: 3px auto;
+  }
+</style>
+</head>
+<body>
+<script>
+  if (location.hash === "#preview") document.body.classList.add("preview");
+</script>
+
+<div class="slide" aria-label="Слайд: Кто я? Никита Руленко">
+
+  <div class="edge-inner" aria-hidden="true"></div>
+
+  <!-- passport head -->
+  <div class="passport-head">
+    <div class="l">
+      <span class="eagle" aria-hidden="true"></span>
+      <span>Досье&nbsp;·&nbsp;Dossier</span>
+      <span>·</span>
+      <b>HLX&nbsp;/&nbsp;042</b>
+    </div>
+    <div class="r">
+      <span>Heisenbug&nbsp;·&nbsp;2026</span>&nbsp;&nbsp;·&nbsp;&nbsp;<b>Type&nbsp;P&nbsp;/&nbsp;Code&nbsp;RUS</b>
+    </div>
+  </div>
+
+  <!-- hero -->
+  <h1 class="who">Кто&nbsp;я?</h1>
+  <div class="who-en">Who&nbsp;am&nbsp;I&nbsp;— личный&nbsp;файл</div>
+
+  <!-- content -->
+  <div class="content">
+
+    <div>
+      <div class="photo-slot">
+        <span class="corner tl" aria-hidden="true"></span>
+        <span class="corner tr" aria-hidden="true"></span>
+        <span class="corner bl" aria-hidden="true"></span>
+        <span class="corner br" aria-hidden="true"></span>
+
+        <img class="photo-img" src="./photo.jpg" alt="Фото Никиты Руленко"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="photo-placeholder" style="display:none;">
+          <div class="icon">ФОТО</div>
+          <div class="tt">Photo</div>
+          <div class="st">4&nbsp;×&nbsp;5&nbsp;см</div>
+        </div>
+      </div>
+      <div class="photo-caption">№ <span>042</span> · ДЕЙСТВ. ДО ∞</div>
+    </div>
+
+    <div class="data">
+      <div class="field">
+        <div class="label">Фамилия · имя / Surname · Name</div>
+        <div class="val big">
+          РУЛЕНКО&nbsp;<span class="last">Никита</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">Должность / Role</div>
+        <div class="val">
+          Ведущий инженер <em>производительности</em>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">Организация / Organization</div>
+        <div class="val">
+          Rambler&nbsp;·&nbsp;Почта
+          <span class="small-tag">QA&nbsp;Automation</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="label">Стаж / Experience</div>
+        <div class="val"><em>6+&nbsp;лет</em> в&nbsp;индустрии</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- визы (флаги стран) -->
+  <div class="visas">
+    <div class="visas-label"><b>Территории</b><br>практики&nbsp;/&nbsp;Fieldwork</div>
+    <div class="visas-row">
+      <!-- Россия -->
+      <div class="visa tilt-1">
+        <div class="flag">
+          <svg width="100%" height="100%" viewBox="0 0 3 2" preserveAspectRatio="none">
+            <rect width="3" height="0.667"                 fill="#FFFFFF"/>
+            <rect width="3" height="0.667" y="0.667"       fill="#0039A6"/>
+            <rect width="3" height="0.667" y="1.333"       fill="#D52B1E"/>
+          </svg>
+        </div>
+        <div class="tag"><span>RUS</span><span class="year">'18–'26</span></div>
+      </div>
+
+      <!-- Саудовская Аравия -->
+      <div class="visa tilt-2">
+        <div class="flag">
+          <svg width="100%" height="100%" viewBox="0 0 3 2" preserveAspectRatio="none">
+            <rect width="3" height="2" fill="#006C35"/>
+            <text x="1.5" y="0.85" font-family="serif" font-size="0.32" font-style="italic" fill="#fff" text-anchor="middle" font-weight="700">
+              لا إله إلا الله
+            </text>
+            <rect x="0.35" y="1.15" width="2.30" height="0.05" fill="#fff"/>
+            <polygon points="2.65,1.175 2.78,1.10 2.78,1.25" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="tag"><span>SAU</span><span class="year">'23–'24</span></div>
+      </div>
+
+      <!-- США -->
+      <div class="visa tilt-3">
+        <div class="flag">
+          <svg width="100%" height="100%" viewBox="0 0 3 2" preserveAspectRatio="none">
+            <!-- 13 stripes -->
+            <g>
+              <rect width="3" height="2" fill="#FFFFFF"/>
+              <rect width="3" height="0.154"                 fill="#BF0A30"/>
+              <rect width="3" height="0.154" y="0.308"       fill="#BF0A30"/>
+              <rect width="3" height="0.154" y="0.616"       fill="#BF0A30"/>
+              <rect width="3" height="0.154" y="0.924"       fill="#BF0A30"/>
+              <rect width="3" height="0.154" y="1.232"       fill="#BF0A30"/>
+              <rect width="3" height="0.154" y="1.540"       fill="#BF0A30"/>
+              <rect width="3" height="0.154" y="1.846"       fill="#BF0A30"/>
+            </g>
+            <!-- canton -->
+            <rect x="0" y="0" width="1.2" height="1.077" fill="#002868"/>
+            <!-- generic dot-stars -->
+            <g fill="#fff">
+              <circle cx="0.2" cy="0.18" r="0.045"/>
+              <circle cx="0.4" cy="0.18" r="0.045"/>
+              <circle cx="0.6" cy="0.18" r="0.045"/>
+              <circle cx="0.8" cy="0.18" r="0.045"/>
+              <circle cx="1.0" cy="0.18" r="0.045"/>
+              <circle cx="0.3" cy="0.36" r="0.045"/>
+              <circle cx="0.5" cy="0.36" r="0.045"/>
+              <circle cx="0.7" cy="0.36" r="0.045"/>
+              <circle cx="0.9" cy="0.36" r="0.045"/>
+              <circle cx="0.2" cy="0.54" r="0.045"/>
+              <circle cx="0.4" cy="0.54" r="0.045"/>
+              <circle cx="0.6" cy="0.54" r="0.045"/>
+              <circle cx="0.8" cy="0.54" r="0.045"/>
+              <circle cx="1.0" cy="0.54" r="0.045"/>
+              <circle cx="0.3" cy="0.72" r="0.045"/>
+              <circle cx="0.5" cy="0.72" r="0.045"/>
+              <circle cx="0.7" cy="0.72" r="0.045"/>
+              <circle cx="0.9" cy="0.72" r="0.045"/>
+              <circle cx="0.2" cy="0.90" r="0.045"/>
+              <circle cx="0.4" cy="0.90" r="0.045"/>
+              <circle cx="0.6" cy="0.90" r="0.045"/>
+              <circle cx="0.8" cy="0.90" r="0.045"/>
+              <circle cx="1.0" cy="0.90" r="0.045"/>
+            </g>
+          </svg>
+        </div>
+        <div class="tag"><span>USA</span><span class="year">'22</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- big decorative stamp -->
+  <div class="big-stamp" aria-hidden="true">
+    <div class="big-stamp-circle">
+      <div style="display:flex; flex-direction:column; align-items:center;">
+        <div class="top-arc">Approved · 2026</div>
+        <div class="dot"></div>
+        <div class="mid">Heisen-<br>bug</div>
+        <div class="dot"></div>
+        <div class="bot-arc">Speaker · MMXXVI</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MRZ -->
+  <div class="mrz">P&lt;RUS&lt;&lt;RULENKO&lt;&lt;NIKITA&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+  <div class="mrz">HLX042RUS8503214M3104210&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;QA&lt;AUTOMATION&lt;HELIXIR&lt;2026&lt;&lt;&lt;&lt;&lt;&lt;</div>
+
+</div>
+</body>
+</html>
