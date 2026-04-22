@@ -2,35 +2,135 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8" />
-<title>Кто я? · Heisenbug 2026</title>
+<title>Никита Руленко · Heisenbug 2026</title>
 <meta name="viewport" content="width=1920" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./_base.css">
 <style>
-  .hero h1 {
-    font-size: 340px;
-    line-height: 0.88;
-    letter-spacing: -0.055em;
-    display: flex; align-items: baseline; gap: 40px; flex-wrap: wrap;
+  /* 2-col layout: photo + identity */
+  .layout {
+    position: absolute;
+    left: 96px; right: 96px;
+    top: 150px; bottom: 130px;
+    display: grid;
+    grid-template-columns: 560px 1fr;
+    gap: 90px;
+    align-items: center;
+    z-index: 5;
   }
-  .hero h1 .q {
+
+  /* photo card (square with crosshair corners) */
+  .photo-card {
+    position: relative;
+    width: 520px; height: 520px;
+    justify-self: center;
+  }
+  .photo-card img {
+    display: block;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.75), 0 10px 24px rgba(0,0,0,0.5);
+  }
+  .photo-card .corner {
+    position: absolute;
+    width: 38px; height: 38px;
+    pointer-events: none;
+  }
+  .photo-card .corner::before,
+  .photo-card .corner::after {
+    content: ""; position: absolute;
+    background: var(--rambler);
+    box-shadow: 0 0 10px var(--rambler);
+  }
+  .photo-card .corner::before { left: 0; top: 0; width: 100%; height: 2px; }
+  .photo-card .corner::after  { left: 0; top: 0; width: 2px; height: 100%; }
+  .photo-card .corner.tl { left: -18px; top: -18px; }
+  .photo-card .corner.tr { right: -18px; top: -18px; transform: scaleX(-1); }
+  .photo-card .corner.bl { left: -18px; bottom: -18px; transform: scaleY(-1); }
+  .photo-card .corner.br { right: -18px; bottom: -18px; transform: scale(-1,-1); }
+
+  /* tiny meta label above photo */
+  .photo-tag {
+    position: absolute;
+    left: -4px; top: -52px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
     color: var(--rambler);
-    font-weight: 800;
   }
-  .chip-row {
-    margin-top: 72px;
-    display: inline-flex; gap: 24px; flex-wrap: wrap;
+  .photo-tag .muted { color: var(--aluminium); }
+
+  /* right column — identity */
+  .identity { display: flex; flex-direction: column; justify-content: center; gap: 0; }
+
+  .kicker {
+    display: inline-flex; align-items: center; gap: 18px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.38em;
+    text-transform: uppercase;
+    color: var(--aluminium);
+    margin-bottom: 24px;
+  }
+  .kicker .bar { width: 56px; height: 2px; background: var(--rambler); }
+  .kicker .q { color: var(--rambler); font-weight: 700; }
+
+  .name {
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 176px;
+    line-height: 0.88;
+    letter-spacing: -0.05em;
+    color: var(--paper);
+    margin-bottom: 36px;
+  }
+  .name .ln2 { color: var(--rambler); display: block; }
+
+  .meta-row {
+    display: flex; align-items: center; gap: 24px;
+    flex-wrap: wrap;
+  }
+  .role {
+    font-family: "Manrope", sans-serif;
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: 0.01em;
+    color: var(--aluminium);
+  }
+  .role b { color: var(--paper); font-weight: 700; }
+
+  /* Russian tricolor strip — identity flag */
+  .flag {
+    display: inline-flex;
+    flex-direction: column;
+    width: 84px; height: 54px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+    overflow: hidden;
+    border: 1px solid rgba(168,174,187,0.25);
+  }
+  .flag span { flex: 1; display: block; }
+  .flag .w { background: #F3F5F9; }
+  .flag .b { background: #0039A6; }
+  .flag .r { background: #D52B1E; }
+
+  /* chips */
+  .chips {
+    margin-top: 32px;
+    display: inline-flex; gap: 18px; flex-wrap: wrap;
   }
   .chip {
     font-family: "JetBrains Mono", monospace;
     font-weight: 500;
-    font-size: 18px;
-    letter-spacing: 0.26em;
+    font-size: 14px;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
     color: var(--paper);
-    padding: 14px 22px;
+    padding: 12px 18px;
     border: 1px solid var(--rambler-dim);
   }
   .chip.accent { color: var(--rambler); border-color: var(--rambler-mid); }
@@ -39,7 +139,7 @@
 <body>
 <script>if (location.hash === "#preview") document.body.classList.add("preview");</script>
 
-<div class="slide" aria-label="Кто я">
+<div class="slide" aria-label="Никита Руленко — кто я">
   <div class="mark-bg right" aria-hidden="true">/</div>
 
   <div class="top">
@@ -51,19 +151,38 @@
   </div>
   <div class="rule-top" aria-hidden="true"></div>
 
-  <div class="hero">
-    <div class="eyebrow">
-      <span class="bar" aria-hidden="true"></span>
-      <span>Слайд <span class="hi">· Знакомство</span></span>
+  <div class="layout">
+    <div class="photo-card">
+      <div class="photo-tag"><span class="muted">//</span>&nbsp;speaker&nbsp;·&nbsp;2026</div>
+      <span class="corner tl" aria-hidden="true"></span>
+      <span class="corner tr" aria-hidden="true"></span>
+      <span class="corner bl" aria-hidden="true"></span>
+      <span class="corner br" aria-hidden="true"></span>
+      <img src="../photo.png" alt="Никита Руленко">
     </div>
 
-    <h1>
-      <span>Кто&nbsp;я</span><span class="q">?</span>
-    </h1>
+    <div class="identity">
+      <div class="kicker">
+        <span class="bar" aria-hidden="true"></span>
+        <span>Кто&nbsp;я<span class="q">?</span></span>
+      </div>
 
-    <div class="chip-row" aria-hidden="true">
-      <span class="chip accent">Nikita Rulenko</span>
-      <span class="chip">Helixir · Founder</span>
+      <h1 class="name">
+        Никита<br>
+        <span class="ln2">Руленко</span>
+      </h1>
+
+      <div class="meta-row">
+        <span class="flag" aria-label="Россия">
+          <span class="w"></span><span class="b"></span><span class="r"></span>
+        </span>
+        <span class="role"><b>Helixir</b> &nbsp;·&nbsp; Founder&nbsp;&amp;&nbsp;Engineer</span>
+      </div>
+
+      <div class="chips" aria-hidden="true">
+        <span class="chip accent">Context Recovery</span>
+        <span class="chip">6+ лет в AI·QA</span>
+      </div>
     </div>
   </div>
 
