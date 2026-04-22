@@ -95,78 +95,24 @@
     display: flex; align-items: center; gap: 24px;
     flex-wrap: wrap;
   }
+  .role-row { margin-top: 22px; }
   .role {
     font-family: "Manrope", sans-serif;
     font-weight: 500;
-    font-size: 26px;
+    font-size: 30px;
     letter-spacing: 0.01em;
     color: var(--aluminium);
   }
   .role b { color: var(--paper); font-weight: 700; }
 
-  /* flags row */
-  .flags { display: inline-flex; gap: 12px; }
+  /* flags row — real PNG flags */
+  .flags { display: inline-flex; gap: 22px; align-items: center; }
   .flag {
-    display: inline-flex;
-    flex-direction: column;
-    width: 72px; height: 46px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.45);
-    overflow: hidden;
-    border: 1px solid rgba(168,174,187,0.25);
-    position: relative;
-  }
-  .flag span { flex: 1; display: block; }
-
-  /* Russia — white / blue / red */
-  .flag.ru .w { background: #F3F5F9; }
-  .flag.ru .b { background: #0039A6; }
-  .flag.ru .r { background: #D52B1E; }
-
-  /* Saudi Arabia — green with emblem-placeholder (shahada bar + sword) */
-  .flag.sa { background: #006C35; }
-  .flag.sa::before {
-    content: "";
-    position: absolute;
-    left: 10%; right: 10%;
-    top: 40%; height: 2px;
-    background: #F3F5F9;
-    box-shadow: 0 6px 0 #F3F5F9;
-  }
-  .flag.sa::after {
-    content: "";
-    position: absolute;
-    left: 12%; right: 12%;
-    bottom: 22%; height: 2px;
-    background: #F3F5F9;
-  }
-
-  /* USA — stripes + canton */
-  .flag.us {
-    background: repeating-linear-gradient(
-      to bottom,
-      #D52B1E 0, #D52B1E 14.28%,
-      #F3F5F9 14.28%, #F3F5F9 28.57%
-    );
-  }
-  .flag.us::before {
-    content: "";
-    position: absolute;
-    left: 0; top: 0;
-    width: 40%; height: 53.8%;
-    background: #0039A6;
-  }
-  .flag.us::after {
-    content: "★ ★ ★ ★\A★ ★ ★ ★";
-    white-space: pre;
-    position: absolute;
-    left: 0; top: 0;
-    width: 40%; height: 53.8%;
-    color: #F3F5F9;
-    font-size: 7px;
-    line-height: 1.6;
-    text-align: center;
-    padding-top: 4px;
-    letter-spacing: 1px;
+    display: block;
+    width: 168px; height: 112px;
+    object-fit: cover;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.6), 0 3px 10px rgba(0,0,0,0.4);
+    border: 1px solid rgba(168,174,187,0.3);
   }
 
   /* chips */
@@ -225,13 +171,13 @@
 
       <div class="meta-row">
         <span class="flags" aria-label="Опыт: Россия, Саудовская Аравия, США">
-          <span class="flag ru" aria-label="Россия">
-            <span class="w"></span><span class="b"></span><span class="r"></span>
-          </span>
-          <span class="flag sa" aria-label="Саудовская Аравия"></span>
-          <span class="flag us" aria-label="США"></span>
+          <img class="flag" src="../flags/ru.png" alt="Россия">
+          <img class="flag" src="../flags/sa.png" alt="Саудовская Аравия">
+          <img class="flag" src="../flags/us.png" alt="США">
         </span>
-        <span class="role"><b>Ведущий&nbsp;инженер</b> производительности</span>
+      </div>
+      <div class="role-row">
+        <span class="role"><b>Ведущий&nbsp;инженер</b>&nbsp;производительности</span>
       </div>
 
       <div class="chips" aria-hidden="true">
