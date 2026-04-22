@@ -11,33 +11,22 @@
 <style>
   .hero { top: 50%; transform: translateY(-52%); }
 
+  /* unified block — identical size, weight, wrapping on both slides */
   .block {
     font-family: "Unbounded", sans-serif;
     font-weight: 700;
+    font-size: 128px;
     line-height: 0.92;
     letter-spacing: -0.04em;
-  }
-  .block .quote { font-weight: 400; }
-
-  /* complaint block (top) — DIMMED on this slide */
-  .block.complaint {
-    font-size: 112px;
-    color: var(--alu-dim);
-    font-weight: 600;
-    opacity: 0.55;
-    margin-bottom: 52px;
-  }
-  .block.complaint .muted { color: var(--alu-dim); }
-
-  /* diagnosis block (bottom) — ACTIVE on this slide */
-  .block.diagnosis {
-    font-size: 144px;
     color: var(--paper);
     position: relative;
     display: inline-block;
+    margin-bottom: 48px;
   }
-  .block.diagnosis .hi { color: var(--rambler); font-weight: 800; }
-  .block.diagnosis::after {
+  .block:last-of-type { margin-bottom: 0; }
+  .block .quote { font-weight: 400; }
+  .block .hi { color: var(--rambler); font-weight: 800; }
+  .block.active::after {
     content: "";
     position: absolute;
     left: 0; right: 0; bottom: -14px;
@@ -46,7 +35,7 @@
     box-shadow: 0 0 22px rgba(30,111,255,0.55);
   }
 
-  /* small connector arrow between blocks */
+  /* connector */
   .connector {
     font-family: "JetBrains Mono", monospace;
     font-weight: 500;
@@ -59,6 +48,7 @@
   }
   .connector .arrow { color: var(--rambler); font-family: "Unbounded", sans-serif; font-weight: 700; font-size: 22px; }
 
+  /* step indicator */
   .step {
     position: absolute;
     right: 96px;
@@ -109,13 +99,15 @@
     </div>
 
     <div class="block complaint">
-      <span class="quote muted">«</span><span class="muted">Мой&nbsp;агент&nbsp;делает&nbsp;не&nbsp;то</span>!<span class="quote muted">»</span>
+      <span class="quote">«</span>Мой&nbsp;агент<br>
+      делает&nbsp;не&nbsp;то!<span class="quote">»</span>
     </div>
 
     <div class="connector"><span class="arrow">↓</span><span>ответ</span></div>
 
-    <div class="block diagnosis">
-      <span class="quote">«</span>Ты <span class="hi">не&nbsp;провёл</span><br><span class="hi">онбординг</span>!<span class="quote">»</span>
+    <div class="block diagnosis active">
+      <span class="quote">«</span>Ты <span class="hi">не&nbsp;провёл</span><br>
+      <span class="hi">онбординг</span>!<span class="quote">»</span>
     </div>
   </div>
 
