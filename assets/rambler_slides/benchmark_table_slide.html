@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Matrix · сравнение подходов · Heisenbug 2026</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./_base.css">
+<style>
+  :root {
+    --ok:   #22C55E;
+    --ok-dim: rgba(34,197,94,0.16);
+    --bad:  #EF4444;
+    --bad-dim: rgba(239,68,68,0.16);
+    --mid-a: rgba(250,204,21,0.14);
+    --mid-b: rgba(249,115,22,0.14);
+  }
+
+  .hero { top: 130px; transform: none; }
+  .hero h1 {
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 96px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--paper);
+  }
+  .hero h1 .hi { color: var(--rambler); }
+
+  .matrix-wrap {
+    position: absolute;
+    left: 96px; right: 96px;
+    top: 380px;
+    z-index: 5;
+  }
+
+  table.matrix {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: "Manrope", sans-serif;
+  }
+  table.matrix th, table.matrix td {
+    border: 1px solid var(--hairline);
+    padding: 26px 22px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  /* column header row */
+  table.matrix thead th {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--aluminium);
+    background: rgba(30,111,255,0.04);
+    padding: 22px 18px;
+  }
+  table.matrix thead th.corner { background: transparent; border-color: transparent; }
+
+  /* row label */
+  table.matrix tbody th {
+    text-align: left;
+    padding-left: 32px;
+    font-family: "Unbounded", sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    letter-spacing: -0.015em;
+    color: var(--paper);
+    background: rgba(255,255,255,0.02);
+    width: 280px;
+  }
+  table.matrix tbody th .idx {
+    display: inline-block;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.28em;
+    color: var(--rambler);
+    margin-right: 12px;
+    vertical-align: 0.18em;
+  }
+
+  /* data cells */
+  table.matrix td { color: var(--aluminium); font-weight: 500; font-size: 28px; }
+  table.matrix td.star {
+    color: var(--rambler);
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1;
+    text-shadow: 0 0 28px rgba(30,111,255,0.55);
+  }
+
+  /* onboarding column cells — color coded */
+  table.matrix td.ob {
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 34px;
+    letter-spacing: -0.02em;
+    color: var(--paper);
+  }
+  table.matrix td.ob-best { background: var(--ok-dim); color: var(--ok); }
+  table.matrix td.ob-worst { background: var(--bad-dim); color: var(--bad); }
+  table.matrix td.ob-mid-a { background: var(--mid-a); color: #FACC15; }
+  table.matrix td.ob-mid-b { background: var(--mid-b); color: #FB923C; }
+
+  /* winner row highlight (Helixir) */
+  table.matrix tbody tr.winner th {
+    color: var(--rambler);
+  }
+  table.matrix tbody tr.winner td { border-color: rgba(30,111,255,0.25); }
+  table.matrix tbody tr.winner th {
+    box-shadow: inset 4px 0 0 var(--rambler);
+  }
+
+  /* legend */
+  .legend {
+    position: absolute;
+    left: 96px; right: 96px;
+    bottom: 140px;
+    display: flex; gap: 36px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--aluminium);
+    z-index: 4;
+  }
+  .legend .item { display: inline-flex; align-items: center; gap: 12px; }
+  .legend .swatch { width: 22px; height: 14px; border: 1px solid rgba(168,174,187,0.3); }
+  .legend .swatch.ok { background: var(--ok-dim); border-color: rgba(34,197,94,0.4); }
+  .legend .swatch.bad { background: var(--bad-dim); border-color: rgba(239,68,68,0.4); }
+  .legend .swatch.star-box { background: transparent; color: var(--rambler); border-color: var(--rambler-mid); text-align: center; line-height: 12px; font-size: 11px; }
+</style>
+</head>
+<body>
+<script>if (location.hash === "#preview") document.body.classList.add("preview");</script>
+
+<div class="slide" aria-label="Matrix — сравнение подходов">
+  <div class="mark-bg right" aria-hidden="true">/</div>
+
+  <div class="top">
+    <div class="lhs">
+      <span class="dot" aria-hidden="true"></span>
+      <span>Benchmark <span class="slash">/</span> Matrix</span>
+    </div>
+    <div class="rhs">Heisenbug · 2026</div>
+  </div>
+  <div class="rule-top" aria-hidden="true"></div>
+
+  <div class="hero">
+    <div class="eyebrow">
+      <span class="bar" aria-hidden="true"></span>
+      <span>Сравнение <span class="hi">· 4 подхода</span></span>
+    </div>
+    <h1>Лучшие <span class="hi">в&nbsp;своём</span> деле</h1>
+  </div>
+
+  <div class="matrix-wrap">
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th class="corner"></th>
+          <th>Цена</th>
+          <th>Связность</th>
+          <th>AI&nbsp;удобство</th>
+          <th>Поддержка</th>
+          <th>Онбординг</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th><span class="idx">01</span>MD&nbsp;files</th>
+          <td class="star">★</td>
+          <td>·</td>
+          <td>·</td>
+          <td>·</td>
+          <td class="ob ob-mid-a">$0.032</td>
+        </tr>
+        <tr>
+          <th><span class="idx">02</span>GitHub&nbsp;Issues</th>
+          <td>·</td>
+          <td>·</td>
+          <td class="star">★</td>
+          <td>·</td>
+          <td class="ob ob-mid-b">$0.033</td>
+        </tr>
+        <tr>
+          <th><span class="idx">03</span>Mem0</th>
+          <td>·</td>
+          <td>·</td>
+          <td>·</td>
+          <td class="star">★</td>
+          <td class="ob ob-best">$0.018</td>
+        </tr>
+        <tr class="winner">
+          <th><span class="idx">04</span>Helixir</th>
+          <td>·</td>
+          <td class="star">★</td>
+          <td>·</td>
+          <td>·</td>
+          <td class="ob ob-worst">$0.102</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend" aria-hidden="true">
+    <span class="item"><span class="swatch star-box">★</span>&nbsp;лидер колонки</span>
+    <span class="item"><span class="swatch ok"></span>&nbsp;дешевле</span>
+    <span class="item"><span class="swatch bad"></span>&nbsp;дороже</span>
+  </div>
+
+  <div class="rule-bot" aria-hidden="true"></div>
+  <div class="footer">
+    <div class="l"><span class="mark">/</span><span>Rambler</span></div>
+    <div class="r"><span>Heisenbug</span><span class="mark">/</span></div>
+  </div>
+</div>
+</body>
+</html>

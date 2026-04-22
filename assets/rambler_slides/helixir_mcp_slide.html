@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Helixir MCP · связь фактов с причинами · Heisenbug 2026</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./_base.css">
+<style>
+  .hero { top: 50%; transform: translateY(-54%); }
+
+  .hero h1 {
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 176px;
+    line-height: 0.94;
+    letter-spacing: -0.05em;
+    color: var(--paper);
+    position: relative;
+    display: block;
+    width: max-content;
+    max-width: 100%;
+  }
+  .hero h1 .brand { color: var(--rambler); font-weight: 900; }
+  .hero h1 .tag {
+    display: inline-block;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 54px;
+    letter-spacing: 0.08em;
+    vertical-align: 0.35em;
+    margin-left: 0.2em;
+    padding: 6px 18px;
+    background: var(--rambler);
+    color: var(--black);
+  }
+  .hero h1::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -16px;
+    height: 6px;
+    background: var(--rambler);
+    box-shadow: 0 0 24px rgba(30,111,255,0.55);
+  }
+
+  .sub {
+    margin-top: 56px;
+    font-family: "Manrope", sans-serif;
+    font-weight: 500;
+    font-size: 60px;
+    letter-spacing: -0.005em;
+    line-height: 1.1;
+    color: var(--aluminium);
+  }
+  .sub b { color: var(--paper); font-weight: 700; }
+  .sub .hi { color: var(--rambler); font-weight: 800; }
+  .sub .dash { color: var(--rambler); padding: 0 0.2em; font-weight: 700; }
+
+  /* graph decoration: fact → cause */
+  .graph {
+    position: absolute;
+    right: 120px;
+    top: 200px;
+    z-index: 5;
+    display: flex; align-items: center; gap: 16px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+  .node {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 18px;
+    border: 1px solid var(--rambler-mid);
+    color: var(--paper);
+  }
+  .node .pin { width: 8px; height: 8px; background: var(--rambler); border-radius: 50%; box-shadow: 0 0 10px var(--rambler); }
+  .node.cause { background: var(--rambler); color: var(--black); border-color: var(--rambler); }
+  .node.cause .pin { background: var(--black); box-shadow: none; }
+  .graph .arr { color: var(--rambler); font-family: "Unbounded", sans-serif; font-size: 22px; }
+</style>
+</head>
+<body>
+<script>if (location.hash === "#preview") document.body.classList.add("preview");</script>
+
+<div class="slide" aria-label="Helixir MCP — связь фактов с причинами">
+  <div class="mark-bg right" aria-hidden="true">/</div>
+
+  <div class="top">
+    <div class="lhs">
+      <span class="dot" aria-hidden="true"></span>
+      <span>Approach <span class="slash">/</span> Helixir</span>
+    </div>
+    <div class="rhs">Heisenbug · 2026</div>
+  </div>
+  <div class="rule-top" aria-hidden="true"></div>
+
+  <div class="graph" aria-hidden="true">
+    <span class="node"><span class="pin"></span>fact</span>
+    <span class="arr">→</span>
+    <span class="node cause"><span class="pin"></span>cause</span>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow">
+      <span class="bar" aria-hidden="true"></span>
+      <span>Подход <span class="hi">· граф</span></span>
+    </div>
+
+    <h1><span class="brand">Helixir</span> <span class="tag">MCP</span></h1>
+
+    <div class="sub">
+      связь <b>фактов</b><span class="dash">—</span>с <span class="hi">причинами</span>
+    </div>
+  </div>
+
+  <div class="rule-bot" aria-hidden="true"></div>
+  <div class="footer">
+    <div class="l"><span class="mark">/</span><span>Rambler</span></div>
+    <div class="r"><span>Heisenbug</span><span class="mark">/</span></div>
+  </div>
+</div>
+</body>
+</html>

@@ -2,17 +2,18 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8" />
-<title>Онбординг задаёт рамку · Heisenbug 2026</title>
+<title>Онбординг задаёт рамку работы · Heisenbug 2026</title>
 <meta name="viewport" content="width=1920" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./_base.css">
 <style>
+  .hero { top: 50%; transform: translateY(-52%); }
   .hero h1 {
-    font-size: 220px;
-    line-height: 0.9;
-    letter-spacing: -0.05em;
+    font-size: 128px;
+    line-height: 0.96;
+    letter-spacing: -0.045em;
   }
   .hero h1 .w { color: var(--paper); font-weight: 700; }
   .hero h1 .muted { color: var(--aluminium); font-weight: 500; }
@@ -25,17 +26,49 @@
   .hero h1 .hi::after {
     content: "";
     position: absolute;
-    left: 0; right: 0; bottom: -0.06em;
-    height: 8px;
+    left: 0; right: 0; bottom: -0.08em;
+    height: 6px;
     background: var(--rambler);
     box-shadow: 0 0 22px rgba(30,111,255,0.55);
   }
+
+  /* thin divider between thesis and consequence */
+  .divider {
+    margin: 60px 0 42px;
+    display: flex; align-items: center; gap: 18px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--aluminium);
+  }
+  .divider .bar { width: 120px; height: 2px; background: var(--rambler); opacity: 0.5; }
+  .divider .dot { width: 8px; height: 8px; background: var(--rambler); border-radius: 50%; box-shadow: 0 0 10px var(--rambler); }
+
+  /* consequence line */
+  .consequence {
+    font-family: "Manrope", sans-serif;
+    font-weight: 500;
+    font-size: 52px;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--aluminium);
+    max-width: 1400px;
+  }
+  .consequence b {
+    color: var(--rambler);
+    font-weight: 800;
+    font-style: normal;
+  }
+  .consequence .dash { color: var(--rambler); padding: 0 0.2em; font-weight: 700; }
+  .consequence .w { color: var(--paper); font-weight: 600; }
 </style>
 </head>
 <body>
 <script>if (location.hash === "#preview") document.body.classList.add("preview");</script>
 
-<div class="slide" aria-label="Онбординг задаёт рамку">
+<div class="slide" aria-label="Онбординг агента задаёт рамку работы">
   <div class="mark-bg right" aria-hidden="true">/</div>
 
   <div class="top">
@@ -54,9 +87,18 @@
     </div>
 
     <h1>
-      <span class="w">Онбординг</span><br>
-      <span class="muted">задаёт</span> <span class="hi">рамку</span>
+      <span class="w">Онбординг&nbsp;агента</span><br>
+      <span class="w">задаёт</span> <span class="hi">рамку&nbsp;работы</span>
     </h1>
+
+    <div class="divider" aria-hidden="true">
+      <span class="bar"></span>
+      <span class="dot"></span>
+    </div>
+
+    <div class="consequence">
+      <b>точнее</b> <span class="w">онбординг</span><span class="dash">—</span><b>меньше</b> <span class="w">затрат</span>
+    </div>
   </div>
 
   <div class="rule-bot" aria-hidden="true"></div>
