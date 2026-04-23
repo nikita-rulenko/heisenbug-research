@@ -255,10 +255,16 @@ class Handler(BaseHTTPRequestHandler):
             qs = parse_qs(url.query)
             if qs.get("live", ["0"])[0] == "1":
                 self._serve_events_live()
-            elif "replay" in qs:
-                self._serve_events_replay(qs["replay"][0])
             else:
-                self._serve_events_replay(BASELINE_ID)
+                # Clamp replay speed to a sane window. 1.0 = recorded pace,
+                # 2.0 = demo pace (fits better in a conference slot).
+                try:
+                    speed = float(qs.get("speed", ["1"])[0])
+                except (TypeError, ValueError):
+                    speed = 1.0
+                speed = max(0.25, min(8.0, speed))
+                rid = qs["replay"][0] if "replay" in qs else BASELINE_ID
+                self._serve_events_replay(rid, speed=speed)
         elif url.path == "/runs":
             self._serve_json(200, {"runs": _list_recordings(), "default": BASELINE_ID})
         elif url.path == "/api/key-status":
@@ -369,21 +375,21 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---------- replay ----------
 
-    def _serve_events_replay(self, rid: str):
+    def _serve_events_replay(self, rid: str, speed: float = 1.0):
         self._begin_sse()
         try:
-            self._stream_replay(rid)
+            self._stream_replay(rid, speed=speed)
         except (BrokenPipeError, ConnectionResetError):
             pass
 
-    def _stream_replay(self, rid: str):
+    def _stream_replay(self, rid: str, speed: float = 1.0):
         jsonl, _ = _recording_paths(rid)
 
         if not jsonl.exists():
             # Fallback to legacy synthetic replay from comparison JSON,
             # so the dashboard still shows something on a fresh checkout.
             if rid == BASELINE_ID and RESULTS_FILE.exists():
-                self._stream_legacy_replay()
+                self._stream_legacy_replay(speed=speed)
                 return
             self._emit({"type": "error", "message": f"recording not found: {rid}"})
             return
@@ -429,14 +435,14 @@ class Handler(BaseHTTPRequestHandler):
             delta_ms = min(delta_ms, 8000)
 
             if delta_ms > 0:
-                time.sleep(delta_ms / 1000.0)
+                time.sleep((delta_ms / 1000.0) / speed)
 
             self._emit(evt)
             prev_ts = ts
             prev_type = evt.get("type")
             prev_approach = evt.get("approach", prev_approach)
 
-    def _stream_legacy_replay(self):
+    def _stream_legacy_replay(self, speed: float = 1.0):
         """Pre-recording fallback: synthesise progress from the comparison JSON."""
         try:
             data = json.loads(RESULTS_FILE.read_text(encoding="utf-8"))
@@ -473,7 +479,7 @@ class Handler(BaseHTTPRequestHandler):
                     "time_ms": int(time_ms * frac),
                     "tool_calls_done": int(tool_calls * frac),
                 })
-                time.sleep(step_dt)
+                time.sleep(step_dt / speed)
             self._emit({"type": "approach_complete", "approach": key,
                         "metrics": metrics})
 

@@ -1538,9 +1538,19 @@ function stopRun() {
    ──────────────────────────────────────────────────────────────── */
 function startReplay() {
   if (SERVED_FROM_HTTP) {
-    const rid = $('#recordingPicker').value || '';
-    const url = rid ? '/events?replay=' + encodeURIComponent(rid) : '/events';
-    setStatus('running', 'replay — streaming ' + (rid || 'baseline'));
+    const picker = $('#recordingPicker');
+    const rid = picker.value || '';
+    // Per-option speed (see fmtRecordingLabel / loadRecordings).
+    // Baseline ships at ×2 so the full replay fits a demo slot; numbers
+    // in the UI are unchanged — only wall-clock pacing is scaled.
+    const opt = picker.selectedOptions && picker.selectedOptions[0];
+    const speed = (opt && opt.dataset && opt.dataset.speed) || '1';
+    let url = rid ? '/events?replay=' + encodeURIComponent(rid) : '/events';
+    if (speed && speed !== '1') {
+      url += (url.includes('?') ? '&' : '?') + 'speed=' + encodeURIComponent(speed);
+    }
+    const speedNote = (speed && speed !== '1') ? ' (×' + speed + ' demo)' : '';
+    setStatus('running', 'replay — streaming ' + (rid || 'baseline') + speedNote);
     openSse(url);
   } else {
     startReplayEmbedded();
@@ -1553,14 +1563,18 @@ function scheduleEvent(delay, evt) {
 }
 
 function startReplayEmbedded() {
-  setStatus('running', 'replay — embedded snapshot (' + (SEED._source || 'seed') + ')');
+  // Match the HTTP path: baseline plays at ×BASELINE_REPLAY_SPEED so the
+  // demo fits the slot. Numbers shown in the UI don't change — only pacing.
+  const speed = BASELINE_REPLAY_SPEED || 1;
+  setStatus('running', 'replay — embedded snapshot (' + (SEED._source || 'seed') + ')' +
+    (speed !== 1 ? ' ×' + speed : ''));
   scheduleEvent(0, { type: 'start', mode: 'replay' });
   const approaches = SEED.approaches || {};
   let cursor = 300;
   for (const key of ORDER) {
     const m = approaches[key];
     if (!m) continue;
-    const wallMs = m.total_time_ms || 3000;
+    const wallMs = (m.total_time_ms || 3000) / speed;
     const steps = Math.max(8, Math.round(wallMs / 80));
     const stepDt = wallMs / steps;
     scheduleEvent(cursor, { type: 'approach_start', approach: key, tool_calls: m.tool_calls || 0 });
@@ -1628,10 +1642,19 @@ function openSse(url) {
 /* ────────────────────────────────────────────────────────────────
    Recording picker
    ──────────────────────────────────────────────────────────────── */
+// Speed multiplier applied when the baseline (pre-recorded demo) run is
+// selected. Scales only the wall-clock pacing on the server — token/time
+// numbers emitted to the UI are untouched.
+const BASELINE_REPLAY_SPEED = 2;
+
 function fmtRecordingLabel(r) {
-  if (r.id === 'baseline') return 'Default run (v3 snapshot)';
+  if (r.id === 'baseline') return 'Default run (v3 snapshot) — ×' + BASELINE_REPLAY_SPEED + ' demo speed';
   const src = r.timestamp || r.id;
   return src.replace('T', ' ').replace(/_/g, ' ').replace(/-(\d\d)-(\d\d)$/, ':$1:$2');
+}
+
+function speedForRecording(r) {
+  return r.id === 'baseline' ? String(BASELINE_REPLAY_SPEED) : '1';
 }
 
 async function loadRecordings() {
@@ -1651,17 +1674,19 @@ async function loadRecordings() {
       const o = document.createElement('option');
       o.value = 'baseline';
       o.textContent = fmtRecordingLabel({ id: 'baseline' });
+      o.dataset.speed = speedForRecording({ id: 'baseline' });
       picker.appendChild(o);
     }
     for (const r of runs) {
       const o = document.createElement('option');
       o.value = r.id;
       o.textContent = fmtRecordingLabel(r);
+      o.dataset.speed = speedForRecording(r);
       picker.appendChild(o);
     }
     picker.value = 'baseline';
   } catch (e) {
-    picker.innerHTML = '<option value="baseline">Default run (v3 snapshot)</option>';
+    picker.innerHTML = '<option value="baseline" data-speed="' + BASELINE_REPLAY_SPEED + '">' + fmtRecordingLabel({ id: 'baseline' }) + '</option>';
   }
 }
 
