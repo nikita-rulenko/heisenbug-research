@@ -871,6 +871,14 @@ let running   = false;
 let replayTimers = [];
 let activeMetric = 'accuracy_pct';
 const hiddenInRadar = new Set();
+// id → approaches snapshot from /runs; used to pre-seed the radar axes so
+// the chart renders at its final proportions from the first frame instead
+// of rescaling as each approach completes during replay.
+const runsById = {};
+// When non-null, overrides the adaptive axis ranges in computeAxisRanges().
+// Set at replay start from runsById[rid].approaches; cleared for live runs
+// where the final values aren't known ahead of time.
+let frozenAxisRanges = null;
 // Wall-clock ticker: `approach_start` arms it, interval writes to the card
 // every 100ms so "Wall time" increments smoothly even between SSE events.
 // `approach_complete` disarms + snaps to final metric. "Tool time" keeps
@@ -1110,10 +1118,14 @@ function axisValue(ax, m) {
   return Number(m[ax.key]) || 0;
 }
 
-function computeAxisRanges() {
-  const vis = ORDER.filter(k => final[k] && !hiddenInRadar.has(k));
+// Axis-range math extracted so we can invoke it with either:
+//   - live `final` (legacy adaptive mode)
+//   - a full approaches snapshot from /runs (replay pre-seed)
+// so the radar doesn't rescale as each approach completes.
+function rangesFromMetrics(metricsByKey) {
+  const vis = ORDER.filter(k => metricsByKey[k]);
   return RADAR_AXES.map(ax => {
-    const vals = vis.map(k => axisValue(ax, final[k]));
+    const vals = vis.map(k => axisValue(ax, metricsByKey[k]));
     if (!vals.length) return { min: 0, max: ax.softMax || 100, vmin: 0, vmax: 0 };
     const vmin = Math.min(...vals);
     const vmax = Math.max(...vals);
@@ -1130,6 +1142,32 @@ function computeAxisRanges() {
     max = Math.ceil(max / tick) * tick;
     return { min, max, vmin, vmax, tick };
   });
+}
+
+function computeAxisRanges() {
+  // When replaying a known recording, use the pre-computed ranges so axis
+  // scales stay stable from frame 1 (no rescaling as data streams in).
+  if (frozenAxisRanges) return frozenAxisRanges;
+  // Legacy adaptive behavior — used for Live runs and until a recording
+  // is selected.
+  const visMap = {};
+  for (const k of ORDER) {
+    if (final[k] && !hiddenInRadar.has(k)) visMap[k] = final[k];
+  }
+  return rangesFromMetrics(visMap);
+}
+
+// Pre-seed radar axes from a recording's final metrics so the chart is
+// drawn at its end-state proportions before the first polygon appears.
+// `rid` is the recording id from the picker; silently no-ops if we don't
+// have metadata for it (e.g. legacy baseline fallback with no /runs entry).
+function freezeAxisRangesForRecording(rid) {
+  const approaches = runsById[rid];
+  if (approaches && Object.keys(approaches).length) {
+    frozenAxisRanges = rangesFromMetrics(approaches);
+  } else {
+    frozenAxisRanges = null;
+  }
 }
 
 function niceTick(raw) {
@@ -1541,8 +1579,9 @@ function startReplay() {
     const picker = $('#recordingPicker');
     const rid = picker.value || '';
     // Per-option speed (see fmtRecordingLabel / loadRecordings).
-    // Baseline ships at ×2 so the full replay fits a demo slot; numbers
-    // in the UI are unchanged — only wall-clock pacing is scaled.
+    // Baseline ships at ×BASELINE_REPLAY_SPEED so the full replay fits
+    // a demo slot; numbers in the UI are unchanged — only wall-clock
+    // pacing is scaled.
     const opt = picker.selectedOptions && picker.selectedOptions[0];
     const speed = (opt && opt.dataset && opt.dataset.speed) || '1';
     let url = rid ? '/events?replay=' + encodeURIComponent(rid) : '/events';
@@ -1550,9 +1589,20 @@ function startReplay() {
       url += (url.includes('?') ? '&' : '?') + 'speed=' + encodeURIComponent(speed);
     }
     const speedNote = (speed && speed !== '1') ? ' (×' + speed + ' demo)' : '';
+    // Pre-seed radar axes from the recording's final metrics so the chart
+    // renders at its end-state proportions from the first frame — avoids
+    // visually distracting rescaling as each approach completes.
+    freezeAxisRangesForRecording(rid || 'baseline');
+    renderRadar();
     setStatus('running', 'replay — streaming ' + (rid || 'baseline') + speedNote);
     openSse(url);
   } else {
+    // Embedded (file://) path: pre-seed from the inlined SEED snapshot so
+    // the chart is stable there too.
+    if (SEED && SEED.approaches) {
+      frozenAxisRanges = rangesFromMetrics(SEED.approaches);
+      renderRadar();
+    }
     startReplayEmbedded();
   }
 }
@@ -1604,6 +1654,10 @@ function startLive() {
     stopRun();
     return;
   }
+  // Final metrics aren't known ahead of time for a live run, so fall back
+  // to the adaptive per-axis ranges as each approach completes.
+  frozenAxisRanges = null;
+  renderRadar();
   setStatus('running', 'connecting to server.py…');
   openSse('/events?live=1');
 }
@@ -1645,7 +1699,7 @@ function openSse(url) {
 // Speed multiplier applied when the baseline (pre-recorded demo) run is
 // selected. Scales only the wall-clock pacing on the server — token/time
 // numbers emitted to the UI are untouched.
-const BASELINE_REPLAY_SPEED = 2;
+const BASELINE_REPLAY_SPEED = 3;
 
 function fmtRecordingLabel(r) {
   if (r.id === 'baseline') return 'Default run (v3 snapshot) — ×' + BASELINE_REPLAY_SPEED + ' demo speed';
@@ -1683,8 +1737,15 @@ async function loadRecordings() {
       o.textContent = fmtRecordingLabel(r);
       o.dataset.speed = speedForRecording(r);
       picker.appendChild(o);
+      // Cache the final approaches snapshot so the radar can pre-seed its
+      // axes on replay start instead of rescaling mid-stream.
+      if (r.approaches) runsById[r.id] = r.approaches;
     }
     picker.value = 'baseline';
+    // Freeze axes for the default selection so the empty radar already
+    // draws at final proportions before the user clicks Run.
+    freezeAxisRangesForRecording(picker.value);
+    renderRadar();
   } catch (e) {
     picker.innerHTML = '<option value="baseline" data-speed="' + BASELINE_REPLAY_SPEED + '">' + fmtRecordingLabel({ id: 'baseline' }) + '</option>';
   }
@@ -1713,7 +1774,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('#runBtn').addEventListener('click', () => running ? stopRun() : startRun());
   $('#recordingPicker').addEventListener('change', () => {
-    if (!running) setStatus('idle', 'ready to replay ' + ($('#recordingPicker').value || 'baseline'));
+    if (running) return;
+    const rid = $('#recordingPicker').value || 'baseline';
+    setStatus('idle', 'ready to replay ' + rid);
+    // Re-seed radar axes to match the newly selected recording so the
+    // pre-Run preview already shows the correct end-state proportions.
+    freezeAxisRangesForRecording(rid);
+    renderRadar();
   });
   $$('.metric-tab').forEach(t => t.addEventListener('click', () => setMetric(t.dataset.metric)));
   $('#keyCancel').addEventListener('click', hideKeyModal);

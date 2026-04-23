@@ -211,17 +211,21 @@ def _list_recordings() -> list[dict]:
 
 
 def _build_meta(events: list[dict]) -> dict:
-    """Summarise a recording (used for the picker label)."""
+    """Summarise a recording.
+
+    The dashboard uses this to (a) label the picker and (b) pre-seed the
+    radar axes with final metrics so the chart renders at its end-state
+    proportions from the first frame (no mid-replay rescaling). To do
+    that properly we need the full metric blob, not just accuracy/tokens
+    — the radar plots Facts/Reasoning/Decisions/Cost/Perf too.
+    """
     summary: dict[str, dict] = {}
     duration = 0
     timestamp = None
     for evt in events:
         if evt.get("type") == "approach_complete" and "metrics" in evt:
-            summary[evt["approach"]] = {
-                "accuracy_pct": evt["metrics"].get("accuracy_pct"),
-                "total_tokens": evt["metrics"].get("total_tokens"),
-                "total_time_ms": evt["metrics"].get("total_time_ms"),
-            }
+            # Copy the whole metrics dict (shallow) — cheap and future-proof.
+            summary[evt["approach"]] = dict(evt["metrics"])
         if evt.get("type") == "start" and evt.get("timestamp"):
             timestamp = evt["timestamp"]
         ts = evt.get("ts_ms")

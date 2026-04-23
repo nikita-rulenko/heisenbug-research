@@ -3,29 +3,104 @@
   "duration_ms": 146016,
   "approaches": {
     "md_files": {
-      "accuracy_pct": 88.8,
+      "context_tokens": 5300,
+      "verification_input_tokens": 35895,
+      "verification_output_tokens": 12000,
       "total_tokens": 53195,
-      "total_time_ms": 8200,
-      "retrieval_quality_pct": 75.0
+      "retrieval_time_ms": 250,
+      "verification_time_ms": 7950,
+      "total_time_ms": 32978,
+      "tool_calls": 1,
+      "messages": 6,
+      "accuracy_pct": 88.8,
+      "part_a_pct": 63.0,
+      "part_b_pct": 73.8,
+      "part_c_pct": 95.0,
+      "cost_estimate_usd": 0.031917,
+      "cost_performance_ratio": 2225.0,
+      "retrieval_quality_pct": 75.0,
+      "retrieval_scores": {
+        "fact_coverage": 4,
+        "causal_density": 1,
+        "structure": 4,
+        "total": 9
+      },
+      "tool_time_ms": 8187
     },
     "github_issues": {
-      "accuracy_pct": 88.8,
+      "context_tokens": 5400,
+      "verification_input_tokens": 36997,
+      "verification_output_tokens": 12000,
       "total_tokens": 54397,
-      "total_time_ms": 8500,
-      "retrieval_quality_pct": 83.3
+      "retrieval_time_ms": 320,
+      "verification_time_ms": 8180,
+      "total_time_ms": 33464,
+      "tool_calls": 1,
+      "messages": 6,
+      "accuracy_pct": 88.8,
+      "part_a_pct": 70.3,
+      "part_b_pct": 71.2,
+      "part_c_pct": 93.8,
+      "cost_estimate_usd": 0.032638,
+      "cost_performance_ratio": 2175.0,
+      "retrieval_quality_pct": 83.3,
+      "retrieval_scores": {
+        "fact_coverage": 4,
+        "causal_density": 3,
+        "structure": 3,
+        "total": 10
+      },
+      "tool_time_ms": 8471
     },
     "mem0": {
-      "accuracy_pct": 58.8,
+      "context_tokens": 2950,
+      "verification_input_tokens": 18688,
+      "verification_output_tokens": 8000,
       "total_tokens": 29638,
-      "total_time_ms": 8700,
-      "retrieval_quality_pct": 41.7
+      "retrieval_time_ms": 1800,
+      "verification_time_ms": 6900,
+      "total_time_ms": 33749,
+      "tool_calls": 6,
+      "messages": 12,
+      "accuracy_pct": 58.8,
+      "part_a_pct": 65.6,
+      "part_b_pct": 68.8,
+      "part_c_pct": 98.8,
+      "cost_estimate_usd": 0.017783,
+      "cost_performance_ratio": 2643.0,
+      "retrieval_quality_pct": 41.7,
+      "retrieval_scores": {
+        "fact_coverage": 3,
+        "causal_density": 1,
+        "structure": 1,
+        "total": 5
+      },
+      "tool_time_ms": 8760
     },
     "helixir_mcp": {
-      "accuracy_pct": 75.0,
+      "context_tokens": 17000,
+      "verification_input_tokens": 138668,
+      "verification_output_tokens": 15000,
       "total_tokens": 170668,
-      "total_time_ms": 20800,
-      "retrieval_quality_pct": 91.7
+      "retrieval_time_ms": 8800,
+      "verification_time_ms": 12000,
+      "total_time_ms": 45775,
+      "tool_calls": 15,
+      "messages": 24,
+      "accuracy_pct": 75.0,
+      "part_a_pct": 59.9,
+      "part_b_pct": 76.2,
+      "part_c_pct": 98.8,
+      "cost_estimate_usd": 0.102401,
+      "cost_performance_ratio": 586.0,
+      "retrieval_quality_pct": 91.7,
+      "retrieval_scores": {
+        "fact_coverage": 3,
+        "causal_density": 4,
+        "structure": 4,
+        "total": 11
+      },
+      "tool_time_ms": 20666
     }
-  },
-  "label": "Default run (v2 snapshot)"
+  }
 }
