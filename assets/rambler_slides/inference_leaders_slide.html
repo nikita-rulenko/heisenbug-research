@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Лидеры инференса · 4 провайдера · Heisenbug 2026</title>
+<meta name="viewport" content="width=1920" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800;900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./_base.css">
+<style>
+  :root {
+    --ok: #22C55E;
+    --ok-dim: rgba(34,197,94,0.14);
+    --ok-line: rgba(34,197,94,0.4);
+    --bad: #EF4444;
+    --bad-dim: rgba(239,68,68,0.14);
+    --bad-line: rgba(239,68,68,0.4);
+    --warn: #FACC15;
+    --warn-dim: rgba(250,204,21,0.12);
+    --warn-line: rgba(250,204,21,0.4);
+  }
+
+  .hero { top: 150px; transform: none; }
+  .hero h1 {
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 104px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--paper);
+  }
+  .hero h1 .hi { color: var(--rambler); }
+
+  /* 4-card grid */
+  .cards {
+    position: absolute;
+    left: 96px; right: 96px;
+    top: 440px;
+    bottom: 200px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    z-index: 5;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40px 36px 36px;
+    border: 1px solid var(--hairline);
+    background: linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.005) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+
+  /* accent per category */
+  .card.c-speed::before   { background: var(--rambler); box-shadow: 0 0 18px rgba(30,111,255,0.55); }
+  .card.c-price::before   { background: var(--ok);      box-shadow: 0 0 18px rgba(34,197,94,0.55); }
+  .card.c-volume::before  { background: var(--warn);    box-shadow: 0 0 18px rgba(250,204,21,0.55); }
+  .card.c-quality::before { background: var(--bad);     box-shadow: 0 0 18px rgba(239,68,68,0.55); }
+
+  .card .top-row {
+    display: flex; align-items: baseline; gap: 14px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--alu-dim);
+  }
+  .card .idx { color: var(--rambler); }
+
+  .card .name {
+    margin-top: 18px;
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 48px;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--paper);
+  }
+  .card .model {
+    margin-top: 14px;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--aluminium);
+  }
+
+  .card .big {
+    margin-top: 40px;
+    display: flex; flex-direction: column;
+  }
+  .card .num {
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 104px;
+    letter-spacing: -0.05em;
+    line-height: 0.9;
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .card.c-speed   .num { color: var(--rambler); text-shadow: 0 0 42px rgba(30,111,255,0.45); }
+  .card.c-price   .num { color: var(--ok);      text-shadow: 0 0 42px rgba(34,197,94,0.45); }
+  .card.c-volume  .num { color: var(--warn);    text-shadow: 0 0 42px rgba(250,204,21,0.45); }
+  .card.c-quality .num { color: var(--bad);     text-shadow: 0 0 42px rgba(239,68,68,0.45); }
+
+  .card .num .suffix {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 0.36em;
+    letter-spacing: 0;
+    margin-left: 0.08em;
+    vertical-align: 0.6em;
+  }
+  .card .num .prefix {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 0.4em;
+    letter-spacing: 0;
+    margin-right: 0.05em;
+    vertical-align: 0.35em;
+  }
+
+  .card .unit {
+    margin-top: 18px;
+    font-family: "Manrope", sans-serif;
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    color: var(--aluminium);
+  }
+  .card .unit b { color: var(--paper); font-weight: 700; }
+
+  .card .badge {
+    margin-top: auto;
+    padding-top: 28px;
+    border-top: 1px solid var(--hairline);
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: "Unbounded", sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+  }
+  .card.c-speed   .badge { color: var(--rambler); }
+  .card.c-price   .badge { color: var(--ok); }
+  .card.c-volume  .badge { color: var(--warn); }
+  .card.c-quality .badge { color: var(--bad); }
+  .card .badge .arrow {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 22px;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+<script>if (location.hash === "#preview") document.body.classList.add("preview");</script>
+
+<div class="slide" aria-label="Лидеры инференса — 4 провайдера">
+  <div class="mark-bg right" aria-hidden="true">/</div>
+
+  <div class="top">
+    <div class="lhs">
+      <span class="dot" aria-hidden="true"></span>
+      <span>Benchmark <span class="slash">/</span> Inference <span class="slash">/</span> Leaders</span>
+    </div>
+    <div class="rhs">Heisenbug · 2026</div>
+  </div>
+  <div class="rule-top" aria-hidden="true"></div>
+
+  <div class="hero">
+    <div class="eyebrow">
+      <span class="bar" aria-hidden="true"></span>
+      <span>Инференс <span class="hi">· 4 провайдера</span></span>
+    </div>
+    <h1>Лидеры <span class="hi">инференса</span></h1>
+  </div>
+
+  <div class="cards">
+    <div class="card c-speed">
+      <div>
+        <div class="top-row"><span class="idx">01</span><span>→</span><span>speed</span></div>
+        <div class="name">Cerebras</div>
+        <div class="model">gpt-oss 120B</div>
+      </div>
+      <div class="big">
+        <span class="num">3&thinsp;000</span>
+        <span class="unit"><b>токенов</b> в секунду</span>
+      </div>
+      <div class="badge"><span>скорость</span><span class="arrow">→</span></div>
+    </div>
+
+    <div class="card c-price">
+      <div>
+        <div class="top-row"><span class="idx">02</span><span>→</span><span>price</span></div>
+        <div class="name">DeepSeek</div>
+        <div class="model">DeepSeek R1</div>
+      </div>
+      <div class="big">
+        <span class="num">$0.55</span>
+        <span class="unit">за <b>1M</b> входных</span>
+      </div>
+      <div class="badge"><span>цена</span><span class="arrow">→</span></div>
+    </div>
+
+    <div class="card c-volume">
+      <div>
+        <div class="top-row"><span class="idx">03</span><span>→</span><span>volume</span></div>
+        <div class="name">Qwen</div>
+        <div class="model">Qwen3.6 Plus</div>
+      </div>
+      <div class="big">
+        <span class="num">1.4 T</span>
+        <span class="unit"><b>токенов</b> в сутки</span>
+      </div>
+      <div class="badge"><span>объём</span><span class="arrow">→</span></div>
+    </div>
+
+    <div class="card c-quality">
+      <div>
+        <div class="top-row"><span class="idx">04</span><span>→</span><span>quality</span></div>
+        <div class="name">Anthropic</div>
+        <div class="model">Claude Opus 4.7</div>
+      </div>
+      <div class="big">
+        <span class="num">87.6%</span>
+        <span class="unit"><b>SWE-bench</b> Verified</span>
+      </div>
+      <div class="badge"><span>качество</span><span class="arrow">→</span></div>
+    </div>
+  </div>
+
+  <div class="rule-bot" aria-hidden="true"></div>
+  <div class="footer">
+    <div class="l"><span class="mark">/</span><span>Rambler</span></div>
+    <div class="r"><span>Heisenbug</span><span class="mark">/</span></div>
+  </div>
+</div>
+</body>
+</html>

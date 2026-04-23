@@ -18,6 +18,7 @@
 | 09 | [Testing Context](background/09_testing_context.md) | Контекст тестирования: покрытие и стратегия |
 | 10 | [Mem0 vs Helixir](background/10_evolution_and_mem0_vs_helixir.md) | Эволюция и сравнение Mem0 и Helixir |
 | 11 | [Talk Framing](background/11_talk_framing.md) | Структура и фрейминг доклада |
+| 12 | [Inference Providers](background/12_inference_providers.md) | Сайд-ресерч: лидеры inference (Cerebras/DeepSeek/Qwen/Anthropic) — скорость/цена/объём/качество |
 
 ### Эксперименты (`experiments/`)
 
